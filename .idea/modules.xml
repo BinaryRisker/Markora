@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/markora.iml" filepath="$PROJECT_DIR$/markora.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/markora_android.iml" filepath="$PROJECT_DIR$/android/markora_android.iml" />
+    </modules>
+  </component>
+</project>
