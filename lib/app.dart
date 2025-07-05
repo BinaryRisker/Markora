@@ -4,11 +4,13 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'core/constants/app_constants.dart';
 import 'types/editor.dart';
+import 'types/document.dart';
 import 'features/editor/presentation/widgets/markdown_editor.dart';
 import 'features/preview/presentation/widgets/markdown_preview.dart';
 import 'features/document/presentation/providers/document_providers.dart';
 import 'features/document/presentation/widgets/file_dialog.dart';
 import 'features/settings/presentation/widgets/settings_page.dart';
+import 'features/export/presentation/widgets/export_dialog.dart';
 
 /// 应用外壳 - 主要界面容器
 class AppShell extends ConsumerStatefulWidget {
@@ -127,6 +129,11 @@ void main() {
             icon: Icon(PhosphorIcons.copySimple()),
             tooltip: '另存为',
             onPressed: () => _handleSaveAsDocument(),
+          ),
+          _buildToolbarButton(
+            icon: Icon(PhosphorIcons.export()),
+            tooltip: '导出文档',
+            onPressed: () => _handleExportDocument(),
           ),
           
           const VerticalDivider(),
@@ -477,6 +484,21 @@ void main() {
         );
       }
     }
+  }
+
+  void _handleExportDocument() {
+    // 获取当前文档或创建临时文档
+    final currentDoc = ref.read(currentDocumentProvider);
+    final documentToExport = currentDoc ?? Document(
+      id: 'temp_export',
+      title: '未命名文档',
+      content: _currentContent,
+      type: DocumentType.markdown,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    showExportDialog(context, documentToExport);
   }
 
   void _handleUndo() {
