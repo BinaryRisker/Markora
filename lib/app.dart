@@ -4,8 +4,11 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'core/constants/app_constants.dart';
 import 'types/editor.dart';
+import 'types/document.dart';
 import 'features/editor/presentation/widgets/markdown_editor.dart';
 import 'features/preview/presentation/widgets/markdown_preview.dart';
+import 'features/document/presentation/providers/document_providers.dart';
+import 'features/document/domain/services/document_service.dart';
 
 /// 应用外壳 - 主要界面容器
 class AppShell extends ConsumerStatefulWidget {
@@ -359,16 +362,62 @@ void main() {
   }
 
   // 事件处理方法
-  void _handleNewDocument() {
-    // TODO: 实现新建文档
+  void _handleNewDocument() async {
+    try {
+      await ref.read(currentDocumentProvider.notifier).createNewDocument(
+        title: '新文档',
+        content: '# 新文档\n\n开始你的创作...',
+      );
+      
+      // 更新当前内容
+      final currentDoc = ref.read(currentDocumentProvider);
+      if (currentDoc != null) {
+        setState(() {
+          _currentContent = currentDoc.content;
+        });
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('已创建新文档')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('创建文档失败: $e')),
+        );
+      }
+    }
   }
 
   void _handleOpenDocument() {
-    // TODO: 实现打开文档
+    // TODO: 实现文档选择对话框
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('文档打开功能即将推出')),
+    );
   }
 
-  void _handleSaveDocument() {
-    // TODO: 实现保存文档
+  void _handleSaveDocument() async {
+    try {
+      // 更新当前文档内容
+      ref.read(currentDocumentProvider.notifier).updateContent(_currentContent);
+      
+      // 保存文档
+      await ref.read(currentDocumentProvider.notifier).saveDocument();
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('文档已保存')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('保存失败: $e')),
+        );
+      }
+    }
   }
 
   void _handleUndo() {
