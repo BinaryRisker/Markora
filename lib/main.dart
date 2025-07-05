@@ -5,6 +5,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'core/constants/app_constants.dart';
 import 'core/themes/app_theme.dart';
 import 'app.dart';
+import 'features/settings/domain/entities/app_settings.dart';
+import 'features/settings/presentation/providers/settings_providers.dart';
+import 'types/document.dart';
 
 /// 应用入口函数
 void main() async {
@@ -13,6 +16,12 @@ void main() async {
 
   // 初始化Hive本地存储
   await Hive.initFlutter();
+  
+  // 注册Hive适配器
+  Hive.registerAdapter(ThemeModeAdapter());
+  Hive.registerAdapter(AppSettingsAdapter());
+  // 注意：Document类还没有Hive适配器，需要后续添加
+  // Hive.registerAdapter(DocumentAdapter());
 
   // 运行应用
   runApp(
@@ -29,15 +38,18 @@ class MarkoraApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 监听设置变化
+    final settings = ref.watch(settingsProvider);
+    
     return MaterialApp(
       // 应用基本信息
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
 
-      // 主题配置
+      // 主题配置 - 响应设置变化
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: settings.themeMode,
 
       // 应用主页
       home: const AppShell(),

@@ -4,11 +4,11 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'core/constants/app_constants.dart';
 import 'types/editor.dart';
-import 'types/document.dart';
 import 'features/editor/presentation/widgets/markdown_editor.dart';
 import 'features/preview/presentation/widgets/markdown_preview.dart';
 import 'features/document/presentation/providers/document_providers.dart';
-import 'features/document/domain/services/document_service.dart';
+import 'features/document/presentation/widgets/file_dialog.dart';
+import 'features/settings/presentation/widgets/settings_page.dart';
 
 /// 应用外壳 - 主要界面容器
 class AppShell extends ConsumerStatefulWidget {
@@ -122,6 +122,11 @@ void main() {
             icon: Icon(PhosphorIcons.floppyDisk()),
             tooltip: '保存文档',
             onPressed: () => _handleSaveDocument(),
+          ),
+          _buildToolbarButton(
+            icon: Icon(PhosphorIcons.copySimple()),
+            tooltip: '另存为',
+            onPressed: () => _handleSaveAsDocument(),
           ),
           
           const VerticalDivider(),
@@ -391,25 +396,79 @@ void main() {
     }
   }
 
-  void _handleOpenDocument() {
-    // TODO: 实现文档选择对话框
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('文档打开功能即将推出')),
-    );
+  void _handleOpenDocument() async {
+    try {
+      final selectedDocument = await showOpenFileDialog(context);
+      if (selectedDocument != null) {
+        // 切换到选中的文档
+        ref.read(currentDocumentProvider.notifier).setCurrentDocument(selectedDocument);
+        
+        // 更新当前内容
+        setState(() {
+          _currentContent = selectedDocument.content;
+        });
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('已打开文档: ${selectedDocument.title}')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('打开文档失败: $e')),
+        );
+      }
+    }
   }
 
   void _handleSaveDocument() async {
     try {
-      // 更新当前文档内容
-      ref.read(currentDocumentProvider.notifier).updateContent(_currentContent);
+      final currentDoc = ref.read(currentDocumentProvider);
       
-      // 保存文档
-      await ref.read(currentDocumentProvider.notifier).saveDocument();
-      
+      // 如果有当前文档，直接保存
+      if (currentDoc != null) {
+        // 更新当前文档内容
+        ref.read(currentDocumentProvider.notifier).updateContent(_currentContent);
+        
+        // 保存文档
+        await ref.read(currentDocumentProvider.notifier).saveDocument();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('文档已保存')),
+          );
+        }
+      } else {
+        // 如果没有当前文档，显示另存为对话框
+        _handleSaveAsDocument();
+      }
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('文档已保存')),
+          SnackBar(content: Text('保存失败: $e')),
         );
+      }
+    }
+  }
+
+  /// 处理另存为
+  void _handleSaveAsDocument() async {
+    try {
+      final fileName = await showSaveFileDialog(context, initialFileName: '新文档');
+      if (fileName != null && fileName.isNotEmpty) {
+        // 创建新文档
+        await ref.read(currentDocumentProvider.notifier).createNewDocument(
+          title: fileName,
+          content: _currentContent,
+        );
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('文档已保存为: $fileName')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -441,6 +500,10 @@ void main() {
   }
 
   void _handleSettings() {
-    // TODO: 实现设置
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SettingsPage(),
+      ),
+    );
   }
 } 
