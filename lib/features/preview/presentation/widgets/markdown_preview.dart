@@ -5,6 +5,14 @@ import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../math/domain/services/math_parser.dart';
+import '../../../math/presentation/widgets/math_formula_widget.dart';
+import '../../../syntax_highlighting/presentation/widgets/code_block_widget.dart';
+import '../../../../types/syntax_highlighting.dart';
+import '../../../charts/domain/services/mermaid_parser.dart';
+import '../../../charts/presentation/widgets/mermaid_chart_widget.dart';
+import '../../../../types/charts.dart';
+
 /// Markdown预览组件
 class MarkdownPreview extends ConsumerStatefulWidget {
   const MarkdownPreview({
@@ -176,13 +184,145 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       child: SingleChildScrollView(
         controller: _scrollController,
         padding: const EdgeInsets.all(16),
-        child: MarkdownBody(
-          data: widget.content,
+        child: _buildContentWithMath(),
+      ),
+    );
+  }
+
+  /// 构建包含数学公式和图表的内容
+  Widget _buildContentWithMath() {
+    // 解析数学公式和Mermaid图表
+    final mathFormulas = MathParser.parseFormulas(widget.content);
+    final mermaidCharts = MermaidParser.parseCharts(widget.content);
+    
+    if (mathFormulas.isEmpty && mermaidCharts.isEmpty) {
+      // 没有特殊内容，直接使用普通Markdown渲染
+      return MarkdownBody(
+        data: widget.content,
+        selectable: widget.selectable,
+        styleSheet: _buildMarkdownStyleSheet(),
+        extensionSet: md.ExtensionSet.gitHubFlavored,
+        builders: {
+          'code': CodeElementBuilder(),
+        },
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            _handleLinkTap(href);
+          }
+        },
+        onTapText: widget.onTap,
+      );
+    }
+
+    // 有特殊内容，需要特殊处理
+    return _buildMixedContent(mathFormulas, mermaidCharts);
+  }
+
+  /// 构建混合内容（文本+数学公式+图表）
+  Widget _buildMixedContent(List<MathFormula> mathFormulas, List<MermaidChart> mermaidCharts) {
+    final widgets = <Widget>[];
+    
+    // 合并所有特殊元素并按位置排序
+    final allElements = <_SpecialElement>[];
+    
+    // 添加数学公式
+    for (final formula in mathFormulas) {
+      allElements.add(_SpecialElement(
+        type: _SpecialElementType.math,
+        startIndex: formula.startIndex,
+        endIndex: formula.endIndex,
+        data: formula,
+      ));
+    }
+    
+    // 添加Mermaid图表
+    for (final chart in mermaidCharts) {
+      allElements.add(_SpecialElement(
+        type: _SpecialElementType.chart,
+        startIndex: chart.startIndex,
+        endIndex: chart.endIndex,
+        data: chart,
+      ));
+    }
+    
+    // 按位置排序
+    allElements.sort((a, b) => a.startIndex.compareTo(b.startIndex));
+    
+    int currentIndex = 0;
+
+    for (final element in allElements) {
+      // 添加元素前的普通文本
+      if (currentIndex < element.startIndex) {
+        final textContent = widget.content.substring(currentIndex, element.startIndex);
+        if (textContent.trim().isNotEmpty) {
+          widgets.add(MarkdownBody(
+            data: textContent,
+            selectable: widget.selectable,
+            styleSheet: _buildMarkdownStyleSheet(),
+            extensionSet: md.ExtensionSet.gitHubFlavored,
+            builders: {
+              'code': CodeElementBuilder(),
+            },
+            onTapLink: (text, href, title) {
+              if (href != null) {
+                _handleLinkTap(href);
+              }
+            },
+            onTapText: widget.onTap,
+          ));
+        }
+      }
+
+      // 添加特殊元素
+      if (element.type == _SpecialElementType.math) {
+        final formula = element.data as MathFormula;
+        widgets.add(MathFormulaWidget(
+          formula: formula,
+          textStyle: Theme.of(context).textTheme.bodyLarge,
+          onError: (error) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('数学公式渲染错误: $error'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+        ));
+      } else if (element.type == _SpecialElementType.chart) {
+        final chart = element.data as MermaidChart;
+        widgets.add(Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: MermaidChartWidget(
+            chart: chart,
+            onError: (error) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('图表渲染错误: $error'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
+        ));
+      }
+
+      currentIndex = element.endIndex;
+    }
+
+    // 添加最后剩余的文本
+    if (currentIndex < widget.content.length) {
+      final remainingContent = widget.content.substring(currentIndex);
+      if (remainingContent.trim().isNotEmpty) {
+        widgets.add(MarkdownBody(
+          data: remainingContent,
           selectable: widget.selectable,
           styleSheet: _buildMarkdownStyleSheet(),
           extensionSet: md.ExtensionSet.gitHubFlavored,
           builders: {
-            'math': MathElementBuilder(),
             'code': CodeElementBuilder(),
           },
           onTapLink: (text, href, title) {
@@ -191,8 +331,13 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
             }
           },
           onTapText: widget.onTap,
-        ),
-      ),
+        ));
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widgets,
     );
   }
 
@@ -393,51 +538,34 @@ class CodeElementBuilder extends MarkdownElementBuilder {
       final language = element.attributes['class']?.replaceFirst('language-', '') ?? '';
       final code = element.textContent;
       
-      return Builder(
-        builder: (context) => Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: Theme.of(context).dividerColor,
-              width: 1,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (language.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    language,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ),
-              if (language.isNotEmpty) const SizedBox(height: 8),
-              SelectableText(
-                code,
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
+      return SimpleCodeBlock(
+        code: code,
+        language: language.isNotEmpty ? language : null,
+        showLineNumbers: true,
+        showCopyButton: true,
       );
     }
     return null;
   }
+}
+
+/// 特殊元素类型
+enum _SpecialElementType {
+  math,   // 数学公式
+  chart,  // Mermaid图表
+}
+
+/// 特殊元素
+class _SpecialElement {
+  const _SpecialElement({
+    required this.type,
+    required this.startIndex,
+    required this.endIndex,
+    required this.data,
+  });
+
+  final _SpecialElementType type;
+  final int startIndex;
+  final int endIndex;
+  final dynamic data;
 } 

@@ -3,7 +3,9 @@ import 'package:equatable/equatable.dart';
 /// 文档类型枚举
 enum DocumentType {
   markdown('md', '普通Markdown文档'),
-  notebook('mdnb', 'Markora笔记本');
+  notebook('mdnb', 'Markora笔记本'),
+  text('txt', '纯文本文档'),
+  html('html', 'HTML文档');
 
   const DocumentType(this.extension, this.description);
   
