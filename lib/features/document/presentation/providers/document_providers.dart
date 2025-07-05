@@ -126,6 +126,11 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
     throw Exception('没有可导出的文档');
   }
 
+  /// 设置当前文档
+  void setCurrentDocument(Document document) {
+    state = document;
+  }
+
   /// 关闭文档
   void closeDocument() {
     state = null;
@@ -138,6 +143,12 @@ final currentDocumentProvider = StateNotifierProvider<CurrentDocumentNotifier, D
 });
 
 /// 文档列表Provider
+final documentListProvider = FutureProvider<List<Document>>((ref) async {
+  final documentService = ref.read(documentServiceProvider);
+  return await documentService.getAllDocuments();
+});
+
+/// 文档列表Provider（别名）
 final documentsListProvider = FutureProvider<List<Document>>((ref) async {
   final documentService = ref.read(documentServiceProvider);
   return await documentService.getAllDocuments();

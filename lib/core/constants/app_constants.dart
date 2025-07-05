@@ -5,6 +5,7 @@ class AppConstants {
 
   /// 应用信息
   static const String appName = 'Markora';
+  static const String version = '1.0.0';
   static const String appVersion = '1.0.0';
   static const String appDescription = '下一代跨平台 Markdown 编辑器';
   
