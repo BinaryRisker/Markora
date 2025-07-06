@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../types/plugin.dart';
 import '../../domain/plugin_manager.dart';
-import '../../data/sample_plugins.dart';
 import '../../domain/plugin_interface.dart';
 
 /// 插件管理器Provider
@@ -11,8 +11,8 @@ final pluginManagerProvider = ChangeNotifierProvider<PluginManager>((ref) {
 
 /// 所有插件列表
 final pluginsProvider = Provider<List<Plugin>>((ref) {
-  // 暂时返回示例数据，后续会从插件管理器获取
-  return SamplePlugins.getSamplePlugins();
+  final manager = ref.watch(pluginManagerProvider);
+  return manager.plugins;
 });
 
 /// 已加载插件列表Provider
@@ -94,15 +94,14 @@ final pluginProvider = Provider.family<Plugin?, String>((ref, pluginId) {
 
 /// 插件配置Provider
 final pluginConfigProvider = FutureProvider.family<PluginConfig?, String>((ref, pluginId) async {
-  // 暂时返回示例配置数据
-  final configs = SamplePlugins.getSampleConfigs();
-  return configs[pluginId];
+  final manager = ref.watch(pluginManagerProvider);
+  return manager.getPluginConfig(pluginId);
 });
 
 /// 插件操作Provider
 final pluginActionsProvider = Provider<PluginActions>((ref) {
-  // 暂时返回模拟的操作实现
-  return PluginActions._mock();
+  final manager = ref.watch(pluginManagerProvider);
+  return PluginActions(manager);
 });
 
 /// 插件统计信息Provider
@@ -129,102 +128,73 @@ final pluginStatsProvider = Provider<PluginStats>((ref) {
 
 /// 插件操作类
 class PluginActions {
-  final PluginManager? _manager;
-  final bool _isMock;
+  final PluginManager _manager;
   
-  PluginActions(this._manager) : _isMock = false;
-  
-  PluginActions._mock() : _manager = null, _isMock = true;
+  PluginActions(this._manager);
   
   /// 启用插件
   Future<bool> enablePlugin(String pluginId) async {
-    if (_isMock) {
-      // 模拟延迟
-      await Future.delayed(const Duration(milliseconds: 500));
-      return true;
-    }
-    
     try {
-      await _manager!.enablePlugin(pluginId);
+      await _manager.enablePlugin(pluginId);
       return true;
     } catch (e) {
+      debugPrint('启用插件失败: $e');
       return false;
     }
   }
   
   /// 禁用插件
   Future<bool> disablePlugin(String pluginId) async {
-    if (_isMock) {
-      // 模拟延迟
-      await Future.delayed(const Duration(milliseconds: 500));
-      return true;
-    }
-    
     try {
-      await _manager!.disablePlugin(pluginId);
+      await _manager.disablePlugin(pluginId);
       return true;
     } catch (e) {
+      debugPrint('禁用插件失败: $e');
       return false;
     }
   }
   
   /// 安装插件
   Future<bool> installPlugin(String pluginPath) async {
-    if (_isMock) {
-      // 模拟延迟
-      await Future.delayed(const Duration(milliseconds: 800));
-      return true;
-    }
-    
     try {
-      await _manager!.installPlugin(pluginPath);
+      await _manager.installPlugin(pluginPath);
       return true;
     } catch (e) {
+      debugPrint('安装插件失败: $e');
       return false;
     }
   }
   
   /// 卸载插件
   Future<bool> uninstallPlugin(String pluginId) async {
-    if (_isMock) {
-      // 模拟延迟
-      await Future.delayed(const Duration(milliseconds: 800));
-      return true;
-    }
-    
     try {
-      await _manager!.uninstallPlugin(pluginId);
+      await _manager.uninstallPlugin(pluginId);
       return true;
     } catch (e) {
+      debugPrint('卸载插件失败: $e');
       return false;
     }
   }
   
   /// 重新加载插件
   Future<bool> reloadPlugin(String pluginId) async {
-    if (_isMock) {
-      // 模拟延迟
-      await Future.delayed(const Duration(milliseconds: 600));
-      return true;
-    }
-    
     try {
-      await _manager!.reloadPlugin(pluginId);
+      await _manager.reloadPlugin(pluginId);
       return true;
     } catch (e) {
+      debugPrint('重新加载插件失败: $e');
       return false;
     }
   }
   
   /// 更新插件配置
   Future<void> updateConfig(String pluginId, Map<String, dynamic> config) async {
-    if (_isMock) {
-      // 模拟延迟
-      await Future.delayed(const Duration(milliseconds: 300));
-      return;
+    try {
+      await _manager.updatePluginConfig(pluginId, config);
+    } catch (e) {
+      debugPrint('更新插件配置失败: $e');
+      rethrow;
     }
-    
-    await _manager!.updatePluginConfig(pluginId, config);
   }
 }
 

@@ -271,7 +271,7 @@ class PluginCard extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? '插件已启用' : '启用失败'),
+          content: Text(success ? '插件已启用' : '启用插件失败'),
           backgroundColor: success ? Colors.green : Colors.red,
         ),
       );
@@ -284,8 +284,8 @@ class PluginCard extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? '插件已禁用' : '禁用失败'),
-          backgroundColor: success ? Colors.orange : Colors.red,
+          content: Text(success ? '插件已禁用' : '禁用插件失败'),
+          backgroundColor: success ? Colors.green : Colors.red,
         ),
       );
     }
