@@ -14,6 +14,7 @@ import 'features/document/presentation/widgets/save_as_dialog.dart';
 import 'features/settings/presentation/widgets/settings_page.dart';
 import 'features/export/presentation/widgets/export_dialog.dart';
 import 'features/editor/domain/services/global_editor_manager.dart';
+import 'features/plugins/presentation/pages/plugin_management_page.dart';
 
 /// 应用外壳 - 主要界面容器
 class AppShell extends ConsumerStatefulWidget {
@@ -176,6 +177,13 @@ void main() {
           _buildModeToggle(),
           
           const SizedBox(width: 8),
+          
+          // 插件管理按钮
+          _buildToolbarButton(
+            icon: Icon(PhosphorIconsRegular.package),
+            tooltip: '插件管理',
+            onPressed: () => _handlePluginManagement(),
+          ),
           
           // 设置按钮
           _buildToolbarButton(
@@ -570,6 +578,14 @@ void main() {
   void _handleRedo() {
     final globalEditorManager = ref.read(globalEditorManagerProvider);
     globalEditorManager.redo();
+  }
+
+  void _handlePluginManagement() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PluginManagementPage(),
+      ),
+    );
   }
 
   void _handleSettings() {
