@@ -10,10 +10,12 @@ import '../../../document/presentation/providers/document_providers.dart';
 /// Export dialog
 class ExportDialog extends ConsumerStatefulWidget {
   final Document document;
+  final ExportFormat? initialFormat;
 
   const ExportDialog({
     super.key,
     required this.document,
+    this.initialFormat,
   });
 
   @override
@@ -21,7 +23,7 @@ class ExportDialog extends ConsumerStatefulWidget {
 }
 
 class _ExportDialogState extends ConsumerState<ExportDialog> {
-  ExportFormat _selectedFormat = ExportFormat.html;
+  late ExportFormat _selectedFormat;
   late TextEditingController _fileNameController;
   bool _isExporting = false;
   ExportProgress? _currentProgress;
@@ -34,6 +36,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
   @override
   void initState() {
     super.initState();
+    _selectedFormat = widget.initialFormat ?? ExportFormat.html;
     _fileNameController = TextEditingController(
       text: _getSuggestedFileName(),
     );
@@ -752,9 +755,16 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
 }
 
 /// Show export dialog
-Future<void> showExportDialog(BuildContext context, Document document) {
+Future<void> showExportDialog(
+  BuildContext context, 
+  Document document, {
+  ExportFormat? initialFormat,
+}) {
   return showDialog(
     context: context,
-    builder: (context) => ExportDialog(document: document),
+    builder: (context) => ExportDialog(
+      document: document,
+      initialFormat: initialFormat,
+    ),
   );
 }
