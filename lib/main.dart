@@ -22,6 +22,9 @@ void main() async {
   // 初始化Hive本地存储
   await Hive.initFlutter();
   
+  // 清理可能存在的冲突数据
+  await _cleanupHiveData();
+  
   // 注册Hive适配器
   Hive.registerAdapter(ThemeModeAdapter());
   Hive.registerAdapter(AppSettingsAdapter());
@@ -44,6 +47,19 @@ void main() async {
       child: const MarkoraApp(),
     ),
   );
+}
+
+/// 清理Hive数据（防止TypeId冲突）
+Future<void> _cleanupHiveData() async {
+  try {
+    // 删除可能存在冲突的Box
+    if (await Hive.boxExists('documents')) {
+      await Hive.deleteBoxFromDisk('documents');
+    }
+  } catch (e) {
+    // 忽略清理错误
+    print('清理Hive数据时出错: $e');
+  }
 }
 
 /// 创建示例文档
