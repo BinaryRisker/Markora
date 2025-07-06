@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../types/document.dart';
 import '../../domain/repositories/document_repository.dart';
 import '../../domain/services/document_service.dart';
+import '../../domain/services/file_service.dart';
 import '../../infrastructure/repositories/hive_document_repository.dart';
 
 /// 文档仓库Provider
@@ -16,6 +17,190 @@ final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
 final documentServiceProvider = Provider<DocumentService>((ref) {
   final repository = ref.read(documentRepositoryProvider);
   return DocumentService(repository);
+});
+
+/// 文件服务Provider
+final fileServiceProvider = Provider<FileService>((ref) {
+  return FileService();
+});
+
+/// 文档Tab信息
+class DocumentTab {
+  const DocumentTab({
+    required this.document,
+    this.isModified = false,
+    this.lastEditTime,
+  });
+
+  final Document document;
+  final bool isModified;
+  final DateTime? lastEditTime;
+
+  DocumentTab copyWith({
+    Document? document,
+    bool? isModified,
+    DateTime? lastEditTime,
+  }) {
+    return DocumentTab(
+      document: document ?? this.document,
+      isModified: isModified ?? this.isModified,
+      lastEditTime: lastEditTime ?? this.lastEditTime,
+    );
+  }
+}
+
+/// 文档Tab管理器
+class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
+  DocumentTabsNotifier(this._documentService) : super([]);
+
+  final DocumentService _documentService;
+  int _activeTabIndex = -1;
+
+  /// 当前激活的Tab索引
+  int get activeTabIndex => _activeTabIndex;
+
+  /// 当前激活的文档
+  Document? get activeDocument => 
+      _activeTabIndex >= 0 && _activeTabIndex < state.length 
+          ? state[_activeTabIndex].document 
+          : null;
+
+  /// 打开文档Tab
+  void openDocumentTab(Document document) {
+    // 检查文档是否已经打开
+    final existingIndex = state.indexWhere((tab) => tab.document.id == document.id);
+    
+    if (existingIndex >= 0) {
+      // 如果已经打开，切换到该Tab
+      setActiveTab(existingIndex);
+    } else {
+      // 如果没有打开，创建新Tab
+      final newTab = DocumentTab(document: document);
+      state = [...state, newTab];
+      _activeTabIndex = state.length - 1;
+    }
+  }
+
+  /// 创建新文档Tab
+  Future<void> createNewDocumentTab({
+    String? title,
+    String? content,
+  }) async {
+    try {
+      final document = await _documentService.createNewDocument(
+        title: title,
+        content: content,
+      );
+      openDocumentTab(document);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// 关闭Tab
+  void closeTab(int index) {
+    if (index < 0 || index >= state.length) return;
+
+    final newState = List<DocumentTab>.from(state);
+    newState.removeAt(index);
+    state = newState;
+
+    // 调整激活Tab索引
+    if (_activeTabIndex == index) {
+      // 如果关闭的是当前激活Tab
+      if (newState.isEmpty) {
+        _activeTabIndex = -1;
+      } else if (index >= newState.length) {
+        _activeTabIndex = newState.length - 1;
+      }
+      // 否则保持当前索引
+    } else if (_activeTabIndex > index) {
+      _activeTabIndex--;
+    }
+  }
+
+  /// 设置激活Tab
+  void setActiveTab(int index) {
+    if (index >= 0 && index < state.length && _activeTabIndex != index) {
+      _activeTabIndex = index;
+      // 通知状态变化，触发UI更新
+      state = [...state];
+    }
+  }
+
+  /// 更新Tab内容
+  void updateTabContent(int index, String content) {
+    if (index < 0 || index >= state.length) return;
+
+    final tab = state[index];
+    final updatedDocument = tab.document.copyWith(
+      content: content,
+      updatedAt: DateTime.now(),
+    );
+    
+    final updatedTab = tab.copyWith(
+      document: updatedDocument,
+      isModified: true,
+      lastEditTime: DateTime.now(),
+    );
+
+    final newState = List<DocumentTab>.from(state);
+    newState[index] = updatedTab;
+    state = newState;
+  }
+
+  /// 保存Tab文档
+  Future<void> saveTab(int index) async {
+    if (index < 0 || index >= state.length) return;
+
+    try {
+      final tab = state[index];
+      await _documentService.saveDocument(tab.document);
+      
+      // 更新Tab状态为已保存
+      final updatedTab = tab.copyWith(isModified: false);
+      final newState = List<DocumentTab>.from(state);
+      newState[index] = updatedTab;
+      state = newState;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// 保存当前激活Tab
+  Future<void> saveActiveTab() async {
+    if (_activeTabIndex >= 0) {
+      await saveTab(_activeTabIndex);
+    }
+  }
+
+  /// 关闭所有Tab
+  void closeAllTabs() {
+    state = [];
+    _activeTabIndex = -1;
+  }
+
+  /// 获取Tab标题（显示修改状态）
+  String getTabTitle(int index) {
+    if (index < 0 || index >= state.length) return '';
+    
+    final tab = state[index];
+    final title = tab.document.title;
+    return tab.isModified ? '$title *' : title;
+  }
+}
+
+/// 文档Tab管理Provider
+final documentTabsProvider = StateNotifierProvider<DocumentTabsNotifier, List<DocumentTab>>((ref) {
+  final documentService = ref.read(documentServiceProvider);
+  return DocumentTabsNotifier(documentService);
+});
+
+/// 当前激活文档Provider
+final activeDocumentProvider = Provider<Document?>((ref) {
+  final tabsNotifier = ref.read(documentTabsProvider.notifier);
+  ref.watch(documentTabsProvider); // 监听tabs变化
+  return tabsNotifier.activeDocument;
 });
 
 /// 当前文档Provider

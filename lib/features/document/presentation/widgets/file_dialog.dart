@@ -538,6 +538,11 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     if (!_canConfirm) return;
 
     if (widget.type == FileDialogType.open) {
+      // 打开文档到Tab
+      if (_selectedDocument != null) {
+        final tabsNotifier = ref.read(documentTabsProvider.notifier);
+        tabsNotifier.openDocumentTab(_selectedDocument!);
+      }
       Navigator.of(context).pop(_selectedDocument);
     } else {
       final fileName = _fileNameController.text.trim();

@@ -5,6 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../types/document.dart';
 import '../../domain/entities/export_settings.dart';
 import '../../domain/services/export_service.dart';
+import '../../../document/presentation/providers/document_providers.dart';
 
 /// 导出对话框
 class ExportDialog extends ConsumerStatefulWidget {
@@ -674,53 +675,51 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     });
 
     try {
+      // 使用FileService进行真正的文件导出
+      final fileService = ref.read(fileServiceProvider);
+      
+      setState(() {
+        _currentProgress = const ExportProgress(
+          progress: 0.3,
+          status: '选择保存位置...',
+        );
+      });
+
       final settings = ExportSettings(
         format: _selectedFormat,
-        outputPath: '/downloads', // 实际应用中会是用户选择的路径
+        outputPath: '', // 将由FileService处理
         fileName: _fileNameController.text.trim(),
         pdfSettings: _pdfSettings,
         htmlSettings: _htmlSettings,
         imageSettings: _imageSettings,
       );
 
-      final exportService = ExportServiceImpl();
-      final result = await exportService.exportDocument(
-        widget.document,
-        settings,
-        onProgress: (progress) {
-          setState(() {
-            _currentProgress = progress;
-          });
-        },
-      );
+      setState(() {
+        _currentProgress = const ExportProgress(
+          progress: 0.6,
+          status: '正在导出...',
+        );
+      });
 
-      if (result.success) {
-        setState(() {
-          _currentProgress = const ExportProgress(
-            progress: 1.0,
-            status: '导出完成！',
-            isCompleted: true,
-          );
-        });
+      // 使用FileService导出文档
+      await fileService.exportDocument(widget.document, settings);
 
-        // 显示成功消息
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('文档已成功导出为 ${_selectedFormat.displayName}'),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
-          );
-        }
-      } else {
-        setState(() {
-          _currentProgress = ExportProgress(
-            progress: 0.0,
-            status: '导出失败',
-            hasError: true,
-            errorMessage: result.errorMessage,
-          );
-        });
+      setState(() {
+        _currentProgress = const ExportProgress(
+          progress: 1.0,
+          status: '导出完成！',
+          isCompleted: true,
+        );
+      });
+
+      // 显示成功消息
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('文档已成功导出为 ${_selectedFormat.displayName}'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
       }
     } catch (e) {
       setState(() {
