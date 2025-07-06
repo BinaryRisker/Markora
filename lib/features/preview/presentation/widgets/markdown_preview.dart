@@ -5,14 +5,21 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../../l10n/app_localizations.dart';
+import '../../../../types/document.dart';
+import '../../../../types/syntax_highlighting.dart';
+import '../../../../main.dart';
 
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../syntax_highlighting/presentation/widgets/code_block_widget.dart';
-import '../../../../types/syntax_highlighting.dart';
-import '../../../../main.dart';
+
 import '../../../plugins/domain/plugin_implementations.dart';
+import '../../../export/presentation/widgets/export_dialog.dart';
+import '../../../export/domain/entities/export_settings.dart';
+import '../../../document/presentation/providers/document_providers.dart';
+
 
 
 /// Render cache item
@@ -611,18 +618,29 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
   /// Export as PDF
   void _exportToPdf() {
-    // TODO: Implement PDF export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('PDF export feature coming soon')),
-    );
+    _showExportDialog(ExportFormat.pdf);
   }
 
   /// Export as HTML
   void _exportToHtml() {
-    // TODO: Implement HTML export functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('HTML export feature coming soon')),
+    _showExportDialog(ExportFormat.html);
+  }
+
+  /// Show export dialog with specified format
+  void _showExportDialog(ExportFormat format) {
+    // Get current document or create temporary document
+    final currentDoc = ref.read(currentDocumentProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final documentToExport = currentDoc ?? Document(
+      id: 'temp_export',
+      title: l10n.untitledDocument,
+      content: widget.content,
+      type: DocumentType.markdown,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
+
+    showExportDialog(context, documentToExport, initialFormat: format);
   }
 
   /// Refresh preview
