@@ -252,7 +252,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
       title: Row(
         children: [
           PhosphorIcon(
-            PhosphorIcons.floppyDisk(),
+            PhosphorIconsRegular.floppyDisk,
             size: 20,
             color: theme.colorScheme.primary,
           ),
@@ -347,7 +347,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : PhosphorIcon(
-                          PhosphorIcons.folder(),
+                          PhosphorIconsRegular.folder,
                           size: 16,
                         ),
                   label: const Text('浏览'),
@@ -500,7 +500,7 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog> {
                   
                   return ListTile(
                     leading: PhosphorIcon(
-                      PhosphorIcons.folder(),
+                      PhosphorIconsRegular.folder,
                       size: 16,
                       color: theme.colorScheme.primary,
                     ),
@@ -545,4 +545,4 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog> {
       ],
     );
   }
-} 
+}

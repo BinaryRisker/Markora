@@ -116,27 +116,27 @@ void main() {
         children: [
           // 文件操作按钮
           _buildToolbarButton(
-            icon: Icon(PhosphorIcons.file()),
+            icon: Icon(PhosphorIconsRegular.file),
             tooltip: '新建文档',
             onPressed: () => _handleNewDocument(),
           ),
           _buildToolbarButton(
-            icon: Icon(PhosphorIcons.folderOpen()),
+            icon: Icon(PhosphorIconsRegular.folderOpen),
             tooltip: '打开文档',
             onPressed: () => _handleOpenDocument(),
           ),
           _buildToolbarButton(
-            icon: Icon(PhosphorIcons.floppyDisk()),
+            icon: Icon(PhosphorIconsRegular.floppyDisk),
             tooltip: '保存文档',
             onPressed: () => _handleSaveDocument(),
           ),
           _buildToolbarButton(
-            icon: Icon(PhosphorIcons.copySimple()),
+            icon: Icon(PhosphorIconsRegular.copySimple),
             tooltip: '另存为',
             onPressed: () => _handleSaveAsDocument(),
           ),
           _buildToolbarButton(
-            icon: Icon(PhosphorIcons.export()),
+            icon: Icon(PhosphorIconsRegular.export),
             tooltip: '导出文档',
             onPressed: () => _handleExportDocument(),
           ),
@@ -145,12 +145,12 @@ void main() {
           
           // 编辑操作按钮
           _buildToolbarButton(
-            icon: Icon(PhosphorIcons.arrowUUpLeft()),
+            icon: Icon(PhosphorIconsRegular.arrowUUpLeft),
             tooltip: '撤销',
             onPressed: () => _handleUndo(),
           ),
           _buildToolbarButton(
-            icon: Icon(PhosphorIcons.arrowUUpRight()),
+            icon: Icon(PhosphorIconsRegular.arrowUUpRight),
             tooltip: '重做',
             onPressed: () => _handleRedo(),
           ),
@@ -168,7 +168,7 @@ void main() {
           
           // 设置按钮
           _buildToolbarButton(
-            icon: Icon(PhosphorIcons.gear()),
+            icon: Icon(PhosphorIconsRegular.gear),
             tooltip: '设置',
             onPressed: () => _handleSettings(),
           ),
@@ -224,15 +224,15 @@ void main() {
       children: [
         Tooltip(
           message: '源码模式',
-          child: Icon(PhosphorIcons.code(), size: 16),
+          child: Icon(PhosphorIconsRegular.code, size: 16),
         ),
         Tooltip(
           message: '分屏模式',
-          child: Icon(PhosphorIcons.columns(), size: 16),
+          child: Icon(PhosphorIconsRegular.columns, size: 16),
         ),
         Tooltip(
           message: '预览模式',
-          child: Icon(PhosphorIcons.eye(), size: 16),
+          child: Icon(PhosphorIconsRegular.eye, size: 16),
         ),
       ],
     );
@@ -568,4 +568,4 @@ void main() {
       ),
     );
   }
-} 
+}

@@ -120,7 +120,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     return Row(
       children: [
         Icon(
-          widget.type == FileDialogType.open ? PhosphorIcons.folderOpen() : PhosphorIcons.floppyDisk(),
+          widget.type == FileDialogType.open ? PhosphorIconsRegular.folderOpen : PhosphorIconsRegular.floppyDisk,
           color: theme.colorScheme.primary,
         ),
         const SizedBox(width: 8),
@@ -133,7 +133,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
         const Spacer(),
         // 预览切换按钮
         IconButton(
-          icon: Icon(_showPreview ? PhosphorIcons.eyeSlash() : PhosphorIcons.eye()),
+          icon: Icon(_showPreview ? PhosphorIconsRegular.eyeSlash : PhosphorIconsRegular.eye),
           onPressed: () {
             setState(() {
               _showPreview = !_showPreview;
@@ -143,7 +143,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
         ),
         // 关闭按钮
         IconButton(
-          icon: Icon(PhosphorIcons.x()),
+          icon: Icon(PhosphorIconsRegular.x),
           onPressed: () => Navigator.of(context).pop(),
           tooltip: '关闭',
         ),
@@ -157,10 +157,10 @@ class _FileDialogState extends ConsumerState<FileDialog> {
       controller: _searchController,
       decoration: InputDecoration(
         hintText: '搜索文档...',
-        prefixIcon: Icon(PhosphorIcons.magnifyingGlass()),
+        prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass),
         suffixIcon: _searchQuery.isNotEmpty
             ? IconButton(
-                icon: Icon(PhosphorIcons.x()),
+                icon: Icon(PhosphorIconsRegular.x),
                 onPressed: () {
                   _searchController.clear();
                 },
@@ -184,7 +184,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                Icon(PhosphorIcons.files(), size: 16),
+                Icon(PhosphorIconsRegular.files, size: 16),
                 const SizedBox(width: 8),
                 Text(
                   '文档列表',
@@ -195,7 +195,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
                 const Spacer(),
                 // 排序按钮
                 PopupMenuButton<String>(
-                  icon: Icon(PhosphorIcons.sortAscending(), size: 16),
+                  icon: Icon(PhosphorIconsRegular.sortAscending, size: 16),
                   tooltip: '排序',
                   itemBuilder: (context) => [
                     const PopupMenuItem(value: 'name', child: Text('按名称')),
@@ -223,7 +223,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(PhosphorIcons.warning(), size: 48, color: theme.colorScheme.error),
+                    Icon(PhosphorIconsRegular.warning, size: 48, color: theme.colorScheme.error),
                     const SizedBox(height: 16),
                     Text('加载文档失败'),
                     const SizedBox(height: 8),
@@ -256,7 +256,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(PhosphorIcons.fileX(), size: 48, color: theme.colorScheme.outline),
+            Icon(PhosphorIconsRegular.fileX, size: 48, color: theme.colorScheme.outline),
             const SizedBox(height: 16),
             Text(
               _searchQuery.isEmpty ? '暂无文档' : '未找到匹配的文档',
@@ -289,7 +289,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
           child: ListTile(
             selected: isSelected,
             leading: Icon(
-              PhosphorIcons.fileText(),
+              PhosphorIconsRegular.fileText,
               color: isSelected ? theme.colorScheme.primary : null,
             ),
             title: Text(
@@ -344,7 +344,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                Icon(PhosphorIcons.eye(), size: 16),
+                Icon(PhosphorIconsRegular.eye, size: 16),
                 const SizedBox(width: 8),
                 Text(
                   '预览',
@@ -367,7 +367,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          PhosphorIcons.fileText(),
+                          PhosphorIconsRegular.fileText,
                           size: 48,
                           color: theme.colorScheme.outline,
                         ),
@@ -609,4 +609,4 @@ Future<String?> showSaveFileDialog(BuildContext context, {String? initialFileNam
       initialFileName: initialFileName,
     ),
   );
-} 
+}
