@@ -8,7 +8,11 @@ import 'app.dart';
 import 'features/settings/domain/entities/app_settings.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
 import 'features/document/infrastructure/repositories/hive_document_repository.dart';
+import 'features/document/presentation/providers/document_providers.dart';
 import 'types/document.dart';
+
+// 全局文档仓库实例
+late HiveDocumentRepository globalDocumentRepository;
 
 /// 应用入口函数
 void main() async {
@@ -25,15 +29,19 @@ void main() async {
   Hive.registerAdapter(DocumentAdapter());
 
   // 初始化文档仓库并创建示例数据
-  final documentRepo = HiveDocumentRepository();
-  await documentRepo.init();
-  await _createSampleDocuments(documentRepo);
+  globalDocumentRepository = HiveDocumentRepository();
+  await globalDocumentRepository.init();
+  await _createSampleDocuments(globalDocumentRepository);
 
   // 运行应用
   runApp(
     // Riverpod状态管理容器
-    const ProviderScope(
-      child: MarkoraApp(),
+    ProviderScope(
+      overrides: [
+        // 使用已初始化的仓库实例
+        documentRepositoryProvider.overrideWithValue(globalDocumentRepository),
+      ],
+      child: const MarkoraApp(),
     ),
   );
 }

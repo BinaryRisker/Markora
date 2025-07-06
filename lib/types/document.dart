@@ -4,7 +4,7 @@ import 'package:hive/hive.dart';
 part 'document.g.dart';
 
 /// 文档类型枚举
-@HiveType(typeId: 0)
+@HiveType(typeId: 2)
 enum DocumentType {
   @HiveField(0)
   markdown('md', '普通Markdown文档'),
@@ -22,7 +22,7 @@ enum DocumentType {
 }
 
 /// 文档实体类
-@HiveType(typeId: 1)
+@HiveType(typeId: 3)
 class Document extends Equatable {
   const Document({
     required this.id,
