@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid Renderer</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: transparent;
+        }
+        .mermaid {
+            text-align: center;
+            background: transparent;
+        }
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #d32f2f;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="mermaid-container">
+        <div class="mermaid" id="mermaid-diagram">
+            <!-- Mermaid diagram will be rendered here -->
+        </div>
+    </div>
+
+    <script>
+        // 初始化Mermaid配置
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: 'inherit',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            },
+            sequence: {
+                useMaxWidth: true,
+                wrap: true
+            },
+            gantt: {
+                useMaxWidth: true
+            }
+        });
+
+        // 渲染Mermaid图表的函数
+        async function renderMermaid(code, theme = 'default') {
+            const container = document.getElementById('mermaid-container');
+            const diagram = document.getElementById('mermaid-diagram');
+            
+            try {
+                // 更新主题配置
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: theme,
+                    securityLevel: 'loose',
+                    fontFamily: 'inherit',
+                    flowchart: {
+                        useMaxWidth: true,
+                        htmlLabels: true
+                    },
+                    sequence: {
+                        useMaxWidth: true,
+                        wrap: true
+                    },
+                    gantt: {
+                        useMaxWidth: true
+                    }
+                });
+
+                // 清空之前的内容
+                diagram.innerHTML = '';
+                diagram.className = 'mermaid';
+                
+                // 渲染新的图表
+                const { svg } = await mermaid.render('mermaid-svg', code);
+                diagram.innerHTML = svg;
+                
+                // 通知Flutter渲染完成
+                if (window.flutter_inappwebview) {
+                    window.flutter_inappwebview.callHandler('onRenderComplete', {
+                        success: true,
+                        width: diagram.scrollWidth,
+                        height: diagram.scrollHeight
+                    });
+                }
+            } catch (error) {
+                console.error('Mermaid rendering error:', error);
+                diagram.className = 'error';
+                diagram.innerHTML = `
+                    <div class="error">
+                        <strong>Mermaid渲染错误:</strong><br>
+                        ${error.message || '未知错误'}
+                    </div>
+                `;
+                
+                // 通知Flutter渲染失败
+                if (window.flutter_inappwebview) {
+                    window.flutter_inappwebview.callHandler('onRenderComplete', {
+                        success: false,
+                        error: error.message || '未知错误'
+                    });
+                }
+            }
+        }
+
+        // 监听来自Flutter的消息
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            if (data.type === 'render') {
+                renderMermaid(data.code, data.theme || 'default');
+            }
+        });
+
+        // 页面加载完成后通知Flutter
+        window.addEventListener('load', function() {
+            if (window.flutter_inappwebview) {
+                window.flutter_inappwebview.callHandler('onPageLoaded');
+            }
+        });
+    </script>
+</body>
+</html>

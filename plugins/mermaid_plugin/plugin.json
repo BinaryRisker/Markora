@@ -1,0 +1,43 @@
+{
+  "id": "mermaid_plugin",
+  "name": "Mermaid 图表插件",
+  "version": "1.0.0",
+  "description": "支持在Markdown中渲染Mermaid图表，包括流程图、序列图、甘特图等多种图表类型",
+  "author": "Markora Team",
+  "homepage": "https://github.com/markora/mermaid-plugin",
+  "repository": "https://github.com/markora/mermaid-plugin.git",
+  "license": "MIT",
+  "type": "renderer",
+  "category": "visualization",
+  "tags": ["图表", "mermaid", "可视化", "流程图"],
+  "minMarkoraVersion": "1.0.0",
+  "dependencies": [],
+  "platforms": ["web", "desktop", "mobile"],
+  "permissions": [
+    "internet",
+    "webview"
+  ],
+  "config": {
+    "theme": {
+      "type": "string",
+      "default": "default",
+      "options": ["default", "dark", "forest", "neutral"]
+    },
+    "enableInteraction": {
+      "type": "boolean",
+      "default": true
+    },
+    "defaultWidth": {
+      "type": "number",
+      "default": 800
+    },
+    "defaultHeight": {
+      "type": "number",
+      "default": 600
+    }
+  },
+  "entryPoint": "lib/main.dart",
+  "assets": [
+    "assets/mermaid_template.html"
+  ]
+}

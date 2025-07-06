@@ -390,13 +390,18 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
   /// 刷新插件列表
   void _refreshPlugins() async {
     try {
-      await _initializePluginManager();
+      final manager = ref.read(pluginManagerProvider);
+      
+      // 重新扫描插件目录
+      await manager.initialize(manager.context ?? _createPluginContext());
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('刷新完成')),
         );
       }
     } catch (e) {
+      debugPrint('刷新插件失败: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('刷新失败: $e')),
