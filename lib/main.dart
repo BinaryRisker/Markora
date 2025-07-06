@@ -9,7 +9,10 @@ import 'features/settings/domain/entities/app_settings.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
 import 'features/document/infrastructure/repositories/hive_document_repository.dart';
 import 'features/document/presentation/providers/document_providers.dart';
+import 'features/plugins/domain/plugin_manager.dart';
+import 'features/plugins/domain/plugin_interface.dart';
 import 'types/document.dart';
+import 'types/plugin.dart';
 
 // 全局文档仓库实例
 late HiveDocumentRepository globalDocumentRepository;
@@ -36,6 +39,9 @@ void main() async {
   await globalDocumentRepository.init();
   await _createSampleDocuments(globalDocumentRepository);
 
+  // 初始化插件管理器
+  await _initializePluginManager();
+
   // 运行应用
   runApp(
     // Riverpod状态管理容器
@@ -60,6 +66,88 @@ Future<void> _cleanupHiveData() async {
     // 忽略清理错误
     print('清理Hive数据时出错: $e');
   }
+}
+
+/// 初始化插件管理器
+Future<void> _initializePluginManager() async {
+  try {
+    final pluginManager = PluginManager.instance;
+    
+    // 创建简单的插件上下文
+    final context = PluginContext(
+      editorController: _SimpleEditorController(),
+      syntaxRegistry: _SimpleSyntaxRegistry(),
+      toolbarRegistry: _SimpleToolbarRegistry(),
+      menuRegistry: _SimpleMenuRegistry(),
+    );
+    
+    // 初始化插件管理器
+    await pluginManager.initialize(context);
+    
+    print('插件管理器初始化完成');
+  } catch (e) {
+    print('插件管理器初始化失败: $e');
+  }
+}
+
+/// 简单的编辑器控制器实现
+class _SimpleEditorController implements EditorController {
+  @override
+  String get content => '';
+  
+  @override
+  void setContent(String content) {}
+  
+  @override
+  void insertText(String text) {}
+  
+  @override
+  String get selectedText => '';
+  
+  @override
+  void replaceSelection(String text) {}
+  
+  @override
+  int get cursorPosition => 0;
+  
+  @override
+  void setCursorPosition(int position) {}
+}
+
+/// 简单的语法注册表实现
+class _SimpleSyntaxRegistry implements SyntaxRegistry {
+  @override
+  void registerSyntax(String name, RegExp pattern, String replacement) {}
+  
+  @override
+  void registerBlockSyntax(String name, RegExp pattern, Widget Function(String content) builder) {}
+  
+  @override
+  void registerInlineSyntax(String name, RegExp pattern, Widget Function(String content) builder) {}
+}
+
+/// 简单的工具栏注册表实现
+class _SimpleToolbarRegistry implements ToolbarRegistry {
+  @override
+  void registerAction(PluginAction action, VoidCallback callback) {}
+  
+  @override
+  void registerGroup(String groupId, String title, List<PluginAction> actions) {}
+  
+  @override
+  void unregisterAction(String actionId) {}
+}
+
+/// 简单的菜单注册表实现
+class _SimpleMenuRegistry implements MenuRegistry {
+  @override
+  void registerMenuItem(String menuId, String title, VoidCallback callback, {String? icon, String? shortcut}) {}
+  
+  @override
+  void registerSubMenu(String parentId, String menuId, String title, List<String> items) {}
+  
+  @override
+  void unregisterMenuItem(String menuId) {}
 }
 
 /// 创建示例文档

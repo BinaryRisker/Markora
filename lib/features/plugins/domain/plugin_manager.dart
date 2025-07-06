@@ -21,6 +21,9 @@ class PluginManager extends ChangeNotifier {
   
   PluginContext? _context;
   
+  /// 获取插件上下文
+  PluginContext? get context => _context;
+  
   /// 所有插件列表
   List<Plugin> get plugins => _plugins.values.toList();
   
@@ -71,16 +74,27 @@ class PluginManager extends ChangeNotifier {
   Future<void> _scanPlugins() async {
     try {
       final pluginsDir = await _getPluginsDirectory();
+      debugPrint('插件目录路径: ${pluginsDir.path}');
+      
       if (!await pluginsDir.exists()) {
+        debugPrint('插件目录不存在，正在创建: ${pluginsDir.path}');
         await pluginsDir.create(recursive: true);
         return;
       }
       
+      debugPrint('开始扫描插件目录: ${pluginsDir.path}');
+      var pluginCount = 0;
+      
       await for (final entity in pluginsDir.list()) {
+        debugPrint('发现实体: ${entity.path}, 类型: ${entity.runtimeType}');
         if (entity is Directory) {
+          pluginCount++;
           await _scanPluginDirectory(entity);
         }
       }
+      
+      debugPrint('扫描完成，发现 $pluginCount 个插件目录');
+      debugPrint('当前已加载插件: ${_plugins.keys.toList()}');
     } catch (e) {
       debugPrint('扫描插件目录失败: $e');
     }
@@ -89,11 +103,23 @@ class PluginManager extends ChangeNotifier {
   /// 扫描单个插件目录
   Future<void> _scanPluginDirectory(Directory pluginDir) async {
     try {
+      debugPrint('正在扫描插件目录: ${pluginDir.path}');
       final manifestFile = File(path.join(pluginDir.path, 'plugin.json'));
-      if (!await manifestFile.exists()) return;
+      debugPrint('查找插件清单文件: ${manifestFile.path}');
       
+      if (!await manifestFile.exists()) {
+        debugPrint('插件清单文件不存在: ${manifestFile.path}');
+        return;
+      }
+      
+      debugPrint('正在加载插件元数据: ${manifestFile.path}');
       final metadata = await _loader.loadPluginMetadata(manifestFile);
-      if (metadata == null) return;
+      if (metadata == null) {
+        debugPrint('插件元数据加载失败: ${manifestFile.path}');
+        return;
+      }
+      
+      debugPrint('成功加载插件元数据: ${metadata.id} - ${metadata.name}');
       
       final existingPlugin = _plugins[metadata.id];
       final status = existingPlugin?.status ?? PluginStatus.installed;
@@ -107,6 +133,7 @@ class PluginManager extends ChangeNotifier {
       );
       
       _plugins[metadata.id] = plugin;
+      debugPrint('插件已添加到管理器: ${metadata.id}');
     } catch (e) {
       debugPrint('扫描插件目录失败 ${pluginDir.path}: $e');
     }
@@ -322,9 +349,31 @@ class PluginManager extends ChangeNotifier {
   
   /// 获取插件目录
   Future<Directory> _getPluginsDirectory() async {
-    // TODO: 根据平台获取合适的插件目录
-    // 这里暂时使用应用数据目录下的plugins文件夹
-    return Directory(path.join(Directory.current.path, 'plugins'));
+    // 在Flutter Web中，使用相对路径
+    // 在其他平台中，使用应用数据目录
+    try {
+      debugPrint('当前工作目录: ${Directory.current.path}');
+      
+      // 尝试使用项目根目录下的plugins文件夹
+      final pluginsPath = path.join(Directory.current.path, 'plugins');
+      debugPrint('计算的插件目录路径: $pluginsPath');
+      
+      final pluginsDir = Directory(pluginsPath);
+      final exists = await pluginsDir.exists();
+      debugPrint('插件目录是否存在: $exists');
+      
+      // 如果目录不存在，尝试创建
+      if (!exists) {
+        debugPrint('正在创建插件目录: $pluginsPath');
+        await pluginsDir.create(recursive: true);
+      }
+      
+      return pluginsDir;
+    } catch (e) {
+      debugPrint('获取插件目录失败: $e');
+      // 回退到当前目录
+      return Directory('plugins');
+    }
   }
   
   /// 加载插件配置
