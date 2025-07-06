@@ -12,6 +12,7 @@ import '../../../charts/presentation/widgets/mermaid_chart_widget.dart';
 import '../../../../types/charts.dart';
 import '../../../document/presentation/providers/document_providers.dart';
 import '../../domain/services/undo_redo_manager.dart';
+import '../../domain/services/global_editor_manager.dart';
 
 /// Markdown编辑器组件
 class MarkdownEditor extends ConsumerStatefulWidget {
@@ -45,6 +46,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
   late UndoRedoManager _undoRedoManager;
   String _lastSyncedContent = '';
   bool _isApplyingUndoRedo = false;
+  String? _tabId;
   
   @override
   void initState() {
@@ -68,14 +70,72 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     
     // 监听文本变化
     _controller.addListener(_onTextChanged);
+    
+    // 延迟注册到全局编辑器管理器，确保 ref 可用
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _registerToGlobalManager();
+    });
+  }
+  
+  @override
+  void didUpdateWidget(MarkdownEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 当组件更新时，检查是否需要更新全局管理器的活跃标签页
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateActiveTab();
+    });
   }
 
   @override
   void dispose() {
+    _unregisterFromGlobalManager();
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  /// 注册到全局编辑器管理器
+  void _registerToGlobalManager() {
+    if (mounted) {
+      final globalManager = ref.read(globalEditorManagerProvider);
+      final activeDocument = ref.read(activeDocumentProvider);
+      if (activeDocument != null) {
+        _tabId = activeDocument.id;
+        globalManager.registerEditor(
+          tabId: _tabId!,
+          undoRedoManager: _undoRedoManager,
+          undoCallback: _undo,
+          redoCallback: _redo,
+        );
+        // 设置为活跃标签页
+        globalManager.setActiveTab(_tabId!);
+      }
+    }
+  }
+
+  /// 从全局编辑器管理器注销
+  void _unregisterFromGlobalManager() {
+    if (_tabId != null && mounted) {
+      final globalManager = ref.read(globalEditorManagerProvider);
+      globalManager.unregisterEditor(_tabId!);
+    }
+  }
+  
+  /// 更新活跃标签页
+  void _updateActiveTab() {
+    if (mounted) {
+      final activeDocument = ref.read(activeDocumentProvider);
+      if (activeDocument != null && _tabId != activeDocument.id) {
+        // 标签页发生了变化，重新注册
+        _unregisterFromGlobalManager();
+        _registerToGlobalManager();
+      } else if (activeDocument != null && _tabId == activeDocument.id) {
+        // 确保当前标签页是活跃的
+        final globalManager = ref.read(globalEditorManagerProvider);
+        globalManager.setActiveTab(_tabId!);
+      }
+    }
   }
 
   /// 文本变化处理
@@ -117,6 +177,12 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       );
       
       widget.onCursorPositionChanged?.call(position);
+    }
+    
+    // 通知全局编辑器管理器状态更新
+    if (_tabId != null && mounted) {
+      final globalManager = ref.read(globalEditorManagerProvider);
+      globalManager.notifyContentChanged(_tabId!, text, _controller.selection);
     }
   }
 
@@ -405,8 +471,14 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
   void _applyEditorState(EditorHistoryState state) {
     _isApplyingUndoRedo = true;
     
+    // 临时移除监听器，避免触发_onTextChanged
+    _controller.removeListener(_onTextChanged);
+    
     _controller.text = state.text;
     _controller.selection = state.selection;
+    
+    // 重新添加监听器
+    _controller.addListener(_onTextChanged);
     
     // 更新Tab内容
     final tabsNotifier = ref.read(documentTabsProvider.notifier);
@@ -416,8 +488,8 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
     _lastSyncedContent = state.text;
     
-    // 延迟重置标志
-    Future.microtask(() => _isApplyingUndoRedo = false);
+    // 立即重置标志
+    _isApplyingUndoRedo = false;
   }
 
   /// 插入Markdown格式
@@ -525,21 +597,36 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       context: context,
       builder: (context) => _MathFormulaDialog(
         onInsert: (latex, isInline) {
-          final prefix = isInline ? '\$' : '\$\$\n';
-          final suffix = isInline ? '\$' : '\n\$\$';
-          _insertMarkdown(prefix, suffix);
-          
-          // 如果提供了LaTeX内容，插入到光标位置
-          if (latex.isNotEmpty) {
-            final selection = _controller.selection;
-            if (selection.isValid) {
-              final start = selection.start - (isInline ? 1 : 3);
-              _controller.text = _controller.text.replaceRange(
-                start, 
-                start, 
-                latex
+          final selection = _controller.selection;
+          if (selection.isValid) {
+            final selectedText = _controller.text.substring(selection.start, selection.end);
+            final formulaText = latex.isNotEmpty ? latex : selectedText;
+            
+            String newText;
+            if (isInline) {
+              newText = '\$${formulaText}\$';
+            } else {
+              newText = '\$\$\n${formulaText}\n\$\$';
+            }
+            
+            // 替换选中的文本
+            final beforeSelection = _controller.text.substring(0, selection.start);
+            final afterSelection = _controller.text.substring(selection.end);
+            _controller.text = beforeSelection + newText + afterSelection;
+            
+            // 设置新的光标位置
+            if (formulaText.isEmpty) {
+              final cursorOffset = isInline ? 1 : 3;
+              _controller.selection = TextSelection.collapsed(
+                offset: selection.start + cursorOffset,
+              );
+            } else {
+              _controller.selection = TextSelection.collapsed(
+                offset: selection.start + newText.length,
               );
             }
+            
+            widget.onChanged?.call(_controller.text);
           }
         },
       ),
@@ -1114,4 +1201,4 @@ class _MermaidChartDialogState extends State<_MermaidChartDialog> {
       _selectedExample = example.code;
     }
   }
-} 
+}

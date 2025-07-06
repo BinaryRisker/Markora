@@ -13,6 +13,7 @@ import 'features/document/presentation/widgets/document_tabs.dart';
 import 'features/document/presentation/widgets/save_as_dialog.dart';
 import 'features/settings/presentation/widgets/settings_page.dart';
 import 'features/export/presentation/widgets/export_dialog.dart';
+import 'features/editor/domain/services/global_editor_manager.dart';
 
 /// 应用外壳 - 主要界面容器
 class AppShell extends ConsumerStatefulWidget {
@@ -144,15 +145,25 @@ void main() {
           const VerticalDivider(),
           
           // 编辑操作按钮
-          _buildToolbarButton(
-            icon: Icon(PhosphorIconsRegular.arrowUUpLeft),
-            tooltip: '撤销',
-            onPressed: () => _handleUndo(),
+          Consumer(
+            builder: (context, ref, child) {
+              final undoRedoState = ref.watch(globalUndoRedoStateProvider);
+              return _buildToolbarButton(
+                icon: Icon(PhosphorIconsRegular.arrowUUpLeft),
+                tooltip: '撤销',
+                onPressed: undoRedoState.canUndo ? () => _handleUndo() : null,
+              );
+            },
           ),
-          _buildToolbarButton(
-            icon: Icon(PhosphorIconsRegular.arrowUUpRight),
-            tooltip: '重做',
-            onPressed: () => _handleRedo(),
+          Consumer(
+            builder: (context, ref, child) {
+              final undoRedoState = ref.watch(globalUndoRedoStateProvider);
+              return _buildToolbarButton(
+                icon: Icon(PhosphorIconsRegular.arrowUUpRight),
+                tooltip: '重做',
+                onPressed: undoRedoState.canRedo ? () => _handleRedo() : null,
+              );
+            },
           ),
           
           const VerticalDivider(),
@@ -181,7 +192,7 @@ void main() {
   Widget _buildToolbarButton({
     required Widget icon,
     required String tooltip,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) {
     return Tooltip(
       message: tooltip,
@@ -552,13 +563,13 @@ void main() {
   }
 
   void _handleUndo() {
-    // 撤销功能由编辑器内部处理
-    // 这里可以添加全局撤销逻辑（如果需要）
+    final globalEditorManager = ref.read(globalEditorManagerProvider);
+    globalEditorManager.undo();
   }
 
   void _handleRedo() {
-    // 重做功能由编辑器内部处理
-    // 这里可以添加全局重做逻辑（如果需要）
+    final globalEditorManager = ref.read(globalEditorManagerProvider);
+    globalEditorManager.redo();
   }
 
   void _handleSettings() {
