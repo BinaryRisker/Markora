@@ -76,6 +76,14 @@ class PluginManager extends ChangeNotifier {
       final pluginsDir = await _getPluginsDirectory();
       debugPrint('插件目录路径: ${pluginsDir.path}');
       
+      // 在Web环境中，跳过目录扫描
+      if (kIsWeb) {
+        debugPrint('Web环境：跳过插件目录扫描');
+        // 在Web环境中，手动添加已知的插件
+        await _scanKnownPlugins();
+        return;
+      }
+      
       if (!await pluginsDir.exists()) {
         debugPrint('插件目录不存在，正在创建: ${pluginsDir.path}');
         await pluginsDir.create(recursive: true);
@@ -97,6 +105,19 @@ class PluginManager extends ChangeNotifier {
       debugPrint('当前已加载插件: ${_plugins.keys.toList()}');
     } catch (e) {
       debugPrint('扫描插件目录失败: $e');
+    }
+  }
+  
+  /// 扫描已知插件（Web环境专用）
+  Future<void> _scanKnownPlugins() async {
+    try {
+      // 手动添加mermaid插件
+      final mermaidPluginDir = Directory('plugins/mermaid_plugin');
+      await _scanPluginDirectory(mermaidPluginDir);
+      
+      debugPrint('Web环境插件扫描完成');
+    } catch (e) {
+      debugPrint('Web环境插件扫描失败: $e');
     }
   }
   
@@ -352,6 +373,15 @@ class PluginManager extends ChangeNotifier {
     // 在Flutter Web中，使用相对路径
     // 在其他平台中，使用应用数据目录
     try {
+      // 检查是否为Web环境
+      if (kIsWeb) {
+        debugPrint('Web环境：使用相对路径');
+        // Web环境下直接使用相对路径，不访问Directory.current
+        final pluginsDir = Directory('plugins');
+        debugPrint('插件目录路径: plugins');
+        return pluginsDir;
+      }
+      
       debugPrint('当前工作目录: ${Directory.current.path}');
       
       // 尝试使用项目根目录下的plugins文件夹

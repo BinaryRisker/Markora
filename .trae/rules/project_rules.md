@@ -46,6 +46,7 @@
 - 完成后简要说明修改内容和影响
 - 完成计划需要实时更新到readme中
 - 每一个阶段完成都需要确保可以编译运行并提交git commit
+- follow mcp-feedback-enhanced instructions
 
 ## 项目上下文
 Markora 是一个跨平台 Markdown 编辑器，对标 Typora，支持数学公式、Mermaid图表、代码高亮等功能。项目已有完整架构，当前处于功能完善和优化阶段。 

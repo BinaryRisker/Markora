@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -9,6 +10,7 @@ import 'features/editor/presentation/widgets/markdown_editor.dart';
 import 'features/preview/presentation/widgets/markdown_preview.dart';
 import 'features/document/presentation/providers/document_providers.dart';
 import 'features/document/presentation/widgets/file_dialog.dart';
+import 'features/document/domain/services/file_service.dart';
 import 'features/document/presentation/widgets/document_tabs.dart';
 import 'features/document/presentation/widgets/save_as_dialog.dart';
 import 'features/settings/presentation/widgets/settings_page.dart';
@@ -443,14 +445,33 @@ void main() {
 
   void _handleOpenDocument() async {
     try {
-      final selectedDocument = await showOpenFileDialog(context);
-      if (selectedDocument != null) {
-        // 文档已经在file_dialog中被添加到Tab了，这里只需要显示消息
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('已打开文档: ${selectedDocument.title}')),
-          );
-        }
+      final fileService = FileService();
+      Document document;
+      
+      // 根据环境选择不同的文件加载方式
+      if (kIsWeb) {
+        // Web环境下直接调用Web专用方法
+        document = await fileService.loadDocumentFromWeb();
+      } else {
+        // 非Web环境使用传统方式
+        final filePath = await fileService.selectOpenFilePath(
+          dialogTitle: '打开Markdown文件',
+          allowedExtensions: ['md', 'markdown', 'txt'],
+        );
+        
+        if (filePath == null) return; // 用户取消了选择
+        
+        document = await fileService.loadDocumentFromFile(filePath);
+      }
+      
+      // 添加到Tab
+      final tabsNotifier = ref.read(documentTabsProvider.notifier);
+      tabsNotifier.openDocumentTab(document);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('已打开文档: ${document.title}')),
+        );
       }
     } catch (e) {
       if (mounted) {

@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
 
@@ -31,22 +33,66 @@ class FileService {
   /// 从文件加载文档
   Future<Document> loadDocumentFromFile(String filePath) async {
     try {
-      final file = File(filePath);
+      if (kIsWeb) {
+        // Web环境下，filePath实际是文件名，需要重新选择文件获取内容
+        return await loadDocumentFromWeb();
+      } else {
+        // 非Web环境，正常文件操作
+        final file = File(filePath);
+        
+        if (!await file.exists()) {
+          throw Exception('文件不存在: $filePath');
+        }
+        
+        final content = await file.readAsString(encoding: utf8);
+        final fileName = path.basenameWithoutExtension(filePath);
+        
+        return Document(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          title: fileName,
+          content: content,
+          type: _getDocumentTypeFromExtension(path.extension(filePath)),
+          createdAt: await file.lastModified(),
+          updatedAt: await file.lastModified(),
+        );
+      }
+    } catch (e) {
+      throw Exception('加载文档失败: $e');
+    }
+  }
+
+  /// Web环境下加载文档
+  Future<Document> loadDocumentFromWeb() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        dialogTitle: '打开Markdown文件',
+        allowedExtensions: ['md', 'markdown', 'txt'],
+        type: FileType.custom,
+        allowMultiple: false,
+      );
       
-      if (!await file.exists()) {
-        throw Exception('文件不存在: $filePath');
+      if (result == null || result.files.isEmpty) {
+        throw Exception('未选择文件');
       }
       
-      final content = await file.readAsString(encoding: utf8);
-      final fileName = path.basenameWithoutExtension(filePath);
+      final file = result.files.first;
+      final bytes = file.bytes;
+      
+      if (bytes == null) {
+        throw Exception('无法读取文件内容');
+      }
+      
+      final content = utf8.decode(bytes);
+      final fileName = path.basenameWithoutExtension(file.name);
+      final now = DateTime.now();
       
       return Document(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: now.millisecondsSinceEpoch.toString(),
         title: fileName,
         content: content,
-        type: _getDocumentTypeFromExtension(path.extension(filePath)),
-        createdAt: await file.lastModified(),
-        updatedAt: await file.lastModified(),
+        type: _getDocumentTypeFromExtension(path.extension(file.name)),
+        createdAt: now,
+        updatedAt: now,
       );
     } catch (e) {
       throw Exception('加载文档失败: $e');
@@ -126,7 +172,13 @@ class FileService {
         allowMultiple: false,
       );
       
-      return result?.files.first.path;
+      if (kIsWeb) {
+        // Web环境下返回文件名，实际文件内容通过bytes获取
+        return result?.files.first.name;
+      } else {
+        // 非Web环境返回文件路径
+        return result?.files.first.path;
+      }
     } catch (e) {
       throw Exception('选择打开路径失败: $e');
     }
@@ -351,4 +403,4 @@ class FileService {
         return 'JPEG图像';
     }
   }
-} 
+}

@@ -97,40 +97,42 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
           ],
         ),
       ),
-      body: Column(
-        children: [
-          // 统计信息卡片
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: PluginStatsCard(),
-          ),
-          
-          // 搜索和过滤
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                const PluginSearchBar(),
-                const SizedBox(height: 8),
-                const PluginFilters(),
-              ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 统计信息卡片
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: PluginStatsCard(),
             ),
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // 插件列表
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildAllPluginsTab(),
-                _buildEnabledPluginsTab(),
-                _buildPluginStoreTab(),
-              ],
+            
+            // 搜索和过滤
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  const PluginSearchBar(),
+                  const SizedBox(height: 8),
+                  const PluginFilters(),
+                ],
+              ),
             ),
-          ),
-        ],
+            
+            const SizedBox(height: 16),
+            
+            // 插件列表
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildAllPluginsTab(),
+                  _buildEnabledPluginsTab(),
+                  _buildPluginStoreTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
