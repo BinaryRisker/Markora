@@ -7,7 +7,9 @@ import '../../infrastructure/repositories/hive_document_repository.dart';
 
 /// 文档仓库Provider
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
-  return HiveDocumentRepository();
+  final repo = HiveDocumentRepository();
+  // 注意：初始化将在main.dart中完成
+  return repo;
 });
 
 /// 文档服务Provider
