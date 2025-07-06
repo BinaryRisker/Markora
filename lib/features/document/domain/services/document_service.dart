@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
-
 import '../../../../types/document.dart';
 import '../repositories/document_repository.dart';
+import '../../../export/domain/services/export_service.dart';
+import '../../../export/domain/entities/export_settings.dart';
 
 /// Document service
 class DocumentService {
@@ -66,6 +68,12 @@ class DocumentService {
   /// Import document
   Future<Document> importDocument(String filePath) async {
     try {
+      if (kIsWeb) {
+        // Web environment: File import should be handled by file picker
+        // This method should not be called directly in Web environment
+        throw Exception('File import in Web environment should use file picker');
+      }
+      
       final file = File(filePath);
       if (!file.existsSync()) {
         throw Exception('File does not exist: $filePath');
@@ -105,44 +113,106 @@ class DocumentService {
     }
   }
 
+  /// Import document from content (Web-compatible)
+  Future<Document> importDocumentFromContent(
+    String content,
+    String fileName, {
+    String? filePath,
+  }) async {
+    try {
+      final extension = path.extension(fileName).toLowerCase();
+
+      DocumentType type;
+      switch (extension) {
+        case '.md':
+        case '.markdown':
+          type = DocumentType.markdown;
+          break;
+        case '.txt':
+          type = DocumentType.text;
+          break;
+        case '.html':
+          type = DocumentType.html;
+          break;
+        default:
+          type = DocumentType.markdown;
+      }
+
+      final documentTitle = path.basenameWithoutExtension(fileName);
+      final document = await createNewDocument(
+        title: documentTitle,
+        content: content,
+      );
+
+      return document.copyWith(
+        type: type,
+        filePath: filePath,
+      );
+    } catch (e) {
+      throw Exception('Failed to import document from content: $e');
+    }
+  }
+
   /// Export document
   Future<String> exportDocument(
     Document document,
     String exportPath, {
-    ExportFormat format = ExportFormat.markdown,
+    ExportFormat format = ExportFormat.html,
   }) async {
     try {
-      String content;
-      String extension;
-
       switch (format) {
-        case ExportFormat.markdown:
-          content = document.content;
-          extension = '.md';
-          break;
         case ExportFormat.html:
-          content = _convertToHtml(document.content);
-          extension = '.html';
-          break;
-        case ExportFormat.text:
-          content = _stripMarkdown(document.content);
-          extension = '.txt';
-          break;
+          final content = _convertToHtml(document.content);
+          final fileName = path.basenameWithoutExtension(exportPath);
+          final finalPath = path.join(
+            path.dirname(exportPath),
+            '$fileName.html',
+          );
+          
+          if (kIsWeb) {
+            // Use export service for Web environment
+            final exportService = ExportServiceImpl();
+            final settings = ExportSettings(
+              format: ExportFormat.html,
+              outputPath: path.dirname(exportPath),
+              fileName: '$fileName.html',
+              pdfSettings: const PdfExportSettings(),
+              htmlSettings: const HtmlExportSettings(),
+            );
+            final result = await exportService.exportDocument(document, settings);
+            if (!result.success) {
+              throw Exception(result.errorMessage ?? 'HTML export failed');
+            }
+            return finalPath;
+          } else {
+            // Use File API for non-Web platforms
+            final file = File(finalPath);
+            await file.writeAsString(content);
+            return finalPath;
+          }
+          
         case ExportFormat.pdf:
-          // TODO: Implement PDF export
-          throw UnimplementedError('PDF export feature coming soon');
+          // Use export service for PDF generation
+          final exportService = ExportServiceImpl();
+          final settings = ExportSettings(
+            format: ExportFormat.pdf,
+            outputPath: path.dirname(exportPath),
+            fileName: path.basename(exportPath),
+            pdfSettings: const PdfExportSettings(),
+            htmlSettings: const HtmlExportSettings(),
+          );
+          final result = await exportService.exportDocument(document, settings);
+          if (!result.success) {
+            throw Exception(result.errorMessage ?? 'PDF export failed');
+          }
+          return exportPath;
+          
+        case ExportFormat.docx:
+        case ExportFormat.png:
+        case ExportFormat.jpeg:
+        default:
+          throw Exception('${format.displayName} export is not supported yet');
       }
-
-      final fileName = path.basenameWithoutExtension(exportPath);
-      final finalPath = path.join(
-        path.dirname(exportPath),
-        '$fileName$extension',
-      );
-
-      final file = File(finalPath);
-      await file.writeAsString(content);
-
-      return finalPath;
     } catch (e) {
       throw Exception('Failed to export document: $e');
     }
@@ -202,15 +272,4 @@ class DocumentService {
         .replaceAll(RegExp(r'\[(.+?)\]\(.+?\)'), '\$1')
         .trim();
   }
-}
-
-/// Export format enumeration
-enum ExportFormat {
-  markdown('Markdown'),
-  html('HTML'),
-  text('纯文本'),
-  pdf('PDF');
-
-  const ExportFormat(this.displayName);
-  final String displayName;
 }

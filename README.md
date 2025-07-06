@@ -54,15 +54,18 @@ Plugin System Features:
 ### ✅ Latest Completed Features
 
 - [x] **Settings Module** - Theme switching, editor configuration, shortcut settings ⭐
-- [x] **File Selection Dialog** - Friendly document management interface with search and preview ⭐
-- [x] **Export Functionality** - Support for HTML/PDF multi-format export with complete configuration options ⭐
+- [x] **File Selection Dialog** - User-friendly document management interface with search and preview ⭐
+- [x] **Export Function** - Multi-format export support (HTML/PDF) with complete configuration options ⭐
+- [x] **Preview Export Integration** - Unified export functionality in preview area with format pre-selection ⭐
+- [x] **PDF Export Implementation** - Complete PDF generation with custom styling and layout options ⭐
 
 ### 🚧 Next Development Plan
 
-#### Features to be Improved
+#### Pending Improvements
 - [ ] **Editor Enhancement** - Undo/redo, text formatting (bold/italic/links)
-- [ ] **Export Function Completion** - PDF/HTML/DOCX export implementation
 - [ ] **File Management** - File sorting functionality
+- [ ] **Export Format Expansion** - Implement DOCX and image export
+- [ ] **Export Dependencies Optimization** - Add image and document processing packages
 
 #### New Feature Development
 - [ ] **Plugin System Architecture** - Extensible plugin framework
@@ -95,7 +98,7 @@ Plugin System Features:
 | Main App Interface | 446 lines | ✅ 95% | Typora-style interface, missing formatting button functionality |
 | Settings System | 600 lines | ✅ 100% | Complete settings interface and state management |
 | File Dialog | 500 lines | ✅ 95% | Missing sorting functionality |
-| Export System | 800 lines | ✅ 70% | Framework complete, PDF/DOCX export not implemented |
+| Export System | 800 lines | ✅ 90% | UI complete, HTML/PDF export working, DOCX/Image formats pending |
 | Type System | 5 files | ✅ 100% | Complete type definition system |
 | Plugin System | 0 lines | ❌ 0% | Not started yet |
 | **Total** | **5500+ lines** | **85%** | **Core functionality complete, details to be refined** |

@@ -1,5 +1,10 @@
+import 'dart:io';
+import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 import '../../../../types/document.dart';
 import '../entities/export_settings.dart';
@@ -57,7 +62,7 @@ class ExportServiceImpl implements ExportService {
       case ExportFormat.html:
         return true;
       case ExportFormat.pdf:
-        return true; // 需要添加pdf包支持
+        return true; // PDF导出已实现
       case ExportFormat.png:
       case ExportFormat.jpeg:
         return false; // 需要添加图像导出支持
@@ -135,8 +140,13 @@ class ExportServiceImpl implements ExportService {
         currentStep: '应用PDF样式',
       ));
 
-      // 这里需要实际的PDF生成逻辑
-      final pdfBytes = await _generatePdfFromHtml(htmlContent, settings.pdfSettings);
+      // 生成PDF
+      final pdfBytes = await _generatePdfFromHtml(
+        document, 
+        htmlContent, 
+        settings.pdfSettings,
+        settings.htmlSettings,
+      );
 
       onProgress?.call(const ExportProgress(
         progress: 0.9,
@@ -477,22 +487,128 @@ MathJax = {
 
   /// 从HTML生成PDF
   Future<Uint8List> _generatePdfFromHtml(
+    Document document,
     String htmlContent, 
-    PdfExportSettings settings,
+    PdfExportSettings pdfSettings,
+    HtmlExportSettings htmlSettings,
   ) async {
-    // 这里需要实际的PDF生成实现
-    throw UnimplementedError('PDF生成功能需要添加printing或pdf包支持');
+    final pdf = pw.Document();
+    
+    // 获取文档标题
+    final title = htmlSettings.title.isNotEmpty 
+        ? htmlSettings.title 
+        : document.title.isNotEmpty 
+            ? document.title 
+            : 'Document';
+    
+    // 创建PDF页面
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: _getPdfPageFormat(pdfSettings.pageSize),
+        margin: pw.EdgeInsets.all(_convertToPoints(pdfSettings.marginTop)),
+        build: (pw.Context context) {
+          return [
+            pw.Header(
+              level: 0,
+              child: pw.Text(
+                title,
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+            pw.Paragraph(
+              text: _stripHtmlTags(htmlContent),
+              style: pw.TextStyle(
+                fontSize: pdfSettings.fontSize,
+                lineSpacing: pdfSettings.lineHeight,
+              ),
+            ),
+            if (pdfSettings.includePageNumbers)
+              pw.Footer(
+                trailing: pw.Text(
+                  'Page ${context.pageNumber} of ${context.pagesCount}',
+                  style: const pw.TextStyle(fontSize: 10),
+                ),
+              ),
+          ];
+        },
+      ),
+    );
+    
+    return pdf.save();
   }
 
   /// 保存HTML文件
   Future<void> _saveHtmlFile(String content, String path) async {
-    debugPrint('模拟保存HTML文件到: $path');
-    debugPrint('内容长度: ${content.length}');
+    try {
+      final file = File(path);
+      
+      // 确保目录存在
+      final directory = Directory(path.substring(0, path.lastIndexOf(Platform.pathSeparator)));
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+      
+      await file.writeAsString(content, encoding: utf8);
+      debugPrint('HTML文件已保存到: $path');
+    } catch (e) {
+      throw Exception('保存HTML文件失败: $e');
+    }
   }
 
   /// 保存PDF文件
   Future<void> _savePdfFile(Uint8List bytes, String path) async {
-    debugPrint('模拟保存PDF文件到: $path');
-    debugPrint('文件大小: ${bytes.length} bytes');
+    try {
+      final file = File(path);
+      
+      // 确保目录存在
+      final directory = Directory(path.substring(0, path.lastIndexOf(Platform.pathSeparator)));
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+      
+      await file.writeAsBytes(bytes);
+      debugPrint('PDF文件已保存到: $path');
+    } catch (e) {
+      throw Exception('保存PDF文件失败: $e');
+    }
+  }
+  
+  /// 获取PDF页面格式
+  PdfPageFormat _getPdfPageFormat(String pageSize) {
+    switch (pageSize.toLowerCase()) {
+      case 'a3':
+        return PdfPageFormat.a3;
+      case 'a4':
+        return PdfPageFormat.a4;
+      case 'a5':
+        return PdfPageFormat.a5;
+      case 'letter':
+        return PdfPageFormat.letter;
+      case 'legal':
+        return PdfPageFormat.legal;
+      default:
+        return PdfPageFormat.a4;
+    }
+  }
+  
+  /// 转换边距为点数
+  double _convertToPoints(double margin) {
+    // 假设输入的边距单位是厘米，转换为点数 (1cm = 28.35 points)
+    return margin * 28.35;
+  }
+  
+  /// 移除HTML标签，保留纯文本
+  String _stripHtmlTags(String html) {
+    return html
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .trim();
   }
 }

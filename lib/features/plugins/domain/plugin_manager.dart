@@ -382,23 +382,30 @@ class PluginManager extends ChangeNotifier {
         return pluginsDir;
       }
       
-      debugPrint('Current working directory: ${Directory.current.path}');
-      
-      // Try to use plugins folder under project root directory
-      final pluginsPath = path.join(Directory.current.path, 'plugins');
-      debugPrint('Calculated plugin directory path: $pluginsPath');
-      
-      final pluginsDir = Directory(pluginsPath);
-      final exists = await pluginsDir.exists();
-      debugPrint('Plugin directory exists: $exists');
-      
-      // Try to create directory if it doesn't exist
-      if (!exists) {
-        debugPrint('Creating plugin directory: $pluginsPath');
-        await pluginsDir.create(recursive: true);
+      // For non-web platforms, use Directory.current safely
+      try {
+        debugPrint('Current working directory: ${Directory.current.path}');
+        
+        // Try to use plugins folder under project root directory
+        final pluginsPath = path.join(Directory.current.path, 'plugins');
+        debugPrint('Calculated plugin directory path: $pluginsPath');
+        
+        final pluginsDir = Directory(pluginsPath);
+        final exists = await pluginsDir.exists();
+        debugPrint('Plugin directory exists: $exists');
+        
+        // Try to create directory if it doesn't exist
+        if (!exists) {
+          debugPrint('Creating plugin directory: $pluginsPath');
+          await pluginsDir.create(recursive: true);
+        }
+        
+        return pluginsDir;
+      } catch (e) {
+        debugPrint('Failed to access current directory: $e');
+        // Fallback to relative path
+        return Directory('plugins');
       }
-      
-      return pluginsDir;
     } catch (e) {
       debugPrint('Failed to get plugin directory: $e');
       // Fallback to current directory

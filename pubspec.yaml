@@ -83,6 +83,12 @@ dependencies:
   
   # URL启动器
   url_launcher: ^6.3.1
+  
+  # PDF生成
+  pdf: ^3.11.1
+  
+  # Web PDF生成
+  js: ^0.6.7
 
 dev_dependencies:
   flutter_test:
