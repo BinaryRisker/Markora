@@ -2,40 +2,71 @@ import 'package:equatable/equatable.dart';
 
 /// 插件类型枚举
 enum PluginType {
-  /// 语法扩展插件
-  syntax('语法扩展'),
-  /// 渲染器插件
-  renderer('渲染器'),
-  /// 主题插件
-  theme('主题'),
-  /// 导出插件
-  exporter('导出器'),
-  /// 工具插件
-  tool('工具'),
-  /// 集成插件
-  integration('集成');
+  syntax,       // 语法插件
+  renderer,     // 渲染器插件
+  theme,        // 主题插件
+  export,       // 导出插件
+  exporter,     // 导出器插件（别名）
+  import,       // 导入插件
+  tool,         // 工具插件
+  widget,       // 组件插件
+  integration,  // 集成插件
+  other,        // 其他插件
+}
 
-  const PluginType(this.displayName);
-  final String displayName;
+/// 插件类型扩展
+extension PluginTypeExtension on PluginType {
+  String get displayName {
+    switch (this) {
+      case PluginType.syntax:
+        return '语法插件';
+      case PluginType.renderer:
+        return '渲染器插件';
+      case PluginType.theme:
+        return '主题插件';
+      case PluginType.export:
+        return '导出插件';
+      case PluginType.exporter:
+        return '导出器插件';
+      case PluginType.import:
+        return '导入插件';
+      case PluginType.tool:
+        return '工具插件';
+      case PluginType.widget:
+        return '组件插件';
+      case PluginType.integration:
+        return '集成插件';
+      case PluginType.other:
+        return '其他插件';
+    }
+  }
 }
 
 /// 插件状态枚举
 enum PluginStatus {
-  /// 未安装
-  uninstalled('未安装'),
-  /// 已安装但未启用
-  installed('已安装'),
-  /// 已启用
-  enabled('已启用'),
-  /// 已禁用
-  disabled('已禁用'),
-  /// 更新可用
-  updateAvailable('有更新'),
-  /// 出错
-  error('出错');
+  enabled,   // 已启用
+  disabled,  // 已禁用
+  installed, // 已安装但未启用
+  error,     // 错误状态
+  loading,   // 加载中
+}
 
-  const PluginStatus(this.displayName);
-  final String displayName;
+/// 插件状态扩展
+extension PluginStatusExtension on PluginStatus {
+  String get displayName {
+    switch (this) {
+      case PluginStatus.enabled:
+        return '已启用';
+      case PluginStatus.disabled:
+        return '已禁用';
+      case PluginStatus.installed:
+        return '已安装';
+      case PluginStatus.error:
+        return '错误';
+      case PluginStatus.loading:
+        return '加载中';
+    }
+  }
 }
 
 /// 插件元数据
@@ -187,6 +218,9 @@ class PluginConfig extends Equatable {
   
   /// 是否启用
   final bool isEnabled;
+  
+  /// 设置数据（兼容性别名）
+  Map<String, dynamic> get settings => config;
 
   PluginConfig copyWith({
     String? pluginId,
@@ -242,4 +276,4 @@ class PluginAction extends Equatable {
         shortcut,
         category,
       ];
-} 
+}
