@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -715,12 +716,49 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
         );
       });
 
-      // Show success message
+      // Show success message with location info
       if (mounted) {
+        String message = 'Document successfully exported as ${_selectedFormat.displayName}';
+        
+        // Add location info for web PDF exports
+        if (_selectedFormat == ExportFormat.pdf && kIsWeb) {
+          message += '\n文件已保存到浏览器的默认下载文件夹';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Document successfully exported as ${_selectedFormat.displayName}'),
+            content: Text(message),
             backgroundColor: Theme.of(context).colorScheme.primary,
+            duration: const Duration(seconds: 5), // 延长显示时间
+            action: _selectedFormat == ExportFormat.pdf && kIsWeb
+                ? SnackBarAction(
+                    label: '查看下载',
+                    textColor: Colors.white,
+                    onPressed: () {
+                      // 显示更详细的说明对话框
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('PDF文件已下载'),
+                          content: const Text(
+                            'PDF文件已保存到您浏览器的默认下载文件夹中。\n\n'
+                            '通常位置：\n'
+                            '• Windows: C:\\Users\\用户名\\Downloads\\\n'
+                            '• macOS: /Users/用户名/Downloads/\n'
+                            '• Linux: /home/用户名/Downloads/\n\n'
+                            '您也可以按 Ctrl+J (Windows/Linux) 或 Cmd+Shift+J (macOS) 查看浏览器下载记录。'
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('知道了'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  )
+                : null,
           ),
         );
       }

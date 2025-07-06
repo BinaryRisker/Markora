@@ -31,6 +31,27 @@
 
   <title>markora</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- jsPDF library for PDF generation -->
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- jsPDF font plugin for Chinese support -->
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.plugin.standard_fonts_metrics.js"></script>
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.plugin.split_text_to_size.js"></script>
+  <script src="https://unpkg.com/jspdf@latest/dist/jspdf.plugin.from_html.js"></script>
+  <script>
+    // 确保jsPDF全局可用
+    window.jsPDF = window.jspdf.jsPDF;
+    
+    // 配置jsPDF以支持中文
+    if (window.jsPDF) {
+      // 设置默认字体为支持Unicode的字体
+      window.jsPDF.API.setFont = function(fontName, fontStyle) {
+        this.internal.getFont.apply(this, arguments);
+        return this;
+      };
+    }
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

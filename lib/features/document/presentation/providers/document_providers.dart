@@ -5,6 +5,7 @@ import '../../domain/repositories/document_repository.dart';
 import '../../domain/services/document_service.dart';
 import '../../domain/services/file_service.dart';
 import '../../infrastructure/repositories/hive_document_repository.dart';
+import '../../../export/domain/entities/export_settings.dart';
 
 /// Document repository provider
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
@@ -297,7 +298,7 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
   /// Export document
   Future<String> exportDocument(
     String exportPath, {
-    ExportFormat format = ExportFormat.markdown,
+    ExportFormat format = ExportFormat.html,
   }) async {
     if (state != null) {
       try {
