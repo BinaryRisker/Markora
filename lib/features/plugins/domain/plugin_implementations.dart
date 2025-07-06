@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import '../../../types/plugin.dart';
 import 'plugin_interface.dart';
 
-/// 编辑器控制器实现
+/// Editor controller implementation
 class EditorControllerImpl implements EditorController {
   EditorControllerImpl(this._textController);
   
@@ -61,7 +61,7 @@ class EditorControllerImpl implements EditorController {
   }
 }
 
-/// 语法注册器实现
+/// Syntax registry implementation
 class SyntaxRegistryImpl implements SyntaxRegistry {
   final Map<String, SyntaxRule> _syntaxRules = {};
   final Map<String, BlockSyntaxRule> _blockSyntaxRules = {};
@@ -94,16 +94,16 @@ class SyntaxRegistryImpl implements SyntaxRegistry {
     );
   }
   
-  /// 获取所有语法规则
+  /// Get all syntax rules
   Map<String, SyntaxRule> get syntaxRules => Map.unmodifiable(_syntaxRules);
   
-  /// 获取所有块级语法规则
+  /// Get all block syntax rules
   Map<String, BlockSyntaxRule> get blockSyntaxRules => Map.unmodifiable(_blockSyntaxRules);
   
-  /// 获取所有行内语法规则
+  /// Get all inline syntax rules
   Map<String, InlineSyntaxRule> get inlineSyntaxRules => Map.unmodifiable(_inlineSyntaxRules);
   
-  /// 移除语法规则
+  /// Remove syntax rule
   void removeSyntax(String name) {
     _syntaxRules.remove(name);
     _blockSyntaxRules.remove(name);
@@ -111,7 +111,7 @@ class SyntaxRegistryImpl implements SyntaxRegistry {
   }
 }
 
-/// 工具栏注册器实现
+/// Toolbar registry implementation
 class ToolbarRegistryImpl implements ToolbarRegistry {
   final Map<String, ToolbarActionItem> _actions = {};
   final Map<String, ToolbarGroup> _groups = {};
@@ -142,23 +142,23 @@ class ToolbarRegistryImpl implements ToolbarRegistry {
     _notifyListeners();
   }
   
-  /// 获取所有工具栏动作
+  /// Get all toolbar actions
   Map<String, ToolbarActionItem> get actions => Map.unmodifiable(_actions);
   
-  /// 获取所有工具栏分组
+  /// Get all toolbar groups
   Map<String, ToolbarGroup> get groups => Map.unmodifiable(_groups);
   
-  /// 添加变更监听器
+  /// Add change listener
   void addChangeListener(VoidCallback listener) {
     _changeListeners.add(listener);
   }
   
-  /// 移除变更监听器
+  /// Remove change listener
   void removeChangeListener(VoidCallback listener) {
     _changeListeners.remove(listener);
   }
   
-  /// 通知监听器
+  /// Notify listeners
   void _notifyListeners() {
     for (final listener in _changeListeners) {
       listener();
@@ -166,7 +166,7 @@ class ToolbarRegistryImpl implements ToolbarRegistry {
   }
 }
 
-/// 菜单注册器实现
+/// Menu registry implementation
 class MenuRegistryImpl implements MenuRegistry {
   final Map<String, MenuItem> _menuItems = {};
   final Map<String, SubMenu> _subMenus = {};
@@ -202,23 +202,23 @@ class MenuRegistryImpl implements MenuRegistry {
     _notifyListeners();
   }
   
-  /// 获取所有菜单项
+  /// Get all menu items
   Map<String, MenuItem> get menuItems => Map.unmodifiable(_menuItems);
   
-  /// 获取所有子菜单
+  /// Get all submenus
   Map<String, SubMenu> get subMenus => Map.unmodifiable(_subMenus);
   
-  /// 添加变更监听器
+  /// Add change listener
   void addChangeListener(VoidCallback listener) {
     _changeListeners.add(listener);
   }
   
-  /// 移除变更监听器
+  /// Remove change listener
   void removeChangeListener(VoidCallback listener) {
     _changeListeners.remove(listener);
   }
   
-  /// 通知监听器
+  /// Notify listeners
   void _notifyListeners() {
     for (final listener in _changeListeners) {
       listener();
@@ -226,7 +226,7 @@ class MenuRegistryImpl implements MenuRegistry {
   }
 }
 
-/// 语法规则
+/// Syntax rule
 class SyntaxRule {
   const SyntaxRule({
     required this.name,
@@ -239,7 +239,7 @@ class SyntaxRule {
   final String replacement;
 }
 
-/// 块级语法规则
+/// Block syntax rule
 class BlockSyntaxRule {
   const BlockSyntaxRule({
     required this.name,
@@ -252,7 +252,7 @@ class BlockSyntaxRule {
   final Widget Function(String content) builder;
 }
 
-/// 行内语法规则
+/// Inline syntax rule
 class InlineSyntaxRule {
   const InlineSyntaxRule({
     required this.name,
@@ -265,7 +265,7 @@ class InlineSyntaxRule {
   final Widget Function(String content) builder;
 }
 
-/// 工具栏动作项
+/// Toolbar action item
 class ToolbarActionItem {
   const ToolbarActionItem({
     required this.action,
@@ -276,7 +276,7 @@ class ToolbarActionItem {
   final VoidCallback callback;
 }
 
-/// 工具栏分组
+/// Toolbar group
 class ToolbarGroup {
   const ToolbarGroup({
     required this.id,
@@ -289,7 +289,7 @@ class ToolbarGroup {
   final List<PluginAction> actions;
 }
 
-/// 菜单项
+/// Menu item
 class MenuItem {
   const MenuItem({
     required this.id,
@@ -306,7 +306,7 @@ class MenuItem {
   final String? shortcut;
 }
 
-/// 子菜单
+/// Submenu
 class SubMenu {
   const SubMenu({
     required this.id,

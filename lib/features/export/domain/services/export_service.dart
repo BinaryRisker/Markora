@@ -32,7 +32,7 @@ class ExportServiceImpl implements ExportService {
       // 初始化进度
       onProgress?.call(const ExportProgress(
         progress: 0.0,
-        status: '开始导出...',
+        status: 'Starting export...',
       ));
 
       switch (settings.format) {
@@ -495,4 +495,4 @@ MathJax = {
     debugPrint('模拟保存PDF文件到: $path');
     debugPrint('文件大小: ${bytes.length} bytes');
   }
-} 
+}

@@ -3,7 +3,7 @@ import 'package:flutter_math_fork/flutter_math.dart';
 
 import '../../domain/services/math_parser.dart';
 
-/// 数学公式渲染组件
+/// Math formula rendering component
 class MathFormulaWidget extends StatelessWidget {
   const MathFormulaWidget({
     super.key,
@@ -15,22 +15,22 @@ class MathFormulaWidget extends StatelessWidget {
     this.onError,
   });
 
-  /// 数学公式对象
+  /// Math formula object
   final MathFormula formula;
   
-  /// 文本样式
+  /// Text style
   final TextStyle? textStyle;
   
-  /// 文字颜色
+  /// Text color
   final Color? color;
   
-  /// 背景颜色
+  /// Background color
   final Color? backgroundColor;
   
-  /// 点击回调
+  /// Click callback
   final VoidCallback? onTap;
   
-  /// 错误回调
+  /// Error callback
   final ValueChanged<String>? onError;
 
   @override
@@ -62,13 +62,13 @@ class MathFormulaWidget extends StatelessWidget {
     );
   }
 
-  /// 构建数学公式
+  /// Build math formula
   Widget _buildMath(BuildContext context, TextStyle? textStyle) {
     try {
-      // 预处理LaTeX内容
+      // Preprocess LaTeX content
       final processedLatex = MathParser.preprocessLatex(formula.content);
       
-      // 验证LaTeX语法
+      // Validate LaTeX syntax
       if (!MathParser.validateLatex(processedLatex)) {
         return _buildErrorWidget(context, '无效的LaTeX语法');
       }
@@ -92,7 +92,7 @@ class MathFormulaWidget extends StatelessWidget {
     }
   }
 
-  /// 构建错误提示组件
+  /// Build error widget
   Widget _buildErrorWidget(BuildContext context, String error) {
     return Container(
       padding: const EdgeInsets.all(8),
@@ -127,7 +127,7 @@ class MathFormulaWidget extends StatelessWidget {
     );
   }
 
-  /// 获取内边距
+  /// Get padding
   EdgeInsets _getPadding() {
     switch (formula.type) {
       case MathType.inline:
@@ -137,19 +137,19 @@ class MathFormulaWidget extends StatelessWidget {
     }
   }
 
-  /// 获取字体大小
+  /// Get font size
   double _getFontSize(TextStyle? textStyle) {
     final baseSize = textStyle?.fontSize ?? 14.0;
     switch (formula.type) {
       case MathType.inline:
         return baseSize;
       case MathType.block:
-        return baseSize * 1.2; // 块级公式略大
+        return baseSize * 1.2; // Block formulas slightly larger
     }
   }
 }
 
-/// 数学公式预览组件
+/// Math formula preview component
 class MathFormulaPreview extends StatefulWidget {
   const MathFormulaPreview({
     super.key,
@@ -158,13 +158,13 @@ class MathFormulaPreview extends StatefulWidget {
     this.showOriginal = false,
   });
 
-  /// LaTeX代码
+  /// LaTeX code
   final String latex;
   
-  /// 文本样式
+  /// Text style
   final TextStyle? textStyle;
   
-  /// 是否显示原始LaTeX代码
+  /// Whether to show raw LaTeX code
   final bool showOriginal;
 
   @override
@@ -183,7 +183,7 @@ class _MathFormulaPreviewState extends State<MathFormulaPreview> {
     return _buildRenderedView();
   }
 
-  /// 构建渲染视图
+  /// Build render view
   Widget _buildRenderedView() {
     return GestureDetector(
       onLongPress: () {
@@ -212,7 +212,7 @@ class _MathFormulaPreviewState extends State<MathFormulaPreview> {
     );
   }
 
-  /// 构建源码视图
+  /// Build source view
   Widget _buildSourceView() {
     return GestureDetector(
       onTap: () {
@@ -275,7 +275,7 @@ class _MathFormulaPreviewState extends State<MathFormulaPreview> {
   }
 }
 
-/// 数学公式输入对话框
+/// Math formula input dialog
 class MathFormulaDialog extends StatefulWidget {
   const MathFormulaDialog({
     super.key,
@@ -283,10 +283,10 @@ class MathFormulaDialog extends StatefulWidget {
     this.title = '插入数学公式',
   });
 
-  /// 初始LaTeX代码
+  /// Initial LaTeX code
   final String initialLatex;
   
-  /// 对话框标题
+  /// Dialog title
   final String title;
 
   @override
@@ -328,7 +328,7 @@ class _MathFormulaDialogState extends State<MathFormulaDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // LaTeX输入框
+            // LaTeX input field
             TextField(
               controller: _controller,
               decoration: const InputDecoration(
@@ -341,7 +341,7 @@ class _MathFormulaDialogState extends State<MathFormulaDialog> {
             
             const SizedBox(height: 16),
             
-            // 预览
+            // Preview
             Text(
               '预览:',
               style: Theme.of(context).textTheme.titleSmall,
@@ -375,7 +375,7 @@ class _MathFormulaDialogState extends State<MathFormulaDialog> {
             
             const SizedBox(height: 8),
             
-            // 常用公式按钮
+            // Common formula buttons
             Wrap(
               spacing: 8,
               runSpacing: 4,
@@ -410,4 +410,4 @@ class _MathFormulaDialogState extends State<MathFormulaDialog> {
       ],
     );
   }
-} 
+}

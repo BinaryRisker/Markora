@@ -1,75 +1,76 @@
 import 'package:equatable/equatable.dart';
 
-/// 插件类型枚举
+/// Plugin type enumeration
 enum PluginType {
-  syntax,       // 语法插件
-  renderer,     // 渲染器插件
-  theme,        // 主题插件
-  export,       // 导出插件
-  exporter,     // 导出器插件（别名）
-  import,       // 导入插件
-  tool,         // 工具插件
-  widget,       // 组件插件
-  integration,  // 集成插件
-  other,        // 其他插件
+  syntax,       // Syntax plugin
+  renderer,     // Renderer plugin
+  theme,        // Theme plugin
+  export,       // Export plugin
+  exporter,     // Exporter plugin (alias)
+  import,       // Import plugin
+  tool,         // Tool plugin
+  widget,       // Widget plugin
+  component,    // Component plugin
+  integration,  // Integration plugin
+  other,        // Other plugin
 }
 
-/// 插件类型扩展
+/// Plugin type extension
 extension PluginTypeExtension on PluginType {
   String get displayName {
     switch (this) {
       case PluginType.syntax:
-        return '语法插件';
+        return 'Syntax Plugin';
       case PluginType.renderer:
-        return '渲染器插件';
+        return 'Renderer Plugin';
       case PluginType.theme:
-        return '主题插件';
+        return 'Theme Plugin';
       case PluginType.export:
-        return '导出插件';
+        return 'Export Plugin';
       case PluginType.exporter:
-        return '导出器插件';
+        return 'Exporter Plugin';
       case PluginType.import:
-        return '导入插件';
+        return 'Import Plugin';
       case PluginType.tool:
-        return '工具插件';
-      case PluginType.widget:
-        return '组件插件';
+        return 'Tool Plugin';
+      case PluginType.component:
+        return 'Component Plugin';
       case PluginType.integration:
-        return '集成插件';
-      case PluginType.other:
-        return '其他插件';
+        return 'Integration Plugin';
+      default:
+        return 'Other Plugin';
     }
   }
 }
 
-/// 插件状态枚举
+/// Plugin status enumeration
 enum PluginStatus {
-  enabled,   // 已启用
-  disabled,  // 已禁用
-  installed, // 已安装但未启用
-  error,     // 错误状态
-  loading,   // 加载中
+  enabled,   // Enabled
+  disabled,  // Disabled
+  installed, // Installed but not enabled
+  error,     // Error status
+  loading,   // Loading
 }
 
-/// 插件状态扩展
+/// Plugin status extension
 extension PluginStatusExtension on PluginStatus {
   String get displayName {
     switch (this) {
       case PluginStatus.enabled:
-        return '已启用';
+        return 'Enabled';
       case PluginStatus.disabled:
-        return '已禁用';
+        return 'Disabled';
       case PluginStatus.installed:
-        return '已安装';
+        return 'Installed';
       case PluginStatus.error:
-        return '错误';
+        return 'Error';
       case PluginStatus.loading:
-        return '加载中';
+        return 'Loading';
     }
   }
 }
 
-/// 插件元数据
+/// Plugin metadata
 class PluginMetadata extends Equatable {
   const PluginMetadata({
     required this.id,
@@ -87,43 +88,43 @@ class PluginMetadata extends Equatable {
     this.dependencies = const [],
   });
 
-  /// 插件唯一标识
+  /// Plugin unique identifier
   final String id;
   
-  /// 插件名称
+  /// Plugin name
   final String name;
   
-  /// 插件版本
+  /// Plugin version
   final String version;
   
-  /// 插件描述
+  /// Plugin description
   final String description;
   
-  /// 插件作者
+  /// Plugin author
   final String author;
   
-  /// 插件类型
+  /// Plugin type
   final PluginType type;
   
-  /// 最小支持版本
+  /// Minimum supported version
   final String minVersion;
   
-  /// 最大支持版本
+  /// Maximum supported version
   final String? maxVersion;
   
-  /// 插件主页
+  /// Plugin homepage
   final String? homepage;
   
-  /// 代码仓库
+  /// Code repository
   final String? repository;
   
-  /// 许可证
+  /// License
   final String license;
   
-  /// 标签列表
+  /// Tag list
   final List<String> tags;
   
-  /// 依赖插件列表
+  /// Dependency plugin list
   final List<String> dependencies;
 
   @override
@@ -144,7 +145,7 @@ class PluginMetadata extends Equatable {
       ];
 }
 
-/// 插件实例
+/// Plugin instance
 class Plugin extends Equatable {
   const Plugin({
     required this.metadata,
@@ -155,22 +156,22 @@ class Plugin extends Equatable {
     this.errorMessage,
   });
 
-  /// 插件元数据
+  /// Plugin metadata
   final PluginMetadata metadata;
   
-  /// 插件状态
+  /// Plugin status
   final PluginStatus status;
   
-  /// 安装路径
+  /// Installation path
   final String? installPath;
   
-  /// 安装日期
+  /// Installation date
   final DateTime? installDate;
   
-  /// 最后更新时间
+  /// Last update time
   final DateTime? lastUpdated;
   
-  /// 错误信息
+  /// Error message
   final String? errorMessage;
 
   Plugin copyWith({
@@ -202,7 +203,7 @@ class Plugin extends Equatable {
       ];
 }
 
-/// 插件配置
+/// Plugin configuration
 class PluginConfig extends Equatable {
   const PluginConfig({
     required this.pluginId,
@@ -210,16 +211,16 @@ class PluginConfig extends Equatable {
     this.isEnabled = true,
   });
 
-  /// 插件ID
+  /// Plugin ID
   final String pluginId;
   
-  /// 配置数据
+  /// Configuration data
   final Map<String, dynamic> config;
   
-  /// 是否启用
+  /// Whether enabled
   final bool isEnabled;
   
-  /// 设置数据（兼容性别名）
+  /// Settings data (compatibility alias)
   Map<String, dynamic> get settings => config;
 
   PluginConfig copyWith({
@@ -238,7 +239,7 @@ class PluginConfig extends Equatable {
   List<Object> get props => [pluginId, config, isEnabled];
 }
 
-/// 插件动作定义
+/// Plugin action definition
 class PluginAction extends Equatable {
   const PluginAction({
     required this.id,
@@ -249,22 +250,22 @@ class PluginAction extends Equatable {
     this.category,
   });
 
-  /// 动作ID
+  /// Action ID
   final String id;
   
-  /// 动作标题
+  /// Action title
   final String title;
   
-  /// 动作描述
+  /// Action description
   final String description;
   
-  /// 图标
+  /// Icon
   final String? icon;
   
-  /// 快捷键
+  /// Shortcut key
   final String? shortcut;
   
-  /// 分类
+  /// Category
   final String? category;
 
   @override

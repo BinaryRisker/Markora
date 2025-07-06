@@ -1,21 +1,21 @@
 import 'package:equatable/equatable.dart';
 
-/// 编辑器模式枚举
+/// Editor mode enumeration
 enum EditorMode {
-  /// 源码编辑模式
-  source('源码模式'),
-  /// 预览模式
-  preview('预览模式'),
-  /// 分屏模式（编辑+预览）
-  split('分屏模式'),
-  /// 实时渲染模式（类似Typora）
-  live('实时渲染');
+  /// Source code editing mode
+  source('Source Mode'),
+  /// Preview mode
+  preview('Preview Mode'),
+  /// Split mode (edit + preview)
+  split('Split Mode'),
+  /// Live rendering mode (similar to Typora)
+  live('Live Rendering');
 
   const EditorMode(this.displayName);
   final String displayName;
 }
 
-/// 光标位置信息
+/// Cursor position information
 class CursorPosition extends Equatable {
   const CursorPosition({
     required this.line,
@@ -23,40 +23,40 @@ class CursorPosition extends Equatable {
     required this.offset,
   });
 
-  /// 行号（从0开始）
+  /// Line number (starting from 0)
   final int line;
   
-  /// 列号（从0开始）
+  /// Column number (starting from 0)
   final int column;
   
-  /// 字符偏移量
+  /// Character offset
   final int offset;
 
   @override
   List<Object> get props => [line, column, offset];
 }
 
-/// 文本选择范围
+/// Text selection range
 class EditorTextSelection extends Equatable {
   const EditorTextSelection({
     required this.start,
     required this.end,
   });
 
-  /// 选择开始位置
+  /// Selection start position
   final CursorPosition start;
   
-  /// 选择结束位置
+  /// Selection end position
   final CursorPosition end;
 
-  /// 是否为空选择（光标位置）
+  /// Whether it's an empty selection (cursor position)
   bool get isEmpty => start == end;
 
   @override
   List<Object> get props => [start, end];
 }
 
-/// 编辑器配置
+/// Editor configuration
 class EditorConfig extends Equatable {
   const EditorConfig({
     this.fontSize = 14.0,
@@ -77,52 +77,52 @@ class EditorConfig extends Equatable {
     this.theme = 'default',
   });
 
-  /// 字体大小
+  /// Font size
   final double fontSize;
   
-  /// 字体族
+  /// Font family
   final String fontFamily;
   
-  /// 行高
+  /// Line height
   final double lineHeight;
   
-  /// Tab大小
+  /// Tab size
   final int tabSize;
   
-  /// 自动换行
+  /// Word wrap
   final bool wordWrap;
   
-  /// 显示行号
+  /// Show line numbers
   final bool showLineNumbers;
   
-  /// 显示不可见字符
+  /// Show invisible characters
   final bool showInvisibles;
   
-  /// 启用自动保存
+  /// Enable auto save
   final bool enableAutoSave;
   
-  /// 自动保存间隔（秒）
+  /// Auto save interval (seconds)
   final int autoSaveInterval;
   
-  /// 启用拼写检查
+  /// Enable spell check
   final bool enableSpellCheck;
   
-  /// 启用语法高亮
+  /// Enable syntax highlighting
   final bool enableSyntaxHighlight;
   
-  /// 启用代码折叠
+  /// Enable code folding
   final bool enableCodeFolding;
   
-  /// 启用括号匹配
+  /// Enable bracket matching
   final bool enableBracketMatching;
   
-  /// 启用自动缩进
+  /// Enable auto indent
   final bool enableAutoIndent;
   
-  /// 启用自动补全
+  /// Enable auto completion
   final bool enableAutoCompletion;
   
-  /// 主题名称
+  /// Theme name
   final String theme;
 
   EditorConfig copyWith({
@@ -184,7 +184,7 @@ class EditorConfig extends Equatable {
       ];
 }
 
-/// 编辑器状态
+/// Editor state
 class EditorState extends Equatable {
   const EditorState({
     required this.mode,
@@ -196,25 +196,25 @@ class EditorState extends Equatable {
     this.canRedo = false,
   });
 
-  /// 当前编辑模式
+  /// Current editing mode
   final EditorMode mode;
   
-  /// 光标位置
+  /// Cursor position
   final CursorPosition cursorPosition;
   
-  /// 选择范围
+  /// Selection range
   final EditorTextSelection? selection;
   
-  /// 是否已修改
+  /// Whether modified
   final bool isModified;
   
-  /// 是否只读
+  /// Whether read-only
   final bool isReadOnly;
   
-  /// 是否可以撤销
+  /// Whether can undo
   final bool canUndo;
   
-  /// 是否可以重做
+  /// Whether can redo
   final bool canRedo;
 
   EditorState copyWith({
@@ -247,4 +247,4 @@ class EditorState extends Equatable {
         canUndo,
         canRedo,
       ];
-} 
+}

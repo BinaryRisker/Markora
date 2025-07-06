@@ -1,6 +1,6 @@
-/// 语法高亮相关类型定义
+/// Syntax highlighting related type definitions
 
-/// 支持的编程语言
+/// Supported programming languages
 enum ProgrammingLanguage {
   dart('Dart', ['dart', 'dt']),
   javascript('JavaScript', ['js', 'javascript', 'jsx']),
@@ -32,13 +32,13 @@ enum ProgrammingLanguage {
 
   const ProgrammingLanguage(this.displayName, this.extensions);
 
-  /// 显示名称
+  /// Display name
   final String displayName;
   
-  /// 文件扩展名列表
+  /// File extension list
   final List<String> extensions;
 
-  /// 根据扩展名或语言标识符获取语言类型
+  /// Get language type by extension or language identifier
   static ProgrammingLanguage? fromIdentifier(String? identifier) {
     if (identifier == null || identifier.isEmpty) return null;
     
@@ -54,31 +54,31 @@ enum ProgrammingLanguage {
   }
 }
 
-/// 语法元素类型
+/// Syntax element type
 enum SyntaxElementType {
-  keyword,      // 关键字
-  string,       // 字符串
-  comment,      // 注释
-  number,       // 数字
-  operator,     // 操作符
-  function,     // 函数名
-  variable,     // 变量名
-  type,         // 类型名
-  punctuation,  // 标点符号
-  annotation,   // 注解
-  property,     // 属性
-  constant,     // 常量
-  parameter,    // 参数
-  namespace,    // 命名空间
-  tag,          // HTML标签
-  attribute,    // HTML属性
-  selector,     // CSS选择器
-  regex,        // 正则表达式
-  escape,       // 转义字符
-  plain,        // 普通文本
+  keyword,      // Keywords
+  string,       // Strings
+  comment,      // Comments
+  number,       // Numbers
+  operator,     // Operators
+  function,     // Function names
+  variable,     // Variable names
+  type,         // Type names
+  punctuation,  // Punctuation
+  annotation,   // Annotations
+  property,     // Properties
+  constant,     // Constants
+  parameter,    // Parameters
+  namespace,    // Namespaces
+  tag,          // HTML tags
+  attribute,    // HTML attributes
+  selector,     // CSS selectors
+  regex,        // Regular expressions
+  escape,       // Escape characters
+  plain,        // Plain text
 }
 
-/// 语法元素
+/// Syntax element
 class SyntaxElement {
   const SyntaxElement({
     required this.type,
@@ -87,16 +87,16 @@ class SyntaxElement {
     required this.endIndex,
   });
 
-  /// 元素类型
+  /// Element type
   final SyntaxElementType type;
   
-  /// 文本内容
+  /// Text content
   final String text;
   
-  /// 开始位置
+  /// Start position
   final int startIndex;
   
-  /// 结束位置
+  /// End position
   final int endIndex;
 
   @override
@@ -105,7 +105,7 @@ class SyntaxElement {
   }
 }
 
-/// 语法高亮规则
+/// Syntax highlighting rule
 class SyntaxRule {
   const SyntaxRule({
     required this.pattern,
@@ -114,20 +114,20 @@ class SyntaxRule {
     this.isMultiLine = false,
   });
 
-  /// 正则表达式模式
+  /// Regular expression pattern
   final RegExp pattern;
   
-  /// 对应的语法元素类型
+  /// Corresponding syntax element type
   final SyntaxElementType elementType;
   
-  /// 优先级（数字越大优先级越高）
+  /// Priority (higher number means higher priority)
   final int priority;
   
-  /// 是否支持多行匹配
+  /// Whether to support multi-line matching
   final bool isMultiLine;
 }
 
-/// 语法高亮主题
+/// Syntax highlighting theme
 class SyntaxHighlightTheme {
   const SyntaxHighlightTheme({
     required this.name,
@@ -137,23 +137,23 @@ class SyntaxHighlightTheme {
     required this.defaultTextColor,
   });
 
-  /// 主题名称
+  /// Theme name
   final String name;
   
-  /// 是否为深色主题
+  /// Whether it is a dark theme
   final bool isDark;
   
-  /// 各语法元素的样式
+  /// Styles for each syntax element
   final Map<SyntaxElementType, SyntaxElementStyle> elementStyles;
   
-  /// 背景颜色
+  /// Background color
   final int backgroundColor;
   
-  /// 默认文本颜色
+  /// Default text color
   final int defaultTextColor;
 }
 
-/// 语法元素样式
+/// Syntax element style
 class SyntaxElementStyle {
   const SyntaxElementStyle({
     required this.color,
@@ -163,23 +163,23 @@ class SyntaxElementStyle {
     this.backgroundColor,
   });
 
-  /// 文字颜色
+  /// Text color
   final int color;
   
-  /// 是否粗体
+  /// Whether bold
   final bool isBold;
   
-  /// 是否斜体
+  /// Whether italic
   final bool isItalic;
   
-  /// 是否下划线
+  /// Whether underlined
   final bool isUnderlined;
   
-  /// 背景颜色（可选）
+  /// Background color (optional)
   final int? backgroundColor;
 }
 
-/// 代码块信息
+/// Code block information
 class CodeBlock {
   const CodeBlock({
     required this.content,
@@ -191,29 +191,29 @@ class CodeBlock {
     this.showCopyButton = true,
   });
 
-  /// 代码内容
+  /// Code content
   final String content;
   
-  /// 编程语言
+  /// Programming language
   final ProgrammingLanguage? language;
   
-  /// 开始行号
+  /// Start line number
   final int startLine;
   
-  /// 结束行号
+  /// End line number
   final int endLine;
   
-  /// 文件名（可选）
+  /// File name (optional)
   final String? fileName;
   
-  /// 是否显示行号
+  /// Whether to show line numbers
   final bool showLineNumbers;
   
-  /// 是否显示复制按钮
+  /// Whether to show copy button
   final bool showCopyButton;
 }
 
-/// 语法高亮配置
+/// Syntax highlighting configuration
 class SyntaxHighlightConfig {
   const SyntaxHighlightConfig({
     this.enableSyntaxHighlighting = true,
@@ -226,27 +226,27 @@ class SyntaxHighlightConfig {
     this.theme,
   });
 
-  /// 是否启用语法高亮
+  /// Whether to enable syntax highlighting
   final bool enableSyntaxHighlighting;
   
-  /// 是否启用行号
+  /// Whether to enable line numbers
   final bool enableLineNumbers;
   
-  /// 是否启用代码折叠
+  /// Whether to enable code folding
   final bool enableCodeFolding;
   
-  /// 是否启用自动缩进
+  /// Whether to enable auto indentation
   final bool enableAutoIndentation;
   
-  /// Tab大小
+  /// Tab size
   final int tabSize;
   
-  /// 字体大小
+  /// Font size
   final double fontSize;
   
-  /// 字体系列
+  /// Font family
   final String fontFamily;
   
-  /// 语法高亮主题
+  /// Syntax highlighting theme
   final SyntaxHighlightTheme? theme;
-} 
+}

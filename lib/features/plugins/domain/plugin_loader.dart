@@ -7,9 +7,9 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../../../types/plugin.dart';
 import 'plugin_interface.dart';
 
-/// 插件加载器
+/// Plugin loader
 class PluginLoader {
-  /// 从文件加载插件元数据
+  /// Load plugin metadata from file
   Future<PluginMetadata?> loadPluginMetadata(File manifestFile) async {
     try {
       final content = await manifestFile.readAsString();
@@ -36,7 +36,7 @@ class PluginLoader {
     }
   }
   
-  /// 加载插件实例
+  /// Load plugin instance
   Future<MarkoraPlugin?> loadPlugin(Plugin plugin) async {
     try {
       if (plugin.installPath == null) {
@@ -48,7 +48,7 @@ class PluginLoader {
         throw Exception('插件目录不存在: ${plugin.installPath}');
       }
       
-      // 根据插件类型加载不同的插件实现
+      // Load different plugin implementations based on plugin type
       switch (plugin.metadata.type) {
         case PluginType.syntax:
           return await _loadSyntaxPlugin(plugin);
@@ -71,28 +71,28 @@ class PluginLoader {
     }
   }
   
-  /// 加载语法扩展插件
+  /// Load syntax extension plugin
   Future<MarkoraPlugin?> _loadSyntaxPlugin(Plugin plugin) async {
-    // TODO: 实现语法插件加载逻辑
-    // 这里可以加载Dart代码或JavaScript代码
+    // TODO: Implement syntax plugin loading logic
+    // Can load Dart code or JavaScript code here
     return SyntaxPluginImpl(plugin.metadata);
   }
   
-  /// 加载渲染器插件
+  /// Load renderer plugin
   Future<MarkoraPlugin?> _loadRendererPlugin(Plugin plugin) async {
     try {
-      // 检查是否是Mermaid插件
+      // Check if it's a Mermaid plugin
       if (plugin.metadata.id == 'mermaid_plugin') {
-        // 动态导入Mermaid插件
+        // Dynamically import Mermaid plugin
         final pluginMainFile = File(path.join(plugin.installPath!, 'lib', 'main.dart'));
         if (await pluginMainFile.exists()) {
-          // 这里我们直接实例化MermaidPlugin
-          // 在实际项目中，可能需要使用dart:mirrors或其他动态加载机制
+          // Here we directly instantiate MermaidPlugin
+          // In actual projects, might need to use dart:mirrors or other dynamic loading mechanisms
           return _createMermaidPlugin(plugin.metadata);
         }
       }
       
-      // 默认渲染器插件实现
+      // Default renderer plugin implementation
       return RendererPluginImpl(plugin.metadata);
     } catch (e) {
       debugPrint('加载渲染器插件失败: $e');
@@ -100,12 +100,12 @@ class PluginLoader {
     }
   }
   
-  /// 创建Mermaid插件实例
+  /// Create Mermaid plugin instance
   MarkoraPlugin _createMermaidPlugin(PluginMetadata metadata) {
-    // 导入真正的MermaidPlugin
+    // Import the actual MermaidPlugin
     try {
-      // 这里应该动态导入真正的MermaidPlugin
-      // 由于Dart的限制，我们先用一个改进的代理实现
+      // Should dynamically import the actual MermaidPlugin here
+      // Due to Dart limitations, we use an improved proxy implementation first
       return _ImprovedMermaidPluginProxy(metadata);
     } catch (e) {
       debugPrint('创建MermaidPlugin失败: $e');
@@ -113,31 +113,31 @@ class PluginLoader {
     }
   }
   
-  /// 加载主题插件
+  /// Load theme plugin
   Future<MarkoraPlugin?> _loadThemePlugin(Plugin plugin) async {
-    // TODO: 实现主题插件加载逻辑
+    // TODO: Implement theme plugin loading logic
     return ThemePluginImpl(plugin.metadata);
   }
   
-  /// 加载导出插件
+  /// Load export plugin
   Future<MarkoraPlugin?> _loadExporterPlugin(Plugin plugin) async {
-    // TODO: 实现导出插件加载逻辑
+    // TODO: Implement export plugin loading logic
     return ExporterPluginImpl(plugin.metadata);
   }
   
-  /// 加载工具插件
+  /// Load tool plugin
   Future<MarkoraPlugin?> _loadToolPlugin(Plugin plugin) async {
-    // TODO: 实现工具插件加载逻辑
+    // TODO: Implement tool plugin loading logic
     return ToolPluginImpl(plugin.metadata);
   }
   
-  /// 加载集成插件
+  /// Load integration plugin
   Future<MarkoraPlugin?> _loadIntegrationPlugin(Plugin plugin) async {
-    // TODO: 实现集成插件加载逻辑
+    // TODO: Implement integration plugin loading logic
     return IntegrationPluginImpl(plugin.metadata);
   }
   
-  /// 解析插件类型
+  /// Parse plugin type
   PluginType _parsePluginType(String typeString) {
     switch (typeString.toLowerCase()) {
       case 'syntax':
@@ -157,7 +157,7 @@ class PluginLoader {
     }
   }
   
-  /// 验证插件
+  /// Validate plugin
   Future<bool> validatePlugin(Plugin plugin) async {
     try {
       if (plugin.installPath == null) return false;
@@ -165,15 +165,15 @@ class PluginLoader {
       final pluginDir = Directory(plugin.installPath!);
       if (!await pluginDir.exists()) return false;
       
-      // 检查必需文件
+      // Check required files
       final manifestFile = File(path.join(pluginDir.path, 'plugin.json'));
       if (!await manifestFile.exists()) return false;
       
-      // 验证元数据
+      // Validate metadata
       final metadata = await loadPluginMetadata(manifestFile);
       if (metadata == null) return false;
       
-      // TODO: 添加更多验证逻辑（签名验证、版本兼容性等）
+      // TODO: Add more validation logic (signature verification, version compatibility, etc.)
       
       return true;
     } catch (e) {
@@ -183,7 +183,7 @@ class PluginLoader {
   }
 }
 
-/// 基础插件实现
+/// Base plugin implementation
 abstract class BasePlugin implements MarkoraPlugin {
   BasePlugin(this.metadata);
   
@@ -205,17 +205,17 @@ abstract class BasePlugin implements MarkoraPlugin {
   
   @override
   Future<void> onActivate() async {
-    // 默认实现
+    // Default implementation
   }
   
   @override
   Future<void> onDeactivate() async {
-    // 默认实现
+    // Default implementation
   }
   
   @override
   void onConfigChanged(Map<String, dynamic> config) {
-    // 默认实现
+    // Default implementation
   }
   
   @override
@@ -237,73 +237,73 @@ abstract class BasePlugin implements MarkoraPlugin {
   }
 }
 
-/// 语法插件实现
+/// Syntax plugin implementation
 class SyntaxPluginImpl extends BasePlugin {
   SyntaxPluginImpl(super.metadata);
   
   @override
   Future<void> onLoad(PluginContext context) async {
     await super.onLoad(context);
-    // TODO: 注册语法规则
+    // TODO: Register syntax rules
   }
 }
 
-/// 渲染器插件实现
+/// Renderer plugin implementation
 class RendererPluginImpl extends BasePlugin {
   RendererPluginImpl(super.metadata);
   
   @override
   Future<void> onLoad(PluginContext context) async {
     await super.onLoad(context);
-    // TODO: 注册渲染器
+    // TODO: Register renderer
   }
 }
 
-/// 主题插件实现
+/// Theme plugin implementation
 class ThemePluginImpl extends BasePlugin {
   ThemePluginImpl(super.metadata);
   
   @override
   Future<void> onLoad(PluginContext context) async {
     await super.onLoad(context);
-    // TODO: 注册主题
+    // TODO: Register theme
   }
 }
 
-/// 导出插件实现
+/// Export plugin implementation
 class ExporterPluginImpl extends BasePlugin {
   ExporterPluginImpl(super.metadata);
   
   @override
   Future<void> onLoad(PluginContext context) async {
     await super.onLoad(context);
-    // TODO: 注册导出器
+    // TODO: Register exporter
   }
 }
 
-/// 工具插件实现
+/// Tool plugin implementation
 class ToolPluginImpl extends BasePlugin {
   ToolPluginImpl(super.metadata);
   
   @override
   Future<void> onLoad(PluginContext context) async {
     await super.onLoad(context);
-    // TODO: 注册工具
+    // TODO: Register tool
   }
 }
 
-/// 集成插件实现
+/// Integration plugin implementation
 class IntegrationPluginImpl extends BasePlugin {
   IntegrationPluginImpl(super.metadata);
   
   @override
   Future<void> onLoad(PluginContext context) async {
     await super.onLoad(context);
-    // TODO: 注册集成功能
+    // TODO: Register integration features
   }
 }
 
-/// 改进的Mermaid插件代理实现
+/// Improved Mermaid plugin proxy implementation
 class _ImprovedMermaidPluginProxy extends BasePlugin {
   _ImprovedMermaidPluginProxy(super.metadata);
   
@@ -318,7 +318,7 @@ class _ImprovedMermaidPluginProxy extends BasePlugin {
   Future<void> onLoad(PluginContext context) async {
     await super.onLoad(context);
     
-    // 注册Mermaid块级语法
+    // Register Mermaid block syntax
     context.syntaxRegistry.registerBlockSyntax(
       'mermaid',
       RegExp(r'^```mermaid\s*\n([\s\S]*?)\n```', multiLine: true),
@@ -328,7 +328,7 @@ class _ImprovedMermaidPluginProxy extends BasePlugin {
       },
     );
     
-    // 注册工具栏按钮
+    // Register toolbar button
     context.toolbarRegistry.registerAction(
       PluginAction(
         id: 'mermaid',
@@ -337,7 +337,7 @@ class _ImprovedMermaidPluginProxy extends BasePlugin {
         icon: 'account_tree',
       ),
       () {
-        // 插入Mermaid代码块模板
+        // Insert Mermaid code block template
         final template = '''```mermaid
 graph TD
     A[开始] --> B{判断条件}
@@ -377,7 +377,7 @@ graph TD
   }
 }
 
-/// Mermaid插件代理实现
+/// Mermaid plugin proxy implementation
 class _MermaidPluginProxy extends BasePlugin {
   _MermaidPluginProxy(super.metadata);
   
@@ -385,7 +385,7 @@ class _MermaidPluginProxy extends BasePlugin {
   Future<void> onLoad(PluginContext context) async {
     await super.onLoad(context);
     
-    // 注册Mermaid块级语法
+    // Register Mermaid block syntax
     context.syntaxRegistry.registerBlockSyntax(
       'mermaid',
       RegExp(r'^```mermaid\s*\n([\s\S]*?)\n```', multiLine: true),
@@ -395,7 +395,7 @@ class _MermaidPluginProxy extends BasePlugin {
       },
     );
     
-    // 注册工具栏按钮
+    // Register toolbar button
     context.toolbarRegistry.registerAction(
       PluginAction(
         id: 'mermaid',
@@ -404,7 +404,7 @@ class _MermaidPluginProxy extends BasePlugin {
         icon: 'account_tree',
       ),
       () {
-        // 插入Mermaid代码块模板
+        // Insert Mermaid code block template
         final template = '''```mermaid
 graph TD
     A[开始] --> B{判断条件}
@@ -431,20 +431,20 @@ graph TD
   }
 }
 
-/// 改进的Mermaid块级语法实现
+/// Improved Mermaid block syntax implementation
 class ImprovedMermaidBlockSyntax {
   final Map<String, dynamic> config;
   
   ImprovedMermaidBlockSyntax(this.config);
   
-  /// 检查是否匹配Mermaid语法
+  /// Check if matches Mermaid syntax
   bool canParse(String line) {
     return line.trim().startsWith('```mermaid');
   }
   
-  /// 解析Mermaid代码块
+  /// Parse Mermaid code block
   Widget parseBlock(String content) {
-    // 提取mermaid代码
+    // Extract mermaid code
     final lines = content.split('\n');
     final codeLines = <String>[];
     bool inMermaidBlock = false;
@@ -467,16 +467,16 @@ class ImprovedMermaidBlockSyntax {
   }
 }
 
-/// Mermaid块级语法实现
+/// Mermaid block syntax implementation
 class MermaidBlockSyntax {
-  /// 检查是否匹配Mermaid语法
+  /// Check if matches Mermaid syntax
   bool canParse(String line) {
     return line.trim().startsWith('```mermaid');
   }
   
-  /// 解析Mermaid代码块
+  /// Parse Mermaid code block
   Widget parseBlock(String content) {
-    // 提取mermaid代码
+    // Extract mermaid code
     final lines = content.split('\n');
     final codeLines = <String>[];
     bool inMermaidBlock = false;
@@ -499,7 +499,7 @@ class MermaidBlockSyntax {
   }
 }
 
-/// 改进的Mermaid渲染组件
+/// Improved Mermaid rendering component
 class ImprovedMermaidWidget extends StatefulWidget {
   const ImprovedMermaidWidget({
     super.key,
@@ -596,7 +596,7 @@ ${widget.code}
             }
         });
         
-        // 错误处理
+        // Error handling
         window.addEventListener('error', function(e) {
             document.getElementById('mermaid-container').innerHTML = 
                 '<div class="error">图表渲染失败: ' + e.message + '</div>';
@@ -672,7 +672,7 @@ ${widget.code}
   }
 }
 
-/// Mermaid渲染组件
+/// Mermaid rendering component
 class MermaidWidget extends StatefulWidget {
   const MermaidWidget({
     super.key,
@@ -709,8 +709,8 @@ class _MermaidWidgetState extends State<MermaidWidget> {
   }
   
   Widget _buildWebView() {
-    // 这里需要实现WebView来渲染Mermaid
-    // 由于WebView的复杂性，这里先用占位符
+    // Need to implement WebView to render Mermaid here
+    // Due to WebView complexity, use placeholder here first
     return Container(
       color: Colors.grey.shade50,
       child: Center(
@@ -745,7 +745,7 @@ class _MermaidWidgetState extends State<MermaidWidget> {
   }
 }
 
-/// Mermaid配置组件
+/// Mermaid configuration component
 class MermaidConfigWidget extends StatefulWidget {
   const MermaidConfigWidget({super.key});
   
@@ -772,7 +772,7 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
           ),
           const SizedBox(height: 16),
           
-          // 主题选择
+          // Theme selection
           Text(
             '主题',
             style: Theme.of(context).textTheme.titleMedium,
@@ -798,7 +798,7 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
           ),
           const SizedBox(height: 16),
           
-          // 交互选项
+          // Interaction options
           SwitchListTile(
             title: const Text('启用交互'),
             subtitle: const Text('允许用户与图表进行交互'),
@@ -811,7 +811,7 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
           ),
           const SizedBox(height: 16),
           
-          // 默认尺寸
+          // Default dimensions
           Text(
             '默认尺寸',
             style: Theme.of(context).textTheme.titleMedium,

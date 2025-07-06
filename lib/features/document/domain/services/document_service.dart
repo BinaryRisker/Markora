@@ -5,14 +5,14 @@ import 'package:uuid/uuid.dart';
 import '../../../../types/document.dart';
 import '../repositories/document_repository.dart';
 
-/// 文档服务
+/// Document service
 class DocumentService {
   const DocumentService(this._repository);
 
   final DocumentRepository _repository;
   static const _uuid = Uuid();
 
-  /// 创建新文档
+  /// Create new document
   Future<Document> createNewDocument({
     String? title,
     String? content,
@@ -20,7 +20,7 @@ class DocumentService {
     final now = DateTime.now();
     final document = Document(
       id: _uuid.v4(),
-      title: title ?? '未命名文档',
+      title: title ?? 'Untitled Document',
       content: content ?? '',
       type: DocumentType.markdown,
       createdAt: now,
@@ -31,14 +31,14 @@ class DocumentService {
     return document;
   }
 
-  /// 打开文档
+  /// Open document
   Future<Document?> openDocument(String id) async {
     return await _repository.getDocument(id);
   }
 
-  /// 保存文档
+  /// Save document
   Future<void> saveDocument(Document document) async {
-    // 更新元数据
+    // Update metadata
     final updatedDocument = document.copyWith(
       updatedAt: DateTime.now(),
     );
@@ -46,14 +46,14 @@ class DocumentService {
     await _repository.saveDocument(updatedDocument);
   }
 
-  /// 另存为
+  /// Save as
   Future<Document> saveAsDocument(Document document, {
     String? newTitle,
     String? newPath,
   }) async {
     final newDocument = document.copyWith(
       id: _uuid.v4(),
-      title: newTitle ?? '${document.title} - 副本',
+      title: newTitle ?? '${document.title} - Copy',
       filePath: newPath,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -63,12 +63,12 @@ class DocumentService {
     return newDocument;
   }
 
-  /// 导入文档
+  /// Import document
   Future<Document> importDocument(String filePath) async {
     try {
       final file = File(filePath);
       if (!file.existsSync()) {
-        throw Exception('文件不存在: $filePath');
+        throw Exception('File does not exist: $filePath');
       }
 
       final content = await file.readAsString();
@@ -101,11 +101,11 @@ class DocumentService {
         filePath: filePath,
       );
     } catch (e) {
-      throw Exception('导入文档失败: $e');
+      throw Exception('Failed to import document: $e');
     }
   }
 
-  /// 导出文档
+  /// Export document
   Future<String> exportDocument(
     Document document,
     String exportPath, {
@@ -129,8 +129,8 @@ class DocumentService {
           extension = '.txt';
           break;
         case ExportFormat.pdf:
-          // TODO: 实现PDF导出
-          throw UnimplementedError('PDF导出功能即将推出');
+          // TODO: Implement PDF export
+          throw UnimplementedError('PDF export feature coming soon');
       }
 
       final fileName = path.basenameWithoutExtension(exportPath);
@@ -144,26 +144,26 @@ class DocumentService {
 
       return finalPath;
     } catch (e) {
-      throw Exception('导出文档失败: $e');
+      throw Exception('Failed to export document: $e');
     }
   }
 
-  /// 删除文档
+  /// Delete document
   Future<void> deleteDocument(String id) async {
     await _repository.deleteDocument(id);
   }
 
-  /// 获取所有文档
+  /// Get all documents
   Future<List<Document>> getAllDocuments() async {
     return await _repository.getAllDocuments();
   }
 
-  /// 获取最近文档
+  /// Get recent documents
   Future<List<Document>> getRecentDocuments({int limit = 10}) async {
     return await _repository.getRecentDocuments(limit: limit);
   }
 
-  /// 搜索文档
+  /// Search documents
   Future<List<Document>> searchDocuments(String query) async {
     if (query.trim().isEmpty) {
       return [];
@@ -171,16 +171,16 @@ class DocumentService {
     return await _repository.searchDocuments(query);
   }
 
-  /// 统计单词数
+  /// Count words
   int _countWords(String text) {
     if (text.trim().isEmpty) return 0;
     return text.trim().split(RegExp(r'\s+')).length;
   }
 
-  /// 转换为HTML
+  /// Convert to HTML
   String _convertToHtml(String markdown) {
-    // 简单的Markdown到HTML转换
-    // 在实际项目中，应该使用专业的Markdown解析器
+    // Simple Markdown to HTML conversion
+    // In actual projects, professional Markdown parsers should be used
     return markdown
         .replaceAll(RegExp(r'^# (.+)$', multiLine: true), '<h1>\$1</h1>')
         .replaceAll(RegExp(r'^## (.+)$', multiLine: true), '<h2>\$1</h2>')
@@ -192,7 +192,7 @@ class DocumentService {
         .trim();
   }
 
-  /// 去除Markdown格式
+  /// Strip Markdown formatting
   String _stripMarkdown(String markdown) {
     return markdown
         .replaceAll(RegExp(r'^#+\s+'), '')
@@ -204,7 +204,7 @@ class DocumentService {
   }
 }
 
-/// 导出格式枚举
+/// Export format enumeration
 enum ExportFormat {
   markdown('Markdown'),
   html('HTML'),
@@ -213,4 +213,4 @@ enum ExportFormat {
 
   const ExportFormat(this.displayName);
   final String displayName;
-} 
+}

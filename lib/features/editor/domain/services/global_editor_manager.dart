@@ -24,20 +24,20 @@ class GlobalUndoRedoState {
   int get hashCode => canUndo.hashCode ^ canRedo.hashCode;
 }
 
-/// 全局编辑器管理器
-/// 管理多个标签页的编辑器实例和撤销重做状态
+/// Global editor manager
+/// Manages editor instances and undo/redo state for multiple tabs
 class GlobalEditorManager extends ChangeNotifier {
-  // 存储每个标签页的撤销重做管理器
+  // Store undo/redo managers for each tab
   final Map<String, UndoRedoManager> _undoRedoManagers = {};
   
-  // 存储每个标签页的撤销重做回调
+  // Store undo/redo callbacks for each tab
   final Map<String, VoidCallback> _undoCallbacks = {};
   final Map<String, VoidCallback> _redoCallbacks = {};
   
-  // 当前活跃的标签页ID
+  // Current active tab ID
   String? _activeTabId;
   
-  /// 注册标签页的编辑器
+  /// Register editor for tab
   void registerEditor({
     required String tabId,
     required UndoRedoManager undoRedoManager,
@@ -49,25 +49,25 @@ class GlobalEditorManager extends ChangeNotifier {
     _redoCallbacks[tabId] = redoCallback;
   }
   
-  /// 注销标签页的编辑器
+  /// Unregister editor for tab
   void unregisterEditor(String tabId) {
     _undoRedoManagers.remove(tabId);
     _undoCallbacks.remove(tabId);
     _redoCallbacks.remove(tabId);
     
-    // 如果注销的是当前活跃标签页，清除活跃状态
+    // If unregistering the current active tab, clear active state
     if (_activeTabId == tabId) {
       _activeTabId = null;
     }
   }
   
-  /// 设置活跃标签页
+  /// Set active tab
   void setActiveTab(String tabId) {
     _activeTabId = tabId;
     notifyListeners();
   }
   
-  /// 获取当前撤销重做状态
+  /// Get current undo/redo state
   GlobalUndoRedoState getCurrentState() {
     if (_activeTabId == null || !_undoRedoManagers.containsKey(_activeTabId)) {
       return const GlobalUndoRedoState(canUndo: false, canRedo: false);
@@ -80,25 +80,25 @@ class GlobalEditorManager extends ChangeNotifier {
     );
   }
   
-  /// 获取当前活跃标签页的撤销重做管理器
+  /// Get undo/redo manager for current active tab
   UndoRedoManager? get activeUndoRedoManager {
     if (_activeTabId == null) return null;
     return _undoRedoManagers[_activeTabId];
   }
   
-  /// 当前是否可以撤销
+  /// Whether current can undo
   bool get canUndo {
     final manager = activeUndoRedoManager;
     return manager?.canUndo ?? false;
   }
   
-  /// 当前是否可以重做
+  /// Whether current can redo
   bool get canRedo {
     final manager = activeUndoRedoManager;
     return manager?.canRedo ?? false;
   }
   
-  /// 执行撤销操作
+  /// Execute undo operation
   void undo() {
     if (_activeTabId != null && _undoCallbacks.containsKey(_activeTabId)) {
       _undoCallbacks[_activeTabId]!();
@@ -106,7 +106,7 @@ class GlobalEditorManager extends ChangeNotifier {
     }
   }
   
-  /// 执行重做操作
+  /// Execute redo operation
   void redo() {
     if (_activeTabId != null && _redoCallbacks.containsKey(_activeTabId)) {
       _redoCallbacks[_activeTabId]!();
@@ -114,16 +114,16 @@ class GlobalEditorManager extends ChangeNotifier {
     }
   }
   
-  /// 通知内容变化（用于更新撤销重做状态）
+  /// Notify content change (for updating undo/redo state)
   void notifyContentChanged(String tabId, String text, TextSelection selection) {
-    // 这个方法主要用于触发状态更新，实际的内容变化由各自的编辑器处理
-    // 通知监听器状态可能已经改变
+    // This method is mainly used to trigger state updates, actual content changes are handled by respective editors
+    // Notify listeners that state may have changed
     if (tabId == _activeTabId) {
       notifyListeners();
     }
   }
   
-  /// 清除所有编辑器
+  /// Clear all editors
   void clear() {
     _undoRedoManagers.clear();
     _undoCallbacks.clear();
@@ -131,19 +131,19 @@ class GlobalEditorManager extends ChangeNotifier {
     _activeTabId = null;
   }
   
-  /// 获取调试信息
+  /// Get debug information
   String getDebugInfo() {
     return 'GlobalEditorManager: ${_undoRedoManagers.length} editors, '
            'active: $_activeTabId, canUndo: $canUndo, canRedo: $canRedo';
   }
 }
 
-/// 全局编辑器管理器提供者
+/// Global editor manager provider
 final globalEditorManagerProvider = ChangeNotifierProvider<GlobalEditorManager>((ref) {
   return GlobalEditorManager();
 });
 
-/// 全局撤销重做状态提供者
+/// Global undo/redo state provider
 final globalUndoRedoStateProvider = Provider<GlobalUndoRedoState>((ref) {
   final manager = ref.watch(globalEditorManagerProvider);
   return manager.getCurrentState();

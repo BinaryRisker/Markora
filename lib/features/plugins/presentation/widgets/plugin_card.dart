@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../types/plugin.dart';
 import '../providers/plugin_providers.dart';
 
-/// 插件卡片组件
+/// Plugin card component
 class PluginCard extends ConsumerWidget {
   const PluginCard({
     super.key,
@@ -31,10 +32,10 @@ class PluginCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 插件头部信息
+              // Plugin header information
               Row(
                 children: [
-                  // 插件图标
+                  // Plugin icon
                   Container(
                     width: 48,
                     height: 48,
@@ -51,7 +52,7 @@ class PluginCard extends ConsumerWidget {
                   
                   const SizedBox(width: 12),
                   
-                  // 插件名称和版本
+                  // Plugin name and version
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,14 +74,14 @@ class PluginCard extends ConsumerWidget {
                     ),
                   ),
                   
-                  // 状态指示器
+                  // Status indicator
                   _buildStatusChip(plugin.status, theme),
                 ],
               ),
               
               const SizedBox(height: 12),
               
-              // 插件描述
+              // Plugin description
               Text(
                 plugin.metadata.description,
                 style: theme.textTheme.bodyMedium,
@@ -88,7 +89,7 @@ class PluginCard extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               
-              // 标签
+              // Tags
               if (plugin.metadata.tags.isNotEmpty) ...
               [
                 const SizedBox(height: 8),
@@ -106,19 +107,19 @@ class PluginCard extends ConsumerWidget {
                 ),
               ],
               
-              // 操作按钮
+              // Action buttons
               if (showActions) ...
               [
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // 配置按钮
+                    // Configuration button
                     if (plugin.status == PluginStatus.enabled)
                       TextButton.icon(
                         onPressed: () => _showPluginConfig(context, plugin),
                         icon: const Icon(Icons.settings, size: 16),
-                        label: const Text('配置'),
+                        label: Text(AppLocalizations.of(context)!.configure),
                         style: TextButton.styleFrom(
                           visualDensity: VisualDensity.compact,
                         ),
@@ -126,12 +127,12 @@ class PluginCard extends ConsumerWidget {
                     
                     const SizedBox(width: 8),
                     
-                    // 启用/禁用按钮
+                    // Enable/Disable button
                     if (plugin.status == PluginStatus.enabled)
                       FilledButton.icon(
                         onPressed: () => _disablePlugin(context, actions, plugin),
                         icon: const Icon(Icons.pause, size: 16),
-                        label: const Text('禁用'),
+                        label: Text(AppLocalizations.of(context)!.disable),
                         style: FilledButton.styleFrom(
                           backgroundColor: theme.colorScheme.error,
                           visualDensity: VisualDensity.compact,
@@ -142,7 +143,7 @@ class PluginCard extends ConsumerWidget {
                       FilledButton.icon(
                         onPressed: () => _enablePlugin(context, actions, plugin),
                         icon: const Icon(Icons.play_arrow, size: 16),
-                        label: const Text('启用'),
+                        label: Text(AppLocalizations.of(context)!.enable),
                         style: FilledButton.styleFrom(
                           visualDensity: VisualDensity.compact,
                         ),
@@ -157,7 +158,7 @@ class PluginCard extends ConsumerWidget {
     );
   }
   
-  /// 构建状态芯片
+  /// Build status chip
   Widget _buildStatusChip(PluginStatus status, ThemeData theme) {
     Color backgroundColor;
     Color textColor;
@@ -215,7 +216,7 @@ class PluginCard extends ConsumerWidget {
     );
   }
   
-  /// 获取插件类型对应的颜色
+  /// Get color corresponding to plugin type
   Color _getTypeColor(PluginType type) {
     switch (type) {
       case PluginType.syntax:
@@ -233,6 +234,8 @@ class PluginCard extends ConsumerWidget {
         return Colors.red;
       case PluginType.widget:
         return Colors.indigo;
+      case PluginType.component:
+        return Colors.amber;
       case PluginType.integration:
         return Colors.cyan;
       case PluginType.other:
@@ -240,7 +243,7 @@ class PluginCard extends ConsumerWidget {
     }
   }
   
-  /// 获取插件类型对应的图标
+  /// Get icon corresponding to plugin type
   IconData _getTypeIcon(PluginType type) {
     switch (type) {
       case PluginType.syntax:
@@ -258,6 +261,8 @@ class PluginCard extends ConsumerWidget {
         return Icons.build;
       case PluginType.widget:
         return Icons.widgets;
+      case PluginType.component:
+        return Icons.view_module;
       case PluginType.integration:
         return Icons.link;
       case PluginType.other:
@@ -265,33 +270,35 @@ class PluginCard extends ConsumerWidget {
     }
   }
   
-  /// 启用插件
+  /// Enable plugin
   void _enablePlugin(BuildContext context, PluginActions actions, Plugin plugin) async {
     final success = await actions.enablePlugin(plugin.metadata.id);
     if (context.mounted) {
+      final localizations = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? '插件已启用' : '启用插件失败'),
+          content: Text(success ? localizations.pluginEnabled : localizations.enablePluginFailed),
           backgroundColor: success ? Colors.green : Colors.red,
         ),
       );
     }
   }
   
-  /// 禁用插件
+  /// Disable plugin
   void _disablePlugin(BuildContext context, PluginActions actions, Plugin plugin) async {
     final success = await actions.disablePlugin(plugin.metadata.id);
     if (context.mounted) {
+      final localizations = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(success ? '插件已禁用' : '禁用插件失败'),
+          content: Text(success ? localizations.pluginDisabled : localizations.disablePluginFailed),
           backgroundColor: success ? Colors.green : Colors.red,
         ),
       );
     }
   }
   
-  /// 显示插件配置
+  /// Show plugin configuration
   void _showPluginConfig(BuildContext context, Plugin plugin) {
     showDialog(
       context: context,
@@ -300,7 +307,7 @@ class PluginCard extends ConsumerWidget {
   }
 }
 
-/// 插件配置对话框
+/// Plugin configuration dialog
 class _PluginConfigDialog extends ConsumerWidget {
   const _PluginConfigDialog({required this.plugin});
   
@@ -311,15 +318,15 @@ class _PluginConfigDialog extends ConsumerWidget {
     final config = ref.watch(pluginConfigProvider(plugin.metadata.id));
     
     return AlertDialog(
-      title: Text('${plugin.metadata.name} 配置'),
+      title: Text('${plugin.metadata.name} ${AppLocalizations.of(context)!.configuration}'),
       content: SizedBox(
         width: 400,
         height: 300,
         child: config.when(
           data: (pluginConfig) {
             if (pluginConfig == null || pluginConfig.settings.isEmpty) {
-              return const Center(
-                child: Text('该插件暂无可配置项'),
+              return Center(
+                child: Text(AppLocalizations.of(context)!.noConfigurableOptions),
               );
             }
             
@@ -333,7 +340,7 @@ class _PluginConfigDialog extends ConsumerWidget {
                   trailing: IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () {
-                      // TODO: 实现配置编辑
+                      // TODO: Implement configuration editing
                     },
                   ),
                 );
@@ -342,21 +349,21 @@ class _PluginConfigDialog extends ConsumerWidget {
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, stack) => Center(
-            child: Text('加载配置失败: $error'),
+            child: Text('${AppLocalizations.of(context)!.failedToLoadConfiguration}: $error'),
           ),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
+          child: Text(AppLocalizations.of(context)!.close),
         ),
         FilledButton(
           onPressed: () {
-            // TODO: 保存配置
+            // TODO: Save configuration
             Navigator.of(context).pop();
           },
-          child: const Text('保存'),
+          child: Text(AppLocalizations.of(context)!.save),
         ),
       ],
     );

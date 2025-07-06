@@ -1,309 +1,309 @@
 import 'package:flutter/material.dart';
 import '../../../types/syntax_highlighting.dart';
 
-/// 预定义的语法高亮主题
+/// Predefined syntax highlighting themes
 class SyntaxThemes {
   static const _lightThemeStyles = {
     SyntaxElementType.keyword: SyntaxElementStyle(
-      color: 0xFF0000FF, // 蓝色
+      color: 0xFF0000FF, // Blue
       isBold: true,
     ),
     SyntaxElementType.string: SyntaxElementStyle(
-      color: 0xFF008000, // 绿色
+      color: 0xFF008000, // Green
     ),
     SyntaxElementType.comment: SyntaxElementStyle(
-      color: 0xFF808080, // 灰色
+      color: 0xFF808080, // Gray
       isItalic: true,
     ),
     SyntaxElementType.number: SyntaxElementStyle(
-      color: 0xFFFF6600, // 橙色
+      color: 0xFFFF6600, // Orange
     ),
     SyntaxElementType.operator: SyntaxElementStyle(
-      color: 0xFF800080, // 紫色
+      color: 0xFF800080, // Purple
     ),
     SyntaxElementType.function: SyntaxElementStyle(
-      color: 0xFF795E26, // 棕色
+      color: 0xFF795E26, // Brown
       isBold: true,
     ),
     SyntaxElementType.variable: SyntaxElementStyle(
-      color: 0xFF001080, // 深蓝色
+      color: 0xFF001080, // Dark blue
     ),
     SyntaxElementType.type: SyntaxElementStyle(
-      color: 0xFF267F99, // 青蓝色
+      color: 0xFF267F99, // Cyan blue
     ),
     SyntaxElementType.punctuation: SyntaxElementStyle(
-      color: 0xFF000000, // 黑色
+      color: 0xFF000000, // Black
     ),
     SyntaxElementType.annotation: SyntaxElementStyle(
-      color: 0xFF808000, // 暗黄色
+      color: 0xFF808000, // Dark yellow
     ),
     SyntaxElementType.property: SyntaxElementStyle(
-      color: 0xFF0451A5, // 深蓝色
+      color: 0xFF0451A5, // Deep blue
     ),
     SyntaxElementType.constant: SyntaxElementStyle(
-      color: 0xFF0000FF, // 蓝色
+      color: 0xFF0000FF, // Blue
       isBold: true,
     ),
     SyntaxElementType.parameter: SyntaxElementStyle(
-      color: 0xFF795E26, // 棕色
+      color: 0xFF795E26, // Brown
     ),
     SyntaxElementType.namespace: SyntaxElementStyle(
-      color: 0xFF267F99, // 青蓝色
+      color: 0xFF267F99, // Cyan blue
     ),
     SyntaxElementType.tag: SyntaxElementStyle(
-      color: 0xFF800000, // 深红色
+      color: 0xFF800000, // Dark red
     ),
     SyntaxElementType.attribute: SyntaxElementStyle(
-      color: 0xFF0000FF, // 蓝色
+      color: 0xFF0000FF, // Blue
     ),
     SyntaxElementType.selector: SyntaxElementStyle(
-      color: 0xFF800000, // 深红色
+      color: 0xFF800000, // Dark red
     ),
     SyntaxElementType.regex: SyntaxElementStyle(
-      color: 0xFFD16969, // 红色
+      color: 0xFFD16969, // Red
     ),
     SyntaxElementType.escape: SyntaxElementStyle(
-      color: 0xFFD7BA7D, // 淡黄色
+      color: 0xFFD7BA7D, // Light yellow
     ),
     SyntaxElementType.plain: SyntaxElementStyle(
-      color: 0xFF000000, // 黑色
+      color: 0xFF000000, // Black
     ),
   };
 
   static const _darkThemeStyles = {
     SyntaxElementType.keyword: SyntaxElementStyle(
-      color: 0xFF569CD6, // 亮蓝色
+      color: 0xFF569CD6, // Bright blue
       isBold: true,
     ),
     SyntaxElementType.string: SyntaxElementStyle(
-      color: 0xFFCE9178, // 淡橙色
+      color: 0xFFCE9178, // Light orange
     ),
     SyntaxElementType.comment: SyntaxElementStyle(
-      color: 0xFF6A9955, // 绿色
+      color: 0xFF6A9955, // Green
       isItalic: true,
     ),
     SyntaxElementType.number: SyntaxElementStyle(
-      color: 0xFFB5CEA8, // 淡绿色
+      color: 0xFFB5CEA8, // Light green
     ),
     SyntaxElementType.operator: SyntaxElementStyle(
-      color: 0xFFD4D4D4, // 淡白色
+      color: 0xFFD4D4D4, // Light white
     ),
     SyntaxElementType.function: SyntaxElementStyle(
-      color: 0xFFDCDCAA, // 淡黄色
+      color: 0xFFDCDCAA, // Light yellow
       isBold: true,
     ),
     SyntaxElementType.variable: SyntaxElementStyle(
-      color: 0xFF9CDCFE, // 淡蓝色
+      color: 0xFF9CDCFE, // Light blue
     ),
     SyntaxElementType.type: SyntaxElementStyle(
-      color: 0xFF4EC9B0, // 青绿色
+      color: 0xFF4EC9B0, // Cyan green
     ),
     SyntaxElementType.punctuation: SyntaxElementStyle(
-      color: 0xFFD4D4D4, // 淡白色
+      color: 0xFFD4D4D4, // Light white
     ),
     SyntaxElementType.annotation: SyntaxElementStyle(
-      color: 0xFFDCDCAA, // 淡黄色
+      color: 0xFFDCDCAA, // Light yellow
     ),
     SyntaxElementType.property: SyntaxElementStyle(
-      color: 0xFF9CDCFE, // 淡蓝色
+      color: 0xFF9CDCFE, // Light blue
     ),
     SyntaxElementType.constant: SyntaxElementStyle(
-      color: 0xFF569CD6, // 亮蓝色
+      color: 0xFF569CD6, // Bright blue
       isBold: true,
     ),
     SyntaxElementType.parameter: SyntaxElementStyle(
-      color: 0xFFDCDCAA, // 淡黄色
+      color: 0xFFDCDCAA, // Light yellow
     ),
     SyntaxElementType.namespace: SyntaxElementStyle(
-      color: 0xFF4EC9B0, // 青绿色
+      color: 0xFF4EC9B0, // Cyan green
     ),
     SyntaxElementType.tag: SyntaxElementStyle(
-      color: 0xFF569CD6, // 亮蓝色
+      color: 0xFF569CD6, // Bright blue
     ),
     SyntaxElementType.attribute: SyntaxElementStyle(
-      color: 0xFF92C5F8, // 浅蓝色
+      color: 0xFF92C5F8, // Light blue
     ),
     SyntaxElementType.selector: SyntaxElementStyle(
-      color: 0xFFD7BA7D, // 淡黄色
+      color: 0xFFD7BA7D, // Light yellow
     ),
     SyntaxElementType.regex: SyntaxElementStyle(
-      color: 0xFFD16969, // 红色
+      color: 0xFFD16969, // Red
     ),
     SyntaxElementType.escape: SyntaxElementStyle(
-      color: 0xFFD7BA7D, // 淡黄色
+      color: 0xFFD7BA7D, // Light yellow
     ),
     SyntaxElementType.plain: SyntaxElementStyle(
-      color: 0xFFD4D4D4, // 淡白色
+      color: 0xFFD4D4D4, // Light white
     ),
   };
 
-  /// VS Code Light 主题
+  /// VS Code Light theme
   static const vsCodeLight = SyntaxHighlightTheme(
     name: 'VS Code Light',
     isDark: false,
     elementStyles: _lightThemeStyles,
-    backgroundColor: 0xFFFFFFFF, // 白色背景
-    defaultTextColor: 0xFF000000, // 黑色文字
+    backgroundColor: 0xFFFFFFFF, // White background
+    defaultTextColor: 0xFF000000, // Black text
   );
 
-  /// VS Code Dark 主题
+  /// VS Code Dark theme
   static const vsCodeDark = SyntaxHighlightTheme(
     name: 'VS Code Dark',
     isDark: true,
     elementStyles: _darkThemeStyles,
-    backgroundColor: 0xFF1E1E1E, // 深灰色背景
-    defaultTextColor: 0xFFD4D4D4, // 淡白色文字
+    backgroundColor: 0xFF1E1E1E, // Dark gray background
+    defaultTextColor: 0xFFD4D4D4, // Light white text
   );
 
-  /// GitHub Light 主题
+  /// GitHub Light theme
   static const githubLight = SyntaxHighlightTheme(
     name: 'GitHub Light',
     isDark: false,
     elementStyles: {
       SyntaxElementType.keyword: SyntaxElementStyle(
-        color: 0xFFD73A49, // GitHub红色
+        color: 0xFFD73A49, // GitHub red
         isBold: true,
       ),
       SyntaxElementType.string: SyntaxElementStyle(
-        color: 0xFF032F62, // GitHub深蓝色
+        color: 0xFF032F62, // GitHub dark blue
       ),
       SyntaxElementType.comment: SyntaxElementStyle(
-        color: 0xFF6A737D, // GitHub灰色
+        color: 0xFF6A737D, // GitHub gray
         isItalic: true,
       ),
       SyntaxElementType.number: SyntaxElementStyle(
-        color: 0xFF005CC5, // GitHub蓝色
+        color: 0xFF005CC5, // GitHub blue
       ),
       SyntaxElementType.operator: SyntaxElementStyle(
-        color: 0xFFD73A49, // GitHub红色
+        color: 0xFFD73A49, // GitHub red
       ),
       SyntaxElementType.function: SyntaxElementStyle(
-        color: 0xFF6F42C1, // GitHub紫色
+        color: 0xFF6F42C1, // GitHub purple
         isBold: true,
       ),
       SyntaxElementType.variable: SyntaxElementStyle(
-        color: 0xFF24292E, // GitHub黑色
+        color: 0xFF24292E, // GitHub black
       ),
       SyntaxElementType.type: SyntaxElementStyle(
-        color: 0xFF005CC5, // GitHub蓝色
+        color: 0xFF005CC5, // GitHub blue
       ),
       SyntaxElementType.punctuation: SyntaxElementStyle(
-        color: 0xFF24292E, // GitHub黑色
+        color: 0xFF24292E, // GitHub black
       ),
       SyntaxElementType.annotation: SyntaxElementStyle(
-        color: 0xFF6A737D, // GitHub灰色
+        color: 0xFF6A737D, // GitHub gray
       ),
       SyntaxElementType.property: SyntaxElementStyle(
-        color: 0xFF005CC5, // GitHub蓝色
+        color: 0xFF005CC5, // GitHub blue
       ),
       SyntaxElementType.constant: SyntaxElementStyle(
-        color: 0xFF005CC5, // GitHub蓝色
+        color: 0xFF005CC5, // GitHub blue
         isBold: true,
       ),
       SyntaxElementType.parameter: SyntaxElementStyle(
-        color: 0xFFE36209, // GitHub橙色
+        color: 0xFFE36209, // GitHub orange
       ),
       SyntaxElementType.namespace: SyntaxElementStyle(
-        color: 0xFF6F42C1, // GitHub紫色
+        color: 0xFF6F42C1, // GitHub purple
       ),
       SyntaxElementType.tag: SyntaxElementStyle(
-        color: 0xFF22863A, // GitHub绿色
+        color: 0xFF22863A, // GitHub green
       ),
       SyntaxElementType.attribute: SyntaxElementStyle(
-        color: 0xFF6F42C1, // GitHub紫色
+        color: 0xFF6F42C1, // GitHub purple
       ),
       SyntaxElementType.selector: SyntaxElementStyle(
-        color: 0xFF6F42C1, // GitHub紫色
+        color: 0xFF6F42C1, // GitHub purple
       ),
       SyntaxElementType.regex: SyntaxElementStyle(
-        color: 0xFF032F62, // GitHub深蓝色
+        color: 0xFF032F62, // GitHub dark blue
       ),
       SyntaxElementType.escape: SyntaxElementStyle(
-        color: 0xFFE36209, // GitHub橙色
+        color: 0xFFE36209, // GitHub orange
       ),
       SyntaxElementType.plain: SyntaxElementStyle(
-        color: 0xFF24292E, // GitHub黑色
+        color: 0xFF24292E, // GitHub black
       ),
     },
-    backgroundColor: 0xFFFFFFFF, // 白色背景
-    defaultTextColor: 0xFF24292E, // GitHub黑色
+    backgroundColor: 0xFFFFFFFF, // White background
+    defaultTextColor: 0xFF24292E, // GitHub black
   );
 
-  /// GitHub Dark 主题
+  /// GitHub Dark theme
   static const githubDark = SyntaxHighlightTheme(
     name: 'GitHub Dark',
     isDark: true,
     elementStyles: {
       SyntaxElementType.keyword: SyntaxElementStyle(
-        color: 0xFFFF7B72, // GitHub Dark红色
+        color: 0xFFFF7B72, // GitHub Dark red
         isBold: true,
       ),
       SyntaxElementType.string: SyntaxElementStyle(
-        color: 0xFFA5D6FF, // GitHub Dark蓝色
+        color: 0xFFA5D6FF, // GitHub Dark blue
       ),
       SyntaxElementType.comment: SyntaxElementStyle(
-        color: 0xFF8B949E, // GitHub Dark灰色
+        color: 0xFF8B949E, // GitHub Dark gray
         isItalic: true,
       ),
       SyntaxElementType.number: SyntaxElementStyle(
-        color: 0xFF79C0FF, // GitHub Dark蓝色
+        color: 0xFF79C0FF, // GitHub Dark blue
       ),
       SyntaxElementType.operator: SyntaxElementStyle(
-        color: 0xFFFF7B72, // GitHub Dark红色
+        color: 0xFFFF7B72, // GitHub Dark red
       ),
       SyntaxElementType.function: SyntaxElementStyle(
-        color: 0xFFD2A8FF, // GitHub Dark紫色
+        color: 0xFFD2A8FF, // GitHub Dark purple
         isBold: true,
       ),
       SyntaxElementType.variable: SyntaxElementStyle(
-        color: 0xFFF0F6FC, // GitHub Dark白色
+        color: 0xFFF0F6FC, // GitHub Dark white
       ),
       SyntaxElementType.type: SyntaxElementStyle(
-        color: 0xFF79C0FF, // GitHub Dark蓝色
+        color: 0xFF79C0FF, // GitHub Dark blue
       ),
       SyntaxElementType.punctuation: SyntaxElementStyle(
-        color: 0xFFF0F6FC, // GitHub Dark白色
+        color: 0xFFF0F6FC, // GitHub Dark white
       ),
       SyntaxElementType.annotation: SyntaxElementStyle(
-        color: 0xFF8B949E, // GitHub Dark灰色
+        color: 0xFF8B949E, // GitHub Dark gray
       ),
       SyntaxElementType.property: SyntaxElementStyle(
-        color: 0xFF79C0FF, // GitHub Dark蓝色
+        color: 0xFF79C0FF, // GitHub Dark blue
       ),
       SyntaxElementType.constant: SyntaxElementStyle(
-        color: 0xFF79C0FF, // GitHub Dark蓝色
+        color: 0xFF79C0FF, // GitHub Dark blue
         isBold: true,
       ),
       SyntaxElementType.parameter: SyntaxElementStyle(
-        color: 0xFFFFA657, // GitHub Dark橙色
+        color: 0xFFFFA657, // GitHub Dark orange
       ),
       SyntaxElementType.namespace: SyntaxElementStyle(
-        color: 0xFFD2A8FF, // GitHub Dark紫色
+        color: 0xFFD2A8FF, // GitHub Dark purple
       ),
       SyntaxElementType.tag: SyntaxElementStyle(
-        color: 0xFF7EE787, // GitHub Dark绿色
+        color: 0xFF7EE787, // GitHub Dark green
       ),
       SyntaxElementType.attribute: SyntaxElementStyle(
-        color: 0xFFD2A8FF, // GitHub Dark紫色
+        color: 0xFFD2A8FF, // GitHub Dark purple
       ),
       SyntaxElementType.selector: SyntaxElementStyle(
-        color: 0xFFD2A8FF, // GitHub Dark紫色
+        color: 0xFFD2A8FF, // GitHub Dark purple
       ),
       SyntaxElementType.regex: SyntaxElementStyle(
-        color: 0xFFA5D6FF, // GitHub Dark蓝色
+        color: 0xFFA5D6FF, // GitHub Dark blue
       ),
       SyntaxElementType.escape: SyntaxElementStyle(
-        color: 0xFFFFA657, // GitHub Dark橙色
+        color: 0xFFFFA657, // GitHub Dark orange
       ),
       SyntaxElementType.plain: SyntaxElementStyle(
-        color: 0xFFF0F6FC, // GitHub Dark白色
+        color: 0xFFF0F6FC, // GitHub Dark white
       ),
     },
-    backgroundColor: 0xFF0D1117, // GitHub Dark背景
-    defaultTextColor: 0xFFF0F6FC, // GitHub Dark白色
+    backgroundColor: 0xFF0D1117, // GitHub Dark background
+    defaultTextColor: 0xFFF0F6FC, // GitHub Dark white
   );
 
-  /// 获取所有预定义主题
+  /// Get all predefined themes
   static List<SyntaxHighlightTheme> getAllThemes() {
     return [
       vsCodeLight,
@@ -313,7 +313,7 @@ class SyntaxThemes {
     ];
   }
 
-  /// 根据主题名称获取主题
+  /// Get theme by name
   static SyntaxHighlightTheme? getThemeByName(String name) {
     final themes = getAllThemes();
     try {
@@ -323,17 +323,17 @@ class SyntaxThemes {
     }
   }
 
-  /// 根据是否为深色主题获取默认主题
+  /// Get default theme based on dark mode
   static SyntaxHighlightTheme getDefaultTheme(bool isDark) {
     return isDark ? vsCodeDark : vsCodeLight;
   }
 
-  /// 将主题颜色转换为Flutter Color对象
+  /// Convert theme color to Flutter Color object
   static Color colorFromInt(int colorValue) {
     return Color(colorValue);
   }
 
-  /// 根据语法元素类型和主题获取TextStyle
+  /// Get TextStyle based on syntax element type and theme
   static TextStyle getTextStyle(
     SyntaxElementType elementType,
     SyntaxHighlightTheme theme, {
@@ -362,4 +362,4 @@ class SyntaxThemes {
           : null,
     );
   }
-} 
+}
