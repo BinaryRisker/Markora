@@ -11,6 +11,7 @@ import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../document/presentation/providers/document_providers.dart';
 import '../../domain/services/undo_redo_manager.dart';
 import '../../domain/services/global_editor_manager.dart';
+import '../../../../main.dart';
 
 /// Markdown编辑器组件
 class MarkdownEditor extends ConsumerStatefulWidget {
@@ -337,11 +338,8 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
             tooltip: '数学公式',
             onPressed: isEnabled ? () => _insertMathFormula() : null,
           ),
-          _buildToolbarButton(
-            icon: Icons.account_tree,
-            tooltip: 'Mermaid图表 (插件)',
-                    onPressed: null, // 功能已移至插件
-          ),
+          // 插件工具栏按钮
+          ..._buildPluginToolbarButtons(isEnabled),
           _buildToolbarButton(
             icon: Icons.format_quote,
             tooltip: '引用',
@@ -368,6 +366,63 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
         ],
       ),
     );
+  }
+
+  /// 构建插件工具栏按钮
+  List<Widget> _buildPluginToolbarButtons(bool isEnabled) {
+    final actions = globalToolbarRegistry.actions;
+    final widgets = <Widget>[];
+    
+    // 调试信息
+    debugPrint('工具栏注册表中的动作数量: ${actions.length}');
+    for (final entry in actions.entries) {
+      debugPrint('动作ID: ${entry.key}, 标题: ${entry.value.action.title}');
+    }
+    
+    for (final actionItem in actions.values) {
+      final action = actionItem.action;
+      widgets.add(_buildToolbarButton(
+        icon: _getIconFromString(action.icon),
+        tooltip: action.title,
+        onPressed: isEnabled ? () {
+          // 执行插件动作
+          debugPrint('执行插件动作: ${action.title}');
+          actionItem.callback();
+        } : null,
+      ));
+    }
+    
+    if (widgets.isNotEmpty) {
+      widgets.add(const VerticalDivider(width: 1));
+    }
+    
+    return widgets;
+  }
+  
+  /// 将字符串转换为IconData
+  IconData _getIconFromString(String? iconName) {
+    if (iconName == null) return Icons.extension;
+    
+    switch (iconName) {
+      case 'account_tree':
+        return Icons.account_tree;
+      case 'code':
+        return Icons.code;
+      case 'image':
+        return Icons.image;
+      case 'link':
+        return Icons.link;
+      case 'functions':
+        return Icons.functions;
+      case 'format_quote':
+        return Icons.format_quote;
+      case 'format_list_bulleted':
+        return Icons.format_list_bulleted;
+      case 'format_list_numbered':
+        return Icons.format_list_numbered;
+      default:
+        return Icons.extension;
+    }
   }
 
   /// 构建工具栏按钮

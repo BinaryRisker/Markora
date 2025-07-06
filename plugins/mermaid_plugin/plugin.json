@@ -10,7 +10,7 @@
   "type": "renderer",
   "category": "visualization",
   "tags": ["图表", "mermaid", "可视化", "流程图"],
-  "minMarkoraVersion": "1.0.0",
+  "minVersion": "1.0.0",
   "dependencies": [],
   "platforms": ["web", "desktop", "mobile"],
   "permissions": [

@@ -13,7 +13,7 @@ import 'features/plugins/domain/plugin_manager.dart';
 import 'features/plugins/domain/plugin_interface.dart';
 import 'features/plugins/domain/plugin_implementations.dart';
 import 'types/document.dart';
-import 'types/plugin.dart';
+
 
 // 全局文档仓库实例
 late HiveDocumentRepository globalDocumentRepository;
