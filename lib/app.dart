@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'l10n/generated/app_localizations.dart';
 
 import 'core/constants/app_constants.dart';
 import 'types/editor.dart';
@@ -18,7 +19,7 @@ import 'features/export/presentation/widgets/export_dialog.dart';
 import 'features/editor/domain/services/global_editor_manager.dart';
 import 'features/plugins/presentation/pages/plugin_management_page.dart';
 
-/// 应用外壳 - 主要界面容器
+/// Application shell - main interface container
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
 
@@ -27,31 +28,33 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  // 当前编辑器模式
+  // Current editor mode
   EditorMode _currentMode = EditorMode.split;
   
-  // 分屏比例（编辑器:预览）
+  // Split ratio (editor:preview)
   double _splitRatio = AppConstants.defaultSplitRatio;
   
-  // 当前文档内容
-  String _currentContent = '''# 欢迎使用 Markora
+  // Current document content
+  String get _currentContent {
+    final l10n = AppLocalizations.of(context)!;
+    return '''# ${l10n.welcomeTitle}
 
-这是一个功能强大的 Markdown 编辑器，支持：
+${l10n.welcomeDescription}
 
-## 核心功能
+## ${l10n.coreFeatures}
 
-- **实时预览** - 所见即所得的编辑体验
-- **语法高亮** - 支持多种编程语言
-- **数学公式** - 支持 LaTeX 数学公式
-- **图表支持** - 集成 Mermaid 图表
+- **${l10n.realtimePreview}** - ${l10n.realtimePreviewDesc}
+- **${l10n.syntaxHighlighting}** - ${l10n.syntaxHighlightingDesc}
+- **${l10n.mathFormulas}** - ${l10n.mathFormulasDesc}
+- **${l10n.chartSupport}** - ${l10n.chartSupportDesc}
 
-## 快速开始
+## ${l10n.quickStart}
 
-1. 在左侧编辑器中输入 Markdown 内容
-2. 右侧会实时显示预览效果
-3. 使用工具栏快速插入格式
+1. ${l10n.quickStartStep1}
+2. ${l10n.quickStartStep2}
+3. ${l10n.quickStartStep3}
 
-### 代码示例
+### ${l10n.codeExample}
 
 ```dart
 void main() {
@@ -59,51 +62,86 @@ void main() {
 }
 ```
 
-### 数学公式
+### Math Formulas
 
-行内公式：\$E = mc^2\$
+${l10n.inlineFormula}：\$E = mc^2\$
 
-块级公式：
+${l10n.blockFormula}：
 \$\$\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}\$\$
 
-### 表格
+### Table
 
-| 功能 | 状态 | 说明 |
+| ${l10n.feature} | ${l10n.status} | ${l10n.description} |
 |------|------|------|
-| 编辑器 | ✅ | 完成 |
-| 预览 | ✅ | 完成 |
-| 数学公式 | 🚧 | 开发中 |
+| ${l10n.editor} | ✅ | ${l10n.completed} |
+| ${l10n.preview} | ✅ | ${l10n.completed} |
+| Math | 🚧 | In Development |
 
-> 开始你的 Markdown 创作之旅吧！
+> ${l10n.startJourney}
 ''';
+  }
   
-  // 光标位置
+  // Cursor position
   CursorPosition _cursorPosition = const CursorPosition(line: 0, column: 0, offset: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    // Update sample documents with localized content after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateSampleDocuments();
+    });
+  }
+
+  /// Update sample documents with localized content
+  Future<void> _updateSampleDocuments() async {
+    try {
+      final repository = ref.read(documentRepositoryProvider);
+      final documents = await repository.getAllDocuments();
+      
+      // Find and update the welcome document
+      for (final doc in documents) {
+        if (doc.title == AppLocalizations.of(context)!.welcomeDocument) {
+          final l10n = AppLocalizations.of(context)!;
+          final updatedDoc = doc.copyWith(
+            title: l10n.welcomeTitle,
+            content: _currentContent,
+            updatedAt: DateTime.now(),
+          );
+          await repository.saveDocument(updatedDoc);
+          break;
+        }
+      }
+    } catch (e) {
+      // Ignore errors during sample document update
+      debugPrint('Failed to update sample documents: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          // 工具栏
+          // Toolbar
           _buildToolbar(),
           
-          // 文档Tab栏
+          // Document tab bar
           const DocumentTabs(),
           
-          // 主要内容区域
+          // Main content area
           Expanded(
             child: _buildContent(),
           ),
           
-          // 状态栏
+          // Status bar
           _buildStatusBar(),
         ],
       ),
     );
   }
 
-  /// 构建工具栏
+  /// Build toolbar
   Widget _buildToolbar() {
     return Container(
       height: AppConstants.toolbarHeight,
@@ -118,42 +156,42 @@ void main() {
       ),
       child: Row(
         children: [
-          // 文件操作按钮
+          // File operation buttons
           _buildToolbarButton(
             icon: Icon(PhosphorIconsRegular.file),
-            tooltip: '新建文档',
+            tooltip: AppLocalizations.of(context)!.newDocument,
             onPressed: () => _handleNewDocument(),
           ),
           _buildToolbarButton(
             icon: Icon(PhosphorIconsRegular.folderOpen),
-            tooltip: '打开文档',
+            tooltip: AppLocalizations.of(context)!.openDocument,
             onPressed: () => _handleOpenDocument(),
           ),
           _buildToolbarButton(
             icon: Icon(PhosphorIconsRegular.floppyDisk),
-            tooltip: '保存文档',
+            tooltip: AppLocalizations.of(context)!.saveDocument,
             onPressed: () => _handleSaveDocument(),
           ),
           _buildToolbarButton(
             icon: Icon(PhosphorIconsRegular.copySimple),
-            tooltip: '另存为',
+            tooltip: AppLocalizations.of(context)!.saveAs,
             onPressed: () => _handleSaveAsDocument(),
           ),
           _buildToolbarButton(
             icon: Icon(PhosphorIconsRegular.export),
-            tooltip: '导出文档',
+            tooltip: AppLocalizations.of(context)!.exportDocument,
             onPressed: () => _handleExportDocument(),
           ),
           
           const VerticalDivider(),
           
-          // 编辑操作按钮
+          // Edit operation buttons
           Consumer(
             builder: (context, ref, child) {
               final undoRedoState = ref.watch(globalUndoRedoStateProvider);
               return _buildToolbarButton(
                 icon: Icon(PhosphorIconsRegular.arrowUUpLeft),
-                tooltip: '撤销',
+                tooltip: AppLocalizations.of(context)!.undo,
                 onPressed: undoRedoState.canUndo ? () => _handleUndo() : null,
               );
             },
@@ -163,7 +201,7 @@ void main() {
               final undoRedoState = ref.watch(globalUndoRedoStateProvider);
               return _buildToolbarButton(
                 icon: Icon(PhosphorIconsRegular.arrowUUpRight),
-                tooltip: '重做',
+                tooltip: AppLocalizations.of(context)!.redo,
                 onPressed: undoRedoState.canRedo ? () => _handleRedo() : null,
               );
             },
@@ -175,22 +213,22 @@ void main() {
           
           const Spacer(),
           
-          // 视图模式切换
+          // View mode toggle
           _buildModeToggle(),
           
           const SizedBox(width: 8),
           
-          // 插件管理按钮
+          // Plugin management button
           _buildToolbarButton(
             icon: Icon(PhosphorIconsRegular.package),
-            tooltip: '插件管理',
+            tooltip: AppLocalizations.of(context)!.pluginManagement,
             onPressed: () => _handlePluginManagement(),
           ),
           
-          // 设置按钮
+          // Settings button
           _buildToolbarButton(
             icon: Icon(PhosphorIconsRegular.gear),
-            tooltip: '设置',
+            tooltip: AppLocalizations.of(context)!.settings,
             onPressed: () => _handleSettings(),
           ),
         ],
@@ -198,7 +236,7 @@ void main() {
     );
   }
 
-  /// 构建工具栏按钮
+  /// Build toolbar button
   Widget _buildToolbarButton({
     required Widget icon,
     required String tooltip,
@@ -214,7 +252,7 @@ void main() {
     );
   }
 
-  /// 构建模式切换器
+  /// Build mode toggle
   Widget _buildModeToggle() {
     return ToggleButtons(
       borderRadius: BorderRadius.circular(8),
@@ -244,22 +282,22 @@ void main() {
       },
       children: [
         Tooltip(
-          message: '源码模式',
+          message: AppLocalizations.of(context)!.sourceMode,
           child: Icon(PhosphorIconsRegular.code, size: 16),
         ),
         Tooltip(
-          message: '分屏模式',
+          message: AppLocalizations.of(context)!.splitMode,
           child: Icon(PhosphorIconsRegular.columns, size: 16),
         ),
         Tooltip(
-          message: '预览模式',
+          message: AppLocalizations.of(context)!.previewMode,
           child: Icon(PhosphorIconsRegular.eye, size: 16),
         ),
       ],
     );
   }
 
-  /// 构建主要内容区域
+  /// Build main content area
   Widget _buildContent() {
     switch (_currentMode) {
       case EditorMode.source:
@@ -273,7 +311,7 @@ void main() {
     }
   }
 
-  /// 构建编辑器
+  /// Build editor
   Widget _buildEditor() {
     final activeDocument = ref.watch(activeDocumentProvider);
     final content = activeDocument?.content ?? '';
@@ -281,8 +319,8 @@ void main() {
     return MarkdownEditor(
       initialContent: content,
       onChanged: (content) {
-        // 移除setState调用，因为内容已经通过Tab系统管理
-        // Tab系统会自动处理内容同步
+        // Remove setState call as content is managed by Tab system
+        // Tab system will automatically handle content synchronization
       },
       onCursorPositionChanged: (position) {
         setState(() {
@@ -292,7 +330,7 @@ void main() {
     );
   }
 
-  /// 构建预览器
+  /// Build preview
   Widget _buildPreview() {
     final activeDocument = ref.watch(activeDocumentProvider);
     final content = activeDocument?.content ?? '';
@@ -302,17 +340,17 @@ void main() {
     );
   }
 
-  /// 构建分屏视图
+  /// Build split view
   Widget _buildSplitView() {
     return Row(
       children: [
-        // 编辑器区域
+        // Editor area
         Expanded(
           flex: (_splitRatio * 100).round(),
           child: _buildEditor(),
         ),
         
-        // 分隔线
+        // Divider
         GestureDetector(
           onPanUpdate: (details) {
             final RenderBox box = context.findRenderObject() as RenderBox;
@@ -334,7 +372,7 @@ void main() {
           ),
         ),
         
-        // 预览区域
+        // Preview area
         Expanded(
           flex: ((1 - _splitRatio) * 100).round(),
           child: _buildPreview(),
@@ -343,13 +381,13 @@ void main() {
     );
   }
 
-  /// 构建实时编辑器
+  /// Build live editor
   Widget _buildLiveEditor() {
     return Container(
       color: Theme.of(context).colorScheme.background,
       child: const Center(
         child: Text(
-          '实时编辑器\n(即将实现)',
+          'Live Editor\n(Coming Soon)',
           style: TextStyle(fontSize: 18),
           textAlign: TextAlign.center,
         ),
@@ -357,7 +395,7 @@ void main() {
     );
   }
 
-  /// 构建状态栏
+  /// Build status bar
   Widget _buildStatusBar() {
     final activeDocument = ref.watch(activeDocumentProvider);
     final tabs = ref.watch(documentTabsProvider);
@@ -380,7 +418,7 @@ void main() {
           children: [
             if (activeDocument != null) ...[
               Text(
-                '${activeDocument.title} | ${activeDocument.content.length} 字符',
+                '${activeDocument.title} | ${activeDocument.content.length} characters',
                 style: const TextStyle(fontSize: 12),
               ),
               const SizedBox(width: 8),
@@ -394,7 +432,7 @@ void main() {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '已修改',
+                  'Modified',
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).colorScheme.primary,
@@ -403,7 +441,7 @@ void main() {
               ],
             ] else ...[
               const Text(
-                '没有打开的文档',
+                'No open documents',
                 style: TextStyle(fontSize: 12),
               ),
             ],
@@ -420,24 +458,26 @@ void main() {
     );
   }
 
-  // 事件处理方法
+  // Event handling methods
   void _handleNewDocument() async {
     try {
+      final l10n = AppLocalizations.of(context)!;
       final tabsNotifier = ref.read(documentTabsProvider.notifier);
       await tabsNotifier.createNewDocumentTab(
-        title: '新文档',
-        content: '# 新文档\n\n开始你的创作...',
+        title: l10n.newDocument,
+        content: '# ${l10n.newDocument}\n\n${l10n.startCreating}',
       );
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已创建新文档')),
+          SnackBar(content: Text(l10n.documentCreated)),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('创建文档失败: $e')),
+          SnackBar(content: Text('${l10n.createDocumentFailed}: $e')),
         );
       }
     }
@@ -448,35 +488,37 @@ void main() {
       final fileService = FileService();
       Document document;
       
-      // 根据环境选择不同的文件加载方式
+      // Choose different file loading methods based on environment
       if (kIsWeb) {
-        // Web环境下直接调用Web专用方法
+        // Call Web-specific method directly in Web environment
         document = await fileService.loadDocumentFromWeb();
       } else {
-        // 非Web环境使用传统方式
+        // Use traditional method in non-Web environment
         final filePath = await fileService.selectOpenFilePath(
-          dialogTitle: '打开Markdown文件',
+          dialogTitle: AppLocalizations.of(context)!.openMarkdownFile,
           allowedExtensions: ['md', 'markdown', 'txt'],
         );
         
-        if (filePath == null) return; // 用户取消了选择
+        if (filePath == null) return; // User cancelled selection
         
         document = await fileService.loadDocumentFromFile(filePath);
       }
       
-      // 添加到Tab
+      // Add to Tab
       final tabsNotifier = ref.read(documentTabsProvider.notifier);
       tabsNotifier.openDocumentTab(document);
       
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('已打开文档: ${document.title}')),
+          SnackBar(content: Text('${l10n.documentOpened}: ${document.title}')),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('打开文档失败: $e')),
+          SnackBar(content: Text('${l10n.openDocumentFailed}: $e')),
         );
       }
     }
@@ -487,35 +529,38 @@ void main() {
       final tabsNotifier = ref.read(documentTabsProvider.notifier);
       final activeDocument = ref.read(activeDocumentProvider);
       
-      // 如果有激活文档，直接保存
+      // If there's an active document, save directly
       if (activeDocument != null) {
         await tabsNotifier.saveActiveTab();
         
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('文档已保存')),
+            SnackBar(content: Text(l10n.documentSaved)),
           );
         }
       } else {
-        // 如果没有激活文档，显示另存为对话框
+        // If no active document, show save as dialog
         _handleSaveAsDocument();
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
+          SnackBar(content: Text('${l10n.saveFailed}: $e')),
         );
       }
     }
   }
 
-  /// 处理另存为
+  /// Handle save as
   void _handleSaveAsDocument() async {
     try {
       final activeDocument = ref.read(activeDocumentProvider);
+      final l10n = AppLocalizations.of(context)!;
       final documentToSave = activeDocument ?? Document(
         id: 'temp_save',
-        title: '新文档',
+        title: l10n.newDocument,
         content: _currentContent,
         type: DocumentType.markdown,
         createdAt: DateTime.now(),
@@ -531,57 +576,60 @@ void main() {
       );
 
       if (result != null) {
-        // 根据选择的格式保存文件
+        // Save file according to selected format
         await _saveFileWithFormat(documentToSave, result);
         
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('文档已保存为: ${result.fileName}')),
+            SnackBar(content: Text('${l10n.documentSavedAs}: ${result.fileName}')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败: $e')),
+          SnackBar(content: Text('${l10n.saveFailed}: $e')),
         );
       }
     }
   }
 
-  /// 根据格式保存文件
+  /// Save file according to format
   Future<void> _saveFileWithFormat(Document document, SaveResult result) async {
-    // 文件已经在SaveAsDialog中保存到磁盘了
-    // 这里只需要更新Tab中的文档信息
+    // File has already been saved to disk in SaveAsDialog
+    // Here we only need to update document info in Tab
     final tabsNotifier = ref.read(documentTabsProvider.notifier);
     
-    // 更新文档标题为文件名（不包含扩展名）
+    // Update document title to filename (without extension)
     final fileNameWithoutExt = result.fileName.replaceAll(RegExp(r'\.[^.]*$'), '');
     final updatedDocument = document.copyWith(
       title: fileNameWithoutExt,
       updatedAt: DateTime.now(),
     );
     
-    // 保存到Hive数据库
+    // Save to Hive database
     await ref.read(documentServiceProvider).saveDocument(updatedDocument);
     
-    // 如果文档在Tab中，更新Tab
+    // If document is in Tab, update Tab
     final activeIndex = tabsNotifier.activeTabIndex;
     if (activeIndex >= 0) {
       final tabs = ref.read(documentTabsProvider);
       if (activeIndex < tabs.length && tabs[activeIndex].document.id == document.id) {
-        // 更新当前Tab的文档信息
+        // Update current Tab's document info
         tabsNotifier.updateTabContent(activeIndex, updatedDocument.content);
       }
     }
   }
 
   void _handleExportDocument() {
-    // 获取当前文档或创建临时文档
+    // Get current document or create temporary document
     final currentDoc = ref.read(currentDocumentProvider);
+    final l10n = AppLocalizations.of(context)!;
     final documentToExport = currentDoc ?? Document(
       id: 'temp_export',
-      title: '未命名文档',
+      title: l10n.untitledDocument,
       content: _currentContent,
       type: DocumentType.markdown,
       createdAt: DateTime.now(),

@@ -115,7 +115,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
   /// 构建头部
   Widget _buildHeader(ThemeData theme) {
     String title = widget.title ?? 
-        (widget.type == FileDialogType.open ? '打开文档' : '保存文档');
+        (widget.type == FileDialogType.open ? 'Open Document' : 'Save Document');
 
     return Row(
       children: [
@@ -516,7 +516,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
             // 确认按钮
             FilledButton(
               onPressed: _canConfirm ? _handleConfirm : null,
-              child: Text(widget.type == FileDialogType.open ? '打开' : '保存'),
+              child: Text(widget.type == FileDialogType.open ? 'Open' : 'Save'),
             ),
           ],
         ),
@@ -538,7 +538,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     if (!_canConfirm) return;
 
     if (widget.type == FileDialogType.open) {
-      // 打开文档到Tab
+      // Open document to Tab
       if (_selectedDocument != null) {
         final tabsNotifier = ref.read(documentTabsProvider.notifier);
         tabsNotifier.openDocumentTab(_selectedDocument!);

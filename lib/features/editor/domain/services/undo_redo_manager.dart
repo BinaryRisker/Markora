@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 编辑器历史状态
+/// Editor history state
 class EditorHistoryState {
   const EditorHistoryState({
     required this.text,
@@ -36,70 +36,70 @@ class EditorHistoryState {
   int get hashCode => text.hashCode ^ selection.hashCode;
 }
 
-/// 撤销/重做管理器
+/// Undo/redo manager
 class UndoRedoManager {
   UndoRedoManager({
     this.maxHistoryLength = 100,
     Duration? mergeTimeThreshold,
   }) : mergeTimeThreshold = mergeTimeThreshold ?? const Duration(seconds: 1);
 
-  /// 最大历史记录长度
+  /// Maximum history length
   final int maxHistoryLength;
   
-  /// 合并操作的时间阈值
+  /// Time threshold for merging operations
   final Duration mergeTimeThreshold;
 
-  /// 历史记录栈
+  /// History stack
   final List<EditorHistoryState> _history = [];
   
-  /// 当前位置
+  /// Current position
   int _currentIndex = -1;
   
-  /// 是否正在应用撤销/重做操作
+  /// Whether applying undo/redo operation
   bool _isApplying = false;
 
-  /// 当前是否可以撤销
+  /// Whether can undo currently
   bool get canUndo => _currentIndex > 0;
 
-  /// 当前是否可以重做
+  /// Whether can redo currently
   bool get canRedo => _currentIndex < _history.length - 1;
 
-  /// 当前状态
+  /// Current state
   EditorHistoryState? get currentState => 
       _currentIndex >= 0 && _currentIndex < _history.length 
           ? _history[_currentIndex] 
           : null;
 
-  /// 历史记录数量
+  /// History count
   int get historyLength => _history.length;
 
-  /// 添加新状态
+  /// Add new state
   void addState(EditorHistoryState state) {
     if (_isApplying) return;
 
-    // 检查是否应该合并操作
+    // Check if operations should be merged
     if (_shouldMergeWithPrevious(state)) {
       _mergeWithPrevious(state);
       return;
     }
 
-    // 如果当前位置不在末尾，删除后面的历史记录
+    // If current position is not at the end, remove subsequent history
     if (_currentIndex < _history.length - 1) {
       _history.removeRange(_currentIndex + 1, _history.length);
     }
 
-    // 添加新状态
+    // Add new state
     _history.add(state);
     _currentIndex = _history.length - 1;
 
-    // 限制历史记录长度
+    // Limit history length
     if (_history.length > maxHistoryLength) {
       _history.removeAt(0);
       _currentIndex--;
     }
   }
 
-  /// 撤销操作
+  /// Undo operation
   EditorHistoryState? undo() {
     if (!canUndo) return null;
 
@@ -108,13 +108,13 @@ class UndoRedoManager {
     
     final state = _history[_currentIndex];
     
-    // 延迟重置标志，避免在应用状态时触发新的历史记录
+    // Delay resetting flag to avoid triggering new history when applying state
     Future.microtask(() => _isApplying = false);
     
     return state;
   }
 
-  /// 重做操作
+  /// Redo operation
   EditorHistoryState? redo() {
     if (!canRedo) return null;
 
@@ -129,53 +129,53 @@ class UndoRedoManager {
     return state;
   }
 
-  /// 清空历史记录
+  /// Clear history
   void clear() {
     _history.clear();
     _currentIndex = -1;
   }
 
-  /// 检查是否应该与前一个状态合并
+  /// Check if should merge with previous state
   bool _shouldMergeWithPrevious(EditorHistoryState state) {
     if (_history.isEmpty || _currentIndex < 0) return false;
 
     final previous = _history[_currentIndex];
     
-    // 检查时间间隔
+    // Check time interval
     final timeDiff = state.timestamp.difference(previous.timestamp);
     if (timeDiff > mergeTimeThreshold) return false;
 
-    // 检查文本变化是否为单字符编辑
+    // Check if text change is single character edit
     return _isSingleCharacterEdit(previous.text, state.text);
   }
 
-  /// 检查是否为单字符编辑
+  /// Check if is single character edit
   bool _isSingleCharacterEdit(String oldText, String newText) {
     final lengthDiff = (newText.length - oldText.length).abs();
     
-    // 只有单字符差异才考虑合并
+    // Only consider merging for single character difference
     if (lengthDiff != 1) return false;
 
-    // 检查是否为简单的插入或删除
+    // Check if is simple insertion or deletion
     if (newText.length > oldText.length) {
-      // 插入字符
+      // Insert character
       return newText.contains(oldText);
     } else {
-      // 删除字符
+      // Delete character
       return oldText.contains(newText);
     }
   }
 
-  /// 与前一个状态合并
+  /// Merge with previous state
   void _mergeWithPrevious(EditorHistoryState state) {
     if (_currentIndex >= 0 && _currentIndex < _history.length) {
       _history[_currentIndex] = state;
     }
   }
 
-  /// 获取调试信息
+  /// Get debug information
   String getDebugInfo() {
     return 'UndoRedoManager: ${_history.length} states, current: $_currentIndex, '
            'canUndo: $canUndo, canRedo: $canRedo';
   }
-} 
+}

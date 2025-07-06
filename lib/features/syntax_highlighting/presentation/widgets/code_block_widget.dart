@@ -5,7 +5,7 @@ import '../../../../types/syntax_highlighting.dart';
 import '../../../syntax_highlighting/domain/services/syntax_parser.dart';
 import '../../../syntax_highlighting/data/syntax_themes.dart';
 
-/// 代码块渲染组件
+/// Code block rendering component
 class CodeBlockWidget extends StatefulWidget {
   const CodeBlockWidget({
     super.key,
@@ -15,16 +15,16 @@ class CodeBlockWidget extends StatefulWidget {
     this.onLanguageChanged,
   });
 
-  /// 代码块信息
+  /// Code block information
   final CodeBlock codeBlock;
   
-  /// 语法高亮主题
+  /// Syntax highlighting theme
   final SyntaxHighlightTheme? theme;
   
-  /// 语法高亮配置
+  /// Syntax highlighting configuration
   final SyntaxHighlightConfig config;
   
-  /// 语言变化回调
+  /// Language change callback
   final ValueChanged<ProgrammingLanguage?>? onLanguageChanged;
 
   @override
@@ -68,10 +68,10 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 代码块头部
+            // Code block header
             _buildHeader(theme),
             
-            // 代码内容
+            // Code content
             _buildCodeContent(theme),
           ],
         ),
@@ -79,7 +79,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
     );
   }
 
-  /// 构建代码块头部
+  /// Build code block header
   Widget _buildHeader(SyntaxHighlightTheme theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -98,10 +98,10 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
       ),
       child: Row(
         children: [
-          // 语言标识
+          // Language label
           _buildLanguageLabel(theme),
           
-          // 文件名（如果有）
+          // File name (if any)
           if (widget.codeBlock.fileName != null) ...[
             const SizedBox(width: 12),
             Icon(
@@ -122,7 +122,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
           
           const Spacer(),
           
-          // 复制按钮
+          // Copy button
           if (widget.codeBlock.showCopyButton)
             _buildCopyButton(theme),
         ],
@@ -130,7 +130,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
     );
   }
 
-  /// 构建语言标识
+  /// Build language label
   Widget _buildLanguageLabel(SyntaxHighlightTheme theme) {
     final language = widget.codeBlock.language;
     final displayName = language?.displayName ?? 'Plain Text';
@@ -153,13 +153,13 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
     );
   }
 
-  /// 构建复制按钮
+  /// Build copy button
   Widget _buildCopyButton(SyntaxHighlightTheme theme) {
     return AnimatedOpacity(
       opacity: _isHovering ? 1.0 : 0.5,
       duration: const Duration(milliseconds: 200),
       child: Tooltip(
-        message: '复制代码',
+        message: 'Copy Code',
         child: IconButton(
           icon: const Icon(Icons.content_copy),
           iconSize: 16,
@@ -177,7 +177,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
     );
   }
 
-  /// 构建代码内容
+  /// Build code content
   Widget _buildCodeContent(SyntaxHighlightTheme theme) {
     if (!widget.config.enableSyntaxHighlighting) {
       return _buildPlainTextContent(theme);
@@ -194,11 +194,11 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 行号
+          // Line numbers
           if (widget.config.enableLineNumbers && widget.codeBlock.showLineNumbers)
             _buildLineNumbers(theme),
           
-          // 代码内容
+          // Code content
           Expanded(
             child: _buildSyntaxHighlightedContent(syntaxElements, theme),
           ),
@@ -207,7 +207,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
     );
   }
 
-  /// 构建普通文本内容
+  /// Build plain text content
   Widget _buildPlainTextContent(SyntaxHighlightTheme theme) {
     return Container(
       width: double.infinity,
@@ -215,11 +215,11 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 行号
+          // Line numbers
           if (widget.config.enableLineNumbers && widget.codeBlock.showLineNumbers)
             _buildLineNumbers(theme),
           
-          // 文本内容
+          // Text content
           Expanded(
             child: SelectableText(
               widget.codeBlock.content,
@@ -236,7 +236,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
     );
   }
 
-  /// 构建行号
+  /// Build line numbers
   Widget _buildLineNumbers(SyntaxHighlightTheme theme) {
     final lines = widget.codeBlock.content.split('\n');
     final lineCount = lines.length;
@@ -263,7 +263,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
     );
   }
 
-  /// 构建语法高亮内容
+  /// Build syntax highlighted content
   Widget _buildSyntaxHighlightedContent(List<SyntaxElement> elements, SyntaxHighlightTheme theme) {
     return Scrollbar(
       controller: _scrollController,
@@ -294,14 +294,14 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
     );
   }
 
-  /// 复制到剪贴板
+  /// Copy to clipboard
   void _copyToClipboard() async {
     await Clipboard.setData(ClipboardData(text: widget.codeBlock.content));
     
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('代码已复制到剪贴板'),
+          content: Text('Code copied to clipboard'),
           duration: Duration(seconds: 2),
         ),
       );
@@ -309,7 +309,7 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
   }
 }
 
-/// 简化的代码块组件
+/// Simplified code block component
 class SimpleCodeBlock extends StatelessWidget {
   const SimpleCodeBlock({
     super.key,
@@ -320,19 +320,19 @@ class SimpleCodeBlock extends StatelessWidget {
     this.theme,
   });
 
-  /// 代码内容
+  /// Code content
   final String code;
   
-  /// 编程语言
+  /// Programming language
   final String? language;
   
-  /// 是否显示行号
+  /// Whether to show line numbers
   final bool showLineNumbers;
   
-  /// 是否显示复制按钮
+  /// Whether to show copy button
   final bool showCopyButton;
   
-  /// 语法高亮主题
+  /// Syntax highlighting theme
   final SyntaxHighlightTheme? theme;
 
   @override
@@ -353,4 +353,4 @@ class SimpleCodeBlock extends StatelessWidget {
       theme: theme,
     );
   }
-} 
+}

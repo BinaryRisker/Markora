@@ -7,13 +7,14 @@ import '../../../../core/themes/app_theme.dart';
 import '../../../../types/editor.dart';
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 
 import '../../../document/presentation/providers/document_providers.dart';
 import '../../domain/services/undo_redo_manager.dart';
 import '../../domain/services/global_editor_manager.dart';
 import '../../../../main.dart';
 
-/// Markdown编辑器组件
+/// Markdown editor component
 class MarkdownEditor extends ConsumerStatefulWidget {
   const MarkdownEditor({
     super.key,
@@ -23,16 +24,16 @@ class MarkdownEditor extends ConsumerStatefulWidget {
     this.readOnly = false,
   });
 
-  /// 初始内容
+  /// Initial content
   final String initialContent;
   
-  /// 内容变化回调
+  /// Content change callback
   final ValueChanged<String>? onChanged;
   
-  /// 光标位置变化回调
+  /// Cursor position change callback
   final ValueChanged<CursorPosition>? onCursorPositionChanged;
   
-  /// 是否只读
+  /// Whether read-only
   final bool readOnly;
 
   @override
@@ -54,11 +55,11 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     _focusNode = FocusNode();
     _undoRedoManager = UndoRedoManager();
     
-    // 初始化文本编辑器控制器
+    // Initialize text editor controller
     _controller = TextEditingController(text: widget.initialContent);
     _lastSyncedContent = widget.initialContent;
     
-    // 添加初始状态到撤销管理器
+    // Add initial state to undo manager
     if (widget.initialContent.isNotEmpty) {
       _undoRedoManager.addState(EditorHistoryState(
         text: widget.initialContent,
@@ -67,10 +68,10 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       ));
     }
     
-    // 监听文本变化
+    // Listen to text changes
     _controller.addListener(_onTextChanged);
     
-    // 延迟注册到全局编辑器管理器，确保 ref 可用
+    // Delay registration to global editor manager, ensure ref is available
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _registerToGlobalManager();
     });
@@ -79,7 +80,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
   @override
   void didUpdateWidget(MarkdownEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 当组件更新时，检查是否需要更新全局管理器的活跃标签页
+    // When component updates, check if need to update active tab in global manager
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateActiveTab();
     });
@@ -94,7 +95,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     super.dispose();
   }
 
-  /// 注册到全局编辑器管理器
+  /// Register to global editor manager
   void _registerToGlobalManager() {
     if (mounted) {
       final globalManager = ref.read(globalEditorManagerProvider);
@@ -107,13 +108,13 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           undoCallback: _undo,
           redoCallback: _redo,
         );
-        // 设置为活跃标签页
+        // Set as active tab
         globalManager.setActiveTab(_tabId!);
       }
     }
   }
 
-  /// 从全局编辑器管理器注销
+  /// Unregister from global editor manager
   void _unregisterFromGlobalManager() {
     if (_tabId != null && mounted) {
       final globalManager = ref.read(globalEditorManagerProvider);
@@ -121,30 +122,30 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
   
-  /// 更新活跃标签页
+  /// Update active tab
   void _updateActiveTab() {
     if (mounted) {
       final activeDocument = ref.read(activeDocumentProvider);
       if (activeDocument != null && _tabId != activeDocument.id) {
-        // 标签页发生了变化，重新注册
+        // Tab has changed, re-register
         _unregisterFromGlobalManager();
         _registerToGlobalManager();
       } else if (activeDocument != null && _tabId == activeDocument.id) {
-        // 确保当前标签页是活跃的
+        // Ensure current tab is active
         final globalManager = ref.read(globalEditorManagerProvider);
         globalManager.setActiveTab(_tabId!);
       }
     }
   }
 
-  /// 文本变化处理
+  /// Text change handling
   void _onTextChanged() {
     final text = _controller.text;
     
-    // 通知外部回调
+    // Notify external callback
     widget.onChanged?.call(text);
     
-    // 更新当前激活的Tab内容
+    // Update current active tab content
     final tabsNotifier = ref.read(documentTabsProvider.notifier);
     final activeIndex = tabsNotifier.activeTabIndex;
     
@@ -153,7 +154,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       _lastSyncedContent = text;
     }
     
-    // 添加到撤销历史（如果不是撤销/重做操作）
+    // Add to undo history (if not undo/redo operation)
     if (!_isApplyingUndoRedo) {
       _undoRedoManager.addState(EditorHistoryState(
         text: text,
@@ -162,7 +163,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       ));
     }
     
-    // 计算光标位置
+    // Calculate cursor position
     final selection = _controller.selection;
     if (selection.isValid) {
       final lines = text.substring(0, selection.start).split('\n');
@@ -178,26 +179,26 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       widget.onCursorPositionChanged?.call(position);
     }
     
-    // 通知全局编辑器管理器状态更新
+    // Notify global editor manager of state update
     if (_tabId != null && mounted) {
       final globalManager = ref.read(globalEditorManagerProvider);
       globalManager.notifyContentChanged(_tabId!, text, _controller.selection);
     }
   }
 
-  /// 同步Tab内容到编辑器
+  /// Sync tab content to editor
   void _syncTabContent() {
     final activeDocument = ref.watch(activeDocumentProvider);
     
     if (activeDocument != null) {
       final content = activeDocument.content;
       if (content != _controller.text) {
-        // 使用addPostFrameCallback避免在build期间调用setState
+        // Use addPostFrameCallback to avoid calling setState during build
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             _lastSyncedContent = content;
             _controller.text = content;
-            // 保持光标位置在末尾
+            // Keep cursor position at the end
             _controller.selection = TextSelection.collapsed(
               offset: content.length,
             );
@@ -205,7 +206,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
         });
       }
     } else {
-      // 没有激活文档时清空编辑器
+      // Clear editor when no active document
       if (_controller.text.isNotEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
@@ -219,7 +220,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
 
   @override
   Widget build(BuildContext context) {
-    // 监听激活文档变化并同步内容
+    // Listen to active document changes and sync content
     _syncTabContent();
     
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -236,10 +237,10 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       ),
       child: Column(
         children: [
-          // 编辑器工具栏
+          // Editor toolbar
           _buildEditorToolbar(),
           
-          // 代码编辑器
+          // Code editor
           Expanded(
             child: activeDocument != null 
                 ? _buildCodeEditor(isDark, editorTheme)
@@ -250,7 +251,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     );
   }
 
-  /// 构建空状态
+  /// Build empty state
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -263,14 +264,14 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           ),
           const SizedBox(height: 16),
           Text(
-            '没有打开的文档',
+            'No open documents',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            '点击上方的 + 按钮创建新文档，或从文件菜单打开现有文档',
+            'Click the + button above to create a new document, or open an existing document from the file menu',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
             ),
@@ -281,7 +282,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     );
   }
 
-  /// 构建编辑器工具栏
+  /// Build editor toolbar
   Widget _buildEditorToolbar() {
     final activeDocument = ref.watch(activeDocumentProvider);
     final isEnabled = activeDocument != null;
@@ -300,65 +301,65 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       child: Row(
         children: [
           const SizedBox(width: 8),
-          // 撤销/重做按钮
+          // Undo/Redo buttons
           _buildToolbarButton(
             icon: Icons.undo,
-            tooltip: '撤销 (Ctrl+Z)',
+            tooltip: 'Undo (Ctrl+Z)',
             onPressed: isEnabled && _undoRedoManager.canUndo ? _undo : null,
           ),
           _buildToolbarButton(
             icon: Icons.redo,
-            tooltip: '重做 (Ctrl+Y)',
+            tooltip: 'Redo (Ctrl+Y)',
             onPressed: isEnabled && _undoRedoManager.canRedo ? _redo : null,
           ),
           const VerticalDivider(width: 1),
           _buildToolbarButton(
             icon: Icons.title,
-            tooltip: '标题',
+            tooltip: 'Heading',
             onPressed: isEnabled ? () => _insertHeading() : null,
           ),
           _buildToolbarButton(
             icon: Icons.link,
-            tooltip: '链接',
+            tooltip: 'Link',
             onPressed: isEnabled ? () => _insertLink() : null,
           ),
           _buildToolbarButton(
             icon: Icons.image,
-            tooltip: '图片',
+            tooltip: 'Image',
             onPressed: isEnabled ? () => _insertImage() : null,
           ),
           const VerticalDivider(width: 1),
           _buildToolbarButton(
             icon: Icons.code,
-            tooltip: '代码块',
+            tooltip: 'Code block',
             onPressed: isEnabled ? () => _insertCodeBlock() : null,
           ),
           _buildToolbarButton(
             icon: Icons.functions,
-            tooltip: '数学公式',
+            tooltip: 'Math formula',
             onPressed: isEnabled ? () => _insertMathFormula() : null,
           ),
-          // 插件工具栏按钮
+          // Plugin toolbar buttons
           ..._buildPluginToolbarButtons(isEnabled),
           _buildToolbarButton(
             icon: Icons.format_quote,
-            tooltip: '引用',
+            tooltip: 'Quote',
             onPressed: isEnabled ? () => _insertQuote() : null,
           ),
           _buildToolbarButton(
             icon: Icons.format_list_bulleted,
-            tooltip: '无序列表',
+            tooltip: 'Unordered list',
             onPressed: isEnabled ? () => _insertList(false) : null,
           ),
           _buildToolbarButton(
             icon: Icons.format_list_numbered,
-            tooltip: '有序列表',
+            tooltip: 'Ordered list',
             onPressed: isEnabled ? () => _insertList(true) : null,
           ),
           const Spacer(),
           if (isEnabled) ...[
             Text(
-              '行 ${_getCurrentLine()} 列 ${_getCurrentColumn()}',
+              'Line ${_getCurrentLine()} Column ${_getCurrentColumn()}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(width: 8),
@@ -368,15 +369,15 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     );
   }
 
-  /// 构建插件工具栏按钮
+  /// Build plugin toolbar buttons
   List<Widget> _buildPluginToolbarButtons(bool isEnabled) {
     final actions = globalToolbarRegistry.actions;
     final widgets = <Widget>[];
     
-    // 调试信息
-    debugPrint('工具栏注册表中的动作数量: ${actions.length}');
+    // Debug info
+    debugPrint('Number of actions in toolbar registry: ${actions.length}');
     for (final entry in actions.entries) {
-      debugPrint('动作ID: ${entry.key}, 标题: ${entry.value.action.title}');
+      debugPrint('Action ID: ${entry.key}, Title: ${entry.value.action.title}');
     }
     
     for (final actionItem in actions.values) {
@@ -385,8 +386,8 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
         icon: _getIconFromString(action.icon),
         tooltip: action.title,
         onPressed: isEnabled ? () {
-          // 执行插件动作
-          debugPrint('执行插件动作: ${action.title}');
+          // Execute plugin action
+          debugPrint('Execute plugin action: ${action.title}');
           actionItem.callback();
         } : null,
       ));
@@ -399,7 +400,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     return widgets;
   }
   
-  /// 将字符串转换为IconData
+  /// Convert string to IconData
   IconData _getIconFromString(String? iconName) {
     if (iconName == null) return Icons.extension;
     
@@ -425,7 +426,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
 
-  /// 构建工具栏按钮
+  /// Build toolbar button
   Widget _buildToolbarButton({
     required IconData icon,
     required String tooltip,
@@ -448,7 +449,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     );
   }
 
-  /// 构建代码编辑器
+  /// Build code editor
   Widget _buildCodeEditor(bool isDark, EditorTheme editorTheme) {
     return Container(
       padding: const EdgeInsets.all(12),
@@ -468,9 +469,9 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
             color: editorTheme.textColor,
             height: 1.5,
           ),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: InputBorder.none,
-            hintText: '在此输入Markdown内容...',
+            hintText: AppLocalizations.of(context)!.enterMarkdownContent,
             contentPadding: EdgeInsets.zero,
           ),
           cursorColor: editorTheme.cursorColor,
@@ -480,14 +481,14 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           keyboardType: TextInputType.multiline,
           textInputAction: TextInputAction.newline,
           onChanged: (value) {
-            // 由_onTextChanged处理
+            // Handled by _onTextChanged
           },
         ),
       ),
     );
   }
 
-  /// 处理键盘事件
+  /// Handle keyboard events
   void _handleKeyEvent(RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       final isCtrlPressed = event.logicalKey == LogicalKeyboardKey.controlLeft ||
@@ -504,7 +505,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
 
-  /// 撤销操作
+  /// Undo operation
   void _undo() {
     final state = _undoRedoManager.undo();
     if (state != null) {
@@ -512,7 +513,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
 
-  /// 重做操作
+  /// Redo operation
   void _redo() {
     final state = _undoRedoManager.redo();
     if (state != null) {
@@ -520,20 +521,20 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
 
-  /// 应用编辑器状态
+  /// Apply editor state
   void _applyEditorState(EditorHistoryState state) {
     _isApplyingUndoRedo = true;
     
-    // 临时移除监听器，避免触发_onTextChanged
+    // Temporarily remove listener to avoid triggering _onTextChanged
     _controller.removeListener(_onTextChanged);
     
     _controller.text = state.text;
     _controller.selection = state.selection;
     
-    // 重新添加监听器
+    // Re-add listener
     _controller.addListener(_onTextChanged);
     
-    // 更新Tab内容
+    // Update tab content
     final tabsNotifier = ref.read(documentTabsProvider.notifier);
     final activeIndex = tabsNotifier.activeTabIndex;
     if (activeIndex >= 0) {
@@ -541,11 +542,11 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
     _lastSyncedContent = state.text;
     
-    // 立即重置标志
+    // Immediately reset flag
     _isApplyingUndoRedo = false;
   }
 
-  /// 插入Markdown格式
+  /// Insert Markdown format
   void _insertMarkdown(String prefix, String suffix) {
     final selection = _controller.selection;
     final text = _controller.text;
@@ -554,12 +555,12 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       final selectedText = text.substring(selection.start, selection.end);
       final newText = '$prefix$selectedText$suffix';
       
-      // 替换选中的文本
+      // Replace selected text
       final beforeSelection = text.substring(0, selection.start);
       final afterSelection = text.substring(selection.end);
       _controller.text = beforeSelection + newText + afterSelection;
       
-      // 设置新的光标位置
+      // Set new cursor position
       if (selectedText.isEmpty) {
         _controller.selection = material.TextSelection.collapsed(
           offset: selection.start + prefix.length,
@@ -573,7 +574,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
 
-  /// 插入标题
+  /// Insert heading
   void _insertHeading() {
     final selection = _controller.selection;
     final text = _controller.text;
@@ -608,17 +609,17 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
 
-  /// 插入链接
+  /// Insert link
   void _insertLink() {
     _insertMarkdown('[', '](url)');
   }
 
-  /// 插入图片
+  /// Insert image
   void _insertImage() {
     _insertMarkdown('![', '](url)');
   }
 
-  /// 插入代码块
+  /// Insert code block
   void _insertCodeBlock() {
     final selection = _controller.selection;
     final text = _controller.text;
@@ -627,21 +628,21 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       final selectedText = text.substring(selection.start, selection.end);
       final newText = '```\n$selectedText\n```';
       
-      // 替换选中的文本
+      // Replace selected text
       final beforeSelection = text.substring(0, selection.start);
       final afterSelection = text.substring(selection.end);
       _controller.text = beforeSelection + newText + afterSelection;
     }
   }
 
-  /// 插入数学公式
+  /// Insert math formula
   void _insertMathFormula() {
     _showMathFormulaDialog();
   }
 
 
 
-  /// 显示数学公式输入对话框
+  /// Show math formula input dialog
   void _showMathFormulaDialog() {
     showDialog<String>(
       context: context,
@@ -659,12 +660,12 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
               newText = '\$\$\n${formulaText}\n\$\$';
             }
             
-            // 替换选中的文本
+            // Replace selected text
             final beforeSelection = _controller.text.substring(0, selection.start);
             final afterSelection = _controller.text.substring(selection.end);
             _controller.text = beforeSelection + newText + afterSelection;
             
-            // 设置新的光标位置
+            // Set new cursor position
             if (formulaText.isEmpty) {
               final cursorOffset = isInline ? 1 : 3;
               _controller.selection = TextSelection.collapsed(
@@ -685,7 +686,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
 
 
 
-  /// 插入引用
+  /// Insert quote
   void _insertQuote() {
     final selection = _controller.selection;
     final text = _controller.text;
@@ -705,7 +706,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
 
-  /// 插入列表
+  /// Insert list
   void _insertList(bool ordered) {
     final selection = _controller.selection;
     final text = _controller.text;
@@ -726,7 +727,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
 
-  /// 获取当前行号
+  /// Get current line number
   int _getCurrentLine() {
     final selection = _controller.selection;
     if (selection.isValid) {
@@ -735,7 +736,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     return 1;
   }
 
-  /// 获取当前列号
+  /// Get current column number
   int _getCurrentColumn() {
     final selection = _controller.selection;
     if (selection.isValid) {
@@ -746,7 +747,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
   }
 }
 
-/// 数学公式输入对话框
+/// Math formula input dialog
 class _MathFormulaDialog extends StatefulWidget {
   const _MathFormulaDialog({
     required this.onInsert,
@@ -779,7 +780,7 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
 
   void _onTextChanged() {
     setState(() {
-      // 触发重建以更新预览
+      // Trigger rebuild to update preview
     });
   }
 
@@ -793,20 +794,20 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 标题
+            // Title
             Text(
-              '插入数学公式',
+              AppLocalizations.of(context)!.insertMathFormula,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
             
-            // 公式类型选择
+            // Formula type selection
             Row(
               children: [
-                Text('公式类型: ', style: Theme.of(context).textTheme.bodyMedium),
+                Text(AppLocalizations.of(context)!.formulaType, style: Theme.of(context).textTheme.bodyMedium),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                  label: const Text('行内公式'),
+                  label: Text(AppLocalizations.of(context)!.inlineFormulaOption),
                   selected: _isInline,
                   onSelected: (selected) {
                     setState(() {
@@ -816,7 +817,7 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
                 ),
                 const SizedBox(width: 8),
                 ChoiceChip(
-                  label: const Text('块级公式'),
+                  label: Text(AppLocalizations.of(context)!.blockFormulaOption),
                   selected: !_isInline,
                   onSelected: (selected) {
                     setState(() {
@@ -828,31 +829,31 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
             ),
             const SizedBox(height: 16),
             
-            // LaTeX输入框
+            // LaTeX input field
             TextField(
               controller: _controller,
-              decoration: const InputDecoration(
-                labelText: 'LaTeX 公式',
-                hintText: '例如: E = mc^2',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.latexFormula,
+                hintText: AppLocalizations.of(context)!.formulaExample,
+                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
             const SizedBox(height: 16),
             
-            // 常用公式示例
-            Text('常用公式:', style: Theme.of(context).textTheme.bodyMedium),
+            // Common formula examples
+            Text(AppLocalizations.of(context)!.commonFormulas, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 8),
             Expanded(
               child: Row(
                 children: [
-                  // 示例列表
+                  // Examples list
                   Expanded(
                     flex: 2,
                     child: _buildExamplesList(),
                   ),
                   const SizedBox(width: 16),
-                  // 预览
+                  // Preview
                   Expanded(
                     flex: 3,
                     child: _buildPreview(),
@@ -862,13 +863,13 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
             ),
             const SizedBox(height: 16),
             
-            // 按钮
+            // Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('取消'),
+                  child: Text(AppLocalizations.of(context)!.cancel),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
@@ -878,7 +879,7 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
                           Navigator.of(context).pop();
                         }
                       : null,
-                  child: const Text('插入'),
+                  child: Text(AppLocalizations.of(context)!.insert),
                 ),
               ],
             ),
@@ -926,8 +927,8 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
           border: Border.all(color: Theme.of(context).dividerColor),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Center(
-          child: Text('预览将在这里显示'),
+        child: Center(
+          child: Text(AppLocalizations.of(context)!.previewWillBeShownHere),
         ),
       );
     }
@@ -949,7 +950,7 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
           endIndex: _controller.text.trim().length,
         ),
         onError: (error) {
-          // 错误在组件内部处理
+          // Error handled internally by component
         },
       ),
     );

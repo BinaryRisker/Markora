@@ -3,70 +3,70 @@ import 'package:hive/hive.dart';
 
 part 'app_settings.g.dart';
 
-/// 应用设置实体
+/// Application settings entity
 @HiveType(typeId: 1)
 class AppSettings {
-  /// 主题模式
+  /// Theme mode
   @HiveField(0)
   final ThemeMode themeMode;
 
-  /// 编辑器主题
+  /// Editor theme
   @HiveField(1)
   final String editorTheme;
 
-  /// 字体大小
+  /// Font size
   @HiveField(2)
   final double fontSize;
 
-  /// 显示行号
+  /// Show line numbers
   @HiveField(3)
   final bool showLineNumbers;
 
-  /// 自动换行
+  /// Word wrap
   @HiveField(4)
   final bool wordWrap;
 
-  /// 默认视图模式
+  /// Default view mode
   @HiveField(5)
   final String defaultViewMode;
 
-  /// 自动保存
+  /// Auto save
   @HiveField(6)
   final bool autoSave;
 
-  /// 自动保存间隔（秒）
+  /// Auto save interval (seconds)
   @HiveField(7)
   final int autoSaveInterval;
 
-  /// 实时预览
+  /// Live preview
   @HiveField(8)
   final bool livePreview;
 
-  /// 语言设置
+  /// Language setting
   @HiveField(9)
   final String language;
 
-  /// 分屏比例
+  /// Split ratio
   @HiveField(10)
   final double splitRatio;
 
-  /// 启用拼写检查
+  /// Enable spell check
   @HiveField(11)
   final bool enableSpellCheck;
 
-  /// 启用语法检查
+  /// Enable syntax check
   @HiveField(12)
   final bool enableLinting;
 
-  /// 自动完成
+  /// Auto complete
   @HiveField(13)
   final bool enableAutoComplete;
 
-  /// Tab大小
+  /// Tab size
   @HiveField(14)
   final int tabSize;
 
-  /// 使用空格代替Tab
+  /// Use spaces instead of tabs
   @HiveField(15)
   final bool useSpacesForTab;
 
@@ -89,9 +89,23 @@ class AppSettings {
     required this.useSpacesForTab,
   });
 
-  /// 默认设置
+  /// Default settings
   factory AppSettings.defaultSettings() {
-    return const AppSettings(
+    // Detect system language, default to Chinese if system is Chinese, otherwise English
+    String defaultLanguage = 'zh'; // Default to Chinese
+    try {
+      final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
+      if (systemLocale.languageCode == 'zh') {
+        defaultLanguage = 'zh';
+      } else {
+        defaultLanguage = 'en';
+      }
+    } catch (e) {
+      // If detection fails, use Chinese as default
+      defaultLanguage = 'zh';
+    }
+    
+    return AppSettings(
       themeMode: ThemeMode.system,
       editorTheme: 'VS Code Light',
       fontSize: 14.0,
@@ -101,7 +115,7 @@ class AppSettings {
       autoSave: true,
       autoSaveInterval: 30,
       livePreview: true,
-      language: 'zh-CN',
+      language: defaultLanguage,
       splitRatio: 0.5,
       enableSpellCheck: false,
       enableLinting: true,
@@ -111,7 +125,7 @@ class AppSettings {
     );
   }
 
-  /// 复制并修改
+  /// Copy with modifications
   AppSettings copyWith({
     ThemeMode? themeMode,
     String? editorTheme,
@@ -150,7 +164,7 @@ class AppSettings {
     );
   }
 
-  /// 转换为JSON
+  /// Convert to JSON
   Map<String, dynamic> toJson() {
     return {
       'themeMode': themeMode.name,
@@ -172,7 +186,7 @@ class AppSettings {
     };
   }
 
-  /// 从JSON创建
+  /// Create from JSON
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     return AppSettings(
       themeMode: ThemeMode.values.firstWhere(
@@ -187,7 +201,7 @@ class AppSettings {
       autoSave: json['autoSave'] ?? true,
       autoSaveInterval: json['autoSaveInterval'] ?? 30,
       livePreview: json['livePreview'] ?? true,
-      language: json['language'] ?? 'zh-CN',
+      language: json['language'] ?? 'en',
       splitRatio: (json['splitRatio'] ?? 0.5).toDouble(),
       enableSpellCheck: json['enableSpellCheck'] ?? false,
       enableLinting: json['enableLinting'] ?? true,
@@ -264,7 +278,7 @@ class AppSettings {
   }
 }
 
-/// ThemeMode的Hive适配器
+/// Hive adapter for ThemeMode
 class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
   @override
   final int typeId = 2;
@@ -279,4 +293,4 @@ class ThemeModeAdapter extends TypeAdapter<ThemeMode> {
   void write(BinaryWriter writer, ThemeMode obj) {
     writer.writeByte(obj.index);
   }
-} 
+}

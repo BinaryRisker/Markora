@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../types/plugin.dart';
 import '../providers/plugin_providers.dart';
 
-/// 插件过滤器组件
+/// Plugin filter component
 class PluginFilters extends ConsumerWidget {
   const PluginFilters({super.key});
   
@@ -21,15 +21,15 @@ class PluginFilters extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '过滤和排序',
+              'Filter and Sort',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 12),
             
-            // 过滤器行
+            // Filter row
             Row(
               children: [
-                // 类型过滤
+                // Type filter
                 Expanded(
                   child: _TypeFilterDropdown(
                     value: typeFilter,
@@ -41,7 +41,7 @@ class PluginFilters extends ConsumerWidget {
                 
                 const SizedBox(width: 12),
                 
-                // 状态过滤
+                // Status filter
                 Expanded(
                   child: _StatusFilterDropdown(
                     value: statusFilter,
@@ -53,7 +53,7 @@ class PluginFilters extends ConsumerWidget {
                 
                 const SizedBox(width: 12),
                 
-                // 排序方式
+                // Sort method
                 Expanded(
                   child: _SortDropdown(
                     value: sortBy,
@@ -67,7 +67,7 @@ class PluginFilters extends ConsumerWidget {
                 
                 const SizedBox(width: 8),
                 
-                // 排序方向
+                // Sort direction
                 IconButton(
                   onPressed: () {
                     ref.read(pluginSortAscendingProvider.notifier).state = !sortAscending;
@@ -75,19 +75,19 @@ class PluginFilters extends ConsumerWidget {
                   icon: Icon(
                     sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
                   ),
-                  tooltip: sortAscending ? '升序' : '降序',
+                  tooltip: sortAscending ? 'Ascending' : 'Descending',
                 ),
               ],
             ),
             
             const SizedBox(height: 8),
             
-            // 快速过滤按钮
+            // Quick filter buttons
             Wrap(
               spacing: 8,
               children: [
                 _QuickFilterChip(
-                  label: '全部',
+                  label: 'All',
                   isSelected: typeFilter == null && statusFilter == null,
                   onTap: () {
                     ref.read(pluginTypeFilterProvider.notifier).state = null;
@@ -95,28 +95,28 @@ class PluginFilters extends ConsumerWidget {
                   },
                 ),
                 _QuickFilterChip(
-                  label: '已启用',
+                  label: 'Enabled',
                   isSelected: statusFilter == PluginStatus.enabled,
                   onTap: () {
                     ref.read(pluginStatusFilterProvider.notifier).state = PluginStatus.enabled;
                   },
                 ),
                 _QuickFilterChip(
-                  label: '语法插件',
+                  label: 'Syntax',
                   isSelected: typeFilter == PluginType.syntax,
                   onTap: () {
                     ref.read(pluginTypeFilterProvider.notifier).state = PluginType.syntax;
                   },
                 ),
                 _QuickFilterChip(
-                  label: '主题插件',
+                  label: 'Theme',
                   isSelected: typeFilter == PluginType.theme,
                   onTap: () {
                     ref.read(pluginTypeFilterProvider.notifier).state = PluginType.theme;
                   },
                 ),
                 _QuickFilterChip(
-                  label: '工具插件',
+                  label: 'Tool',
                   isSelected: typeFilter == PluginType.tool,
                   onTap: () {
                     ref.read(pluginTypeFilterProvider.notifier).state = PluginType.tool;
@@ -131,7 +131,7 @@ class PluginFilters extends ConsumerWidget {
   }
 }
 
-/// 类型过滤下拉框
+/// Type filter dropdown
 class _TypeFilterDropdown extends StatelessWidget {
   const _TypeFilterDropdown({
     required this.value,
@@ -146,14 +146,14 @@ class _TypeFilterDropdown extends StatelessWidget {
     return DropdownButtonFormField<PluginType?>(
       value: value,
       decoration: const InputDecoration(
-        labelText: '插件类型',
+        labelText: 'Plugin Type',
         border: OutlineInputBorder(),
         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       items: [
         const DropdownMenuItem<PluginType?>(
           value: null,
-          child: Text('全部类型'),
+          child: Text('All Types'),
         ),
         ...PluginType.values.map((type) => DropdownMenuItem(
           value: type,
@@ -186,6 +186,8 @@ class _TypeFilterDropdown extends StatelessWidget {
         return Icons.build;
       case PluginType.widget:
         return Icons.widgets;
+      case PluginType.component:
+        return Icons.view_module;
       case PluginType.exporter:
         return Icons.upload;
       case PluginType.integration:
@@ -196,7 +198,7 @@ class _TypeFilterDropdown extends StatelessWidget {
   }
 }
 
-/// 状态过滤下拉框
+/// Status filter dropdown
 class _StatusFilterDropdown extends StatelessWidget {
   const _StatusFilterDropdown({
     required this.value,
@@ -211,14 +213,14 @@ class _StatusFilterDropdown extends StatelessWidget {
     return DropdownButtonFormField<PluginStatus?>(
       value: value,
       decoration: const InputDecoration(
-        labelText: '插件状态',
+        labelText: 'Plugin Status',
         border: OutlineInputBorder(),
         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       items: [
         const DropdownMenuItem<PluginStatus?>(
           value: null,
-          child: Text('全部状态'),
+          child: Text('All Status'),
         ),
         ...PluginStatus.values.map((status) => DropdownMenuItem(
           value: status,
@@ -251,7 +253,7 @@ class _StatusFilterDropdown extends StatelessWidget {
   }
 }
 
-/// 排序下拉框
+/// Sort dropdown
 class _SortDropdown extends StatelessWidget {
   const _SortDropdown({
     required this.value,
@@ -266,7 +268,7 @@ class _SortDropdown extends StatelessWidget {
     return DropdownButtonFormField<PluginSortBy>(
       value: value,
       decoration: const InputDecoration(
-        labelText: '排序方式',
+        labelText: 'Sort By',
         border: OutlineInputBorder(),
         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
@@ -277,7 +279,7 @@ class _SortDropdown extends StatelessWidget {
             children: [
               Icon(Icons.sort_by_alpha, size: 16),
               SizedBox(width: 8),
-              Text('名称'),
+              Text('Name'),
             ],
           ),
         ),
@@ -287,7 +289,7 @@ class _SortDropdown extends StatelessWidget {
             children: [
               Icon(Icons.category, size: 16),
               SizedBox(width: 8),
-              Text('类型'),
+              Text('Type'),
             ],
           ),
         ),
@@ -297,7 +299,7 @@ class _SortDropdown extends StatelessWidget {
             children: [
               Icon(Icons.info, size: 16),
               SizedBox(width: 8),
-              Text('状态'),
+              Text('Status'),
             ],
           ),
         ),
@@ -307,7 +309,7 @@ class _SortDropdown extends StatelessWidget {
             children: [
               Icon(Icons.update, size: 16),
               SizedBox(width: 8),
-              Text('更新时间'),
+              Text('Last Updated'),
             ],
           ),
         ),
@@ -317,7 +319,7 @@ class _SortDropdown extends StatelessWidget {
             children: [
               Icon(Icons.person, size: 16),
               SizedBox(width: 8),
-              Text('作者'),
+              Text('Author'),
             ],
           ),
         ),
@@ -327,7 +329,7 @@ class _SortDropdown extends StatelessWidget {
   }
 }
 
-/// 快速过滤芯片
+/// Quick filter chip
 class _QuickFilterChip extends StatelessWidget {
   const _QuickFilterChip({
     required this.label,

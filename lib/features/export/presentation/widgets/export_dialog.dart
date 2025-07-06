@@ -7,7 +7,7 @@ import '../../domain/entities/export_settings.dart';
 import '../../domain/services/export_service.dart';
 import '../../../document/presentation/providers/document_providers.dart';
 
-/// 导出对话框
+/// Export dialog
 class ExportDialog extends ConsumerStatefulWidget {
   final Document document;
 
@@ -26,7 +26,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
   bool _isExporting = false;
   ExportProgress? _currentProgress;
 
-  // 导出设置
+  // Export settings
   PdfExportSettings _pdfSettings = const PdfExportSettings();
   HtmlExportSettings _htmlSettings = const HtmlExportSettings();
   ImageExportSettings _imageSettings = const ImageExportSettings();
@@ -57,12 +57,12 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 标题
+            // Title
             _buildHeader(theme),
             
             const SizedBox(height: 24),
             
-            // 主要内容
+            // Main content
             Expanded(
               child: _isExporting
                   ? _buildExportProgress(theme)
@@ -71,7 +71,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
             
             const SizedBox(height: 24),
             
-            // 底部按钮
+            // Bottom buttons
             _buildFooter(theme),
           ],
         ),
@@ -79,7 +79,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     );
   }
 
-  /// 构建头部
+  /// Build header
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
@@ -93,13 +93,13 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '导出文档',
+              'Export Document',
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             Text(
-              '将 "${widget.document.title}" 导出为其他格式',
+              'Export "${widget.document.title}" to other formats',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -110,42 +110,42 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
         IconButton(
           icon: Icon(PhosphorIconsRegular.x),
           onPressed: () => Navigator.of(context).pop(),
-          tooltip: '关闭',
+          tooltip: 'Close',
         ),
       ],
     );
   }
 
-  /// 构建导出设置
+  /// Build export settings
   Widget _buildExportSettings(ThemeData theme) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 格式选择
+          // Format selection
           _buildFormatSelection(theme),
           
           const SizedBox(height: 24),
           
-          // 文件名设置
+          // Filename settings
           _buildFileNameSection(theme),
           
           const SizedBox(height: 24),
           
-          // 格式特定设置
+          // Format-specific settings
           _buildFormatSpecificSettings(theme),
         ],
       ),
     );
   }
 
-  /// 构建格式选择
+  /// Build format selection
   Widget _buildFormatSelection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '导出格式',
+          'Export Format',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -191,7 +191,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                   });
                 }
               } : null,
-              tooltip: isSupported ? format.description : '此格式暂未支持',
+              tooltip: isSupported ? format.description : 'This format is not supported yet',
             );
           }).toList(),
         ),
@@ -199,13 +199,13 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     );
   }
 
-  /// 构建文件名部分
+  /// Build filename section
   Widget _buildFileNameSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '文件名',
+          'File Name',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -215,7 +215,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
         TextField(
           controller: _fileNameController,
           decoration: InputDecoration(
-            hintText: '输入文件名...',
+            hintText: 'Enter file name...',
             suffixText: '.${_selectedFormat.extension}',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -226,7 +226,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     );
   }
 
-  /// 构建格式特定设置
+  /// Build format-specific settings
   Widget _buildFormatSpecificSettings(ThemeData theme) {
     switch (_selectedFormat) {
       case ExportFormat.html:
@@ -241,13 +241,13 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     }
   }
 
-  /// 构建HTML设置
+  /// Build HTML settings
   Widget _buildHtmlSettings(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'HTML导出设置',
+          'HTML Export Settings',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -259,11 +259,11 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // 主题选择
+                // Theme selection
                 Row(
                   children: [
                     Expanded(
-                      child: Text('主题'),
+                      child: Text('Theme'),
                     ),
                     DropdownButton<String>(
                       value: _htmlSettings.theme,
@@ -283,9 +283,9 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 
                 const Divider(),
                 
-                // 功能开关
+                // Feature toggles
                 _buildSettingsSwitch(
-                  '包含目录',
+                  'Include Table of Contents',
                   _htmlSettings.includeTableOfContents,
                   (value) => setState(() {
                     _htmlSettings = _htmlSettings.copyWith(includeTableOfContents: value);
@@ -293,7 +293,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 ),
                 
                 _buildSettingsSwitch(
-                  '启用语法高亮',
+                  'Enable Syntax Highlighting',
                   _htmlSettings.enableSyntaxHighlighting,
                   (value) => setState(() {
                     _htmlSettings = _htmlSettings.copyWith(enableSyntaxHighlighting: value);
@@ -301,7 +301,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 ),
                 
                 _buildSettingsSwitch(
-                  '启用数学公式',
+                  'Enable Math Formulas',
                   _htmlSettings.enableMathJax,
                   (value) => setState(() {
                     _htmlSettings = _htmlSettings.copyWith(enableMathJax: value);
@@ -309,7 +309,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 ),
                 
                 _buildSettingsSwitch(
-                  '启用Mermaid图表',
+                  'Enable Mermaid Charts',
                   _htmlSettings.enableMermaid,
                   (value) => setState(() {
                     _htmlSettings = _htmlSettings.copyWith(enableMermaid: value);
@@ -317,7 +317,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 ),
                 
                 _buildSettingsSwitch(
-                  '响应式设计',
+                  'Responsive Design',
                   _htmlSettings.responsiveDesign,
                   (value) => setState(() {
                     _htmlSettings = _htmlSettings.copyWith(responsiveDesign: value);
@@ -331,13 +331,13 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     );
   }
 
-  /// 构建PDF设置
+  /// Build PDF settings
   Widget _buildPdfSettings(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'PDF导出设置',
+          'PDF Export Settings',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -349,10 +349,10 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // 页面大小
+                // Page size
                 Row(
                   children: [
-                    Expanded(child: Text('页面大小')),
+                    Expanded(child: Text('Page Size')),
                     DropdownButton<String>(
                       value: _pdfSettings.pageSize,
                       items: ['A4', 'A3', 'Letter', 'Legal'].map((size) => 
@@ -371,10 +371,10 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 
                 const Divider(),
                 
-                // 字体大小
+                // Font size
                 Row(
                   children: [
-                    Expanded(child: Text('字体大小')),
+                    Expanded(child: Text('Font Size')),
                     SizedBox(
                       width: 100,
                       child: Slider(
@@ -396,7 +396,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 
                 const Divider(),
                 
-                // 功能开关
+                // Feature toggles
                 _buildSettingsSwitch(
                   '包含目录',
                   _pdfSettings.includeTableOfContents,
@@ -428,7 +428,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     );
   }
 
-  /// 构建图像设置
+  /// Build image settings
   Widget _buildImageSettings(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,7 +466,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     );
   }
 
-  /// 构建DOCX设置
+  /// Build DOCX settings
   Widget _buildDocxSettings(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,7 +504,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     );
   }
 
-  /// 构建导出进度
+  /// Build export progress
   Widget _buildExportProgress(ThemeData theme) {
     return Center(
       child: Column(
@@ -558,7 +558,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
             ),
             const SizedBox(height: 8),
             Text(
-              _currentProgress?.errorMessage ?? '导出过程中出现错误',
+              _currentProgress?.errorMessage ?? 'An error occurred during export',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.error,
               ),
@@ -570,7 +570,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     );
   }
 
-  /// 构建底部按钮
+  /// Build bottom buttons
   Widget _buildFooter(ThemeData theme) {
     if (_isExporting) {
       return Row(
@@ -584,12 +584,12 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                   _currentProgress = null;
                 });
               },
-              child: const Text('重试'),
+              child: const Text('Retry'),
             ),
           if (_currentProgress?.isCompleted == true)
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('完成'),
+              child: const Text('Done'),
             ),
         ],
       );
@@ -597,34 +597,34 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
 
     return Row(
       children: [
-        // 导出预览
+        // Export preview
         TextButton.icon(
           icon: Icon(PhosphorIconsRegular.eye),
-          label: const Text('预览'),
+          label: const Text('Preview'),
           onPressed: () => _showPreview(),
         ),
         
         const Spacer(),
         
-        // 取消按钮
+        // Cancel button
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: const Text('Cancel'),
         ),
         
         const SizedBox(width: 12),
         
-        // 导出按钮
+        // Export button
         FilledButton.icon(
           icon: Icon(PhosphorIconsRegular.export),
-          label: const Text('开始导出'),
+          label: const Text('Start Export'),
           onPressed: _canExport() ? _startExport : null,
         ),
       ],
     );
   }
 
-  /// 构建设置开关
+  /// Build settings switch
   Widget _buildSettingsSwitch(String title, bool value, ValueChanged<bool> onChanged) {
     return Row(
       children: [
@@ -637,7 +637,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     );
   }
 
-  /// 获取格式图标
+  /// Get format icon
   IconData _getFormatIcon(ExportFormat format) {
     switch (format) {
       case ExportFormat.html:
@@ -652,42 +652,42 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     }
   }
 
-  /// 获取建议的文件名
+  /// Get suggested filename
   String _getSuggestedFileName() {
     final baseName = widget.document.title.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
     return baseName;
   }
 
-  /// 是否可以导出
+  /// Whether export is possible
   bool _canExport() {
     return _fileNameController.text.trim().isNotEmpty &&
            ExportServiceImpl().isFormatSupported(_selectedFormat);
   }
 
-  /// 开始导出
+  /// Start export
   void _startExport() async {
     setState(() {
       _isExporting = true;
       _currentProgress = const ExportProgress(
         progress: 0.0,
-        status: '初始化导出...',
+        status: 'Initializing export...',
       );
     });
 
     try {
-      // 使用FileService进行真正的文件导出
+      // Use FileService for actual file export
       final fileService = ref.read(fileServiceProvider);
       
       setState(() {
         _currentProgress = const ExportProgress(
           progress: 0.3,
-          status: '选择保存位置...',
+          status: 'Selecting save location...',
         );
       });
 
       final settings = ExportSettings(
         format: _selectedFormat,
-        outputPath: '', // 将由FileService处理
+        outputPath: '', // Will be handled by FileService
         fileName: _fileNameController.text.trim(),
         pdfSettings: _pdfSettings,
         htmlSettings: _htmlSettings,
@@ -697,26 +697,26 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
       setState(() {
         _currentProgress = const ExportProgress(
           progress: 0.6,
-          status: '正在导出...',
+          status: 'Exporting...',
         );
       });
 
-      // 使用FileService导出文档
+      // Use FileService to export document
       await fileService.exportDocument(widget.document, settings);
 
       setState(() {
         _currentProgress = const ExportProgress(
           progress: 1.0,
-          status: '导出完成！',
+          status: 'Export completed!',
           isCompleted: true,
         );
       });
 
-      // 显示成功消息
+      // Show success message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('文档已成功导出为 ${_selectedFormat.displayName}'),
+            content: Text('Document successfully exported as ${_selectedFormat.displayName}'),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -725,7 +725,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
       setState(() {
         _currentProgress = ExportProgress(
           progress: 0.0,
-          status: '导出失败',
+          status: 'Export failed',
           hasError: true,
           errorMessage: e.toString(),
         );
@@ -733,17 +733,17 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     }
   }
 
-  /// 显示预览
+  /// Show preview
   void _showPreview() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('导出预览'),
-        content: const Text('预览功能即将推出'),
+        title: const Text('Export Preview'),
+        content: const Text('Preview feature coming soon'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('确定'),
+            child: const Text('OK'),
           ),
         ],
       ),
@@ -751,7 +751,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
   }
 }
 
-/// 显示导出对话框
+/// Show export dialog
 Future<void> showExportDialog(BuildContext context, Document document) {
   return showDialog(
     context: context,

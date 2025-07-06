@@ -1,106 +1,106 @@
-# 🚀 Markora - 下一代跨平台 Markdown 编辑器
+# 🚀 Markora - Next-Generation Cross-Platform Markdown Editor
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.32.1-blue?logo=flutter)](https://flutter.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 ![Multi-Platform](https://img.shields.io/badge/Platform-Windows%20|%20macOS%20|%20Linux%20|%20iOS%20|%20Android-lightgrey)
 
-**像 Typora 一样优雅，比传统编辑器更强大**
+**As elegant as Typora, more powerful than traditional editors**
 
-Markora 是基于 Flutter 构建的开源 Markdown 编辑器，集写作、公式编辑、图表绘制于一体，提供真正无缝的多端体验。
+Markora is an open-source Markdown editor built with Flutter, integrating writing, formula editing, and chart drawing to provide a truly seamless multi-platform experience.
 
-## ✨ 核心特性
+## ✨ Core Features
 
-### 🎯 沉浸式写作体验
-- **实时双向预览** - Typora 风格的即时渲染，所见即所得
-- **智能语法高亮** - 支持 Markdown 语法和代码块高亮
-- **专注模式** - 无干扰的纯净写作环境
-- **快捷键支持** - 完整的键盘快捷键体系
+### 🎯 Immersive Writing Experience
+- **Real-time Bidirectional Preview** - Typora-style instant rendering, WYSIWYG
+- **Smart Syntax Highlighting** - Support for Markdown syntax and code block highlighting
+- **Focus Mode** - Distraction-free pure writing environment
+- **Keyboard Shortcuts** - Complete keyboard shortcut system
 
-### 📊 专业内容支持
-- **LaTeX 数学公式** - 基于 KaTeX 引擎的完美公式渲染
-- **Mermaid 图表** - 流程图、时序图、类图等多种图表类型
-- **Excalidraw 白板** - 手绘风格的图形绘制工具
-- **代码块增强** - 语法高亮 + 行号 + 复制功能
+### 📊 Professional Content Support
+- **LaTeX Math Formulas** - Perfect formula rendering based on KaTeX engine
+- **Mermaid Charts** - Multiple chart types including flowcharts, sequence diagrams, class diagrams
+- **Excalidraw Whiteboard** - Hand-drawn style graphic drawing tool
+- **Enhanced Code Blocks** - Syntax highlighting + line numbers + copy functionality
 
-### 🔧 无限扩展可能
+### 🔧 Unlimited Extension Possibilities
 ```yaml
-插件系统功能：
-- 自定义语法解析器
-- 主题引擎（支持 CSS 注入）
-- 云存储适配器（支持各种云服务）
-- 导出格式扩展（PDF、Word、HTML 等）
+Plugin System Features:
+- Custom syntax parsers
+- Theme engine (CSS injection support)
+- Cloud storage adapters (various cloud services)
+- Export format extensions (PDF, Word, HTML, etc.)
 ```
 
-### 🌐 真正的跨平台
-- **桌面端优化** - Windows、macOS、Linux 原生体验
-- **移动端适配** - iOS、Android 响应式界面
-- **数据同步** - 本地存储 + 可选云同步
+### 🌐 True Cross-Platform
+- **Desktop Optimization** - Native experience on Windows, macOS, Linux
+- **Mobile Adaptation** - Responsive interface for iOS, Android
+- **Data Sync** - Local storage + optional cloud sync
 
-## 📊 开发进度
+## 📊 Development Progress
 
-### ✅ 已完成功能
+### ✅ Completed Features
 
-- [x] **项目初始化和架构设计** - Clean Architecture + Riverpod状态管理
-- [x] **基础UI界面和主题系统** - Material Design 3 + Typora风格界面
-- [x] **Markdown编辑器组件** - 功能完整的编辑器（955行代码）
-- [x] **Markdown预览组件** - 实时渲染系统（571行代码）
-- [x] **数学公式渲染** - 基于flutter_math_fork的LaTeX公式支持（413行代码）
-- [x] **Mermaid图表支持** - 12种图表类型，WebView渲染器（860行代码）
-- [x] **代码语法高亮** - 27种编程语言支持（356行代码）
-- [x] **文件管理系统** - 文档CRUD、Hive本地存储、状态同步
-- [x] **应用状态管理** - Riverpod状态管理完整集成
-- [x] **类型系统** - 完整的TypeScript式类型定义（5个核心类型文件）
+- [x] **Project Initialization and Architecture Design** - Clean Architecture + Riverpod state management
+- [x] **Basic UI Interface and Theme System** - Material Design 3 + Typora-style interface
+- [x] **Markdown Editor Component** - Fully functional editor (955 lines of code)
+- [x] **Markdown Preview Component** - Real-time rendering system (571 lines of code)
+- [x] **Math Formula Rendering** - LaTeX formula support based on flutter_math_fork (413 lines of code)
+- [x] **Mermaid Chart Support** - 12 chart types, WebView renderer (860 lines of code)
+- [x] **Code Syntax Highlighting** - Support for 27 programming languages (356 lines of code)
+- [x] **File Management System** - Document CRUD, Hive local storage, state synchronization
+- [x] **Application State Management** - Complete Riverpod state management integration
+- [x] **Type System** - Complete TypeScript-style type definitions (5 core type files)
 
-### ✅ 最新完成功能
+### ✅ Latest Completed Features
 
-- [x] **设置模块** - 主题切换、编辑器配置、快捷键设置 ⭐
-- [x] **文件选择对话框** - 友好的文档管理界面，支持搜索、预览 ⭐
-- [x] **导出功能** - 支持HTML/PDF多格式导出，完整配置选项 ⭐
+- [x] **Settings Module** - Theme switching, editor configuration, shortcut settings ⭐
+- [x] **File Selection Dialog** - Friendly document management interface with search and preview ⭐
+- [x] **Export Functionality** - Support for HTML/PDF multi-format export with complete configuration options ⭐
 
-### 🚧 下一步开发计划
+### 🚧 Next Development Plan
 
-#### 待完善功能
-- [ ] **编辑器增强** - 撤销/重做、文本格式化（粗体/斜体/链接）
-- [ ] **导出功能完善** - PDF/HTML/DOCX导出实现
-- [ ] **文件管理** - 文件排序功能
+#### Features to be Improved
+- [ ] **Editor Enhancement** - Undo/redo, text formatting (bold/italic/links)
+- [ ] **Export Function Completion** - PDF/HTML/DOCX export implementation
+- [ ] **File Management** - File sorting functionality
 
-#### 新功能开发
-- [ ] **插件系统架构** - 可扩展的插件框架  
-- [ ] **性能优化** - 大文档编辑、预览渲染性能提升
-- [ ] **云同步功能** - 支持各种云存储服务
+#### New Feature Development
+- [ ] **Plugin System Architecture** - Extensible plugin framework
+- [ ] **Performance Optimization** - Large document editing, preview rendering performance improvement
+- [ ] **Cloud Sync Functionality** - Support for various cloud storage services
 
-### 🎯 当前完整可用功能
+### 🎯 Current Fully Available Features
 
-- ✨ **专业Markdown编辑器** - 所见即所得，丰富工具栏
-- 🔢 **LaTeX数学公式** - 行内公式($...$)和块级公式($$...$$)
-- 📊 **Mermaid图表渲染** - 流程图、时序图、类图等12种图表
-- 🌈 **代码语法高亮** - 支持27种编程语言，4套精美主题
-- 📱 **三种编辑模式** - 源码、分屏、预览模式无缝切换
-- 💾 **智能文档管理** - 自动保存、实时同步、状态管理
-- 📂 **文件管理界面** - 友好的文档选择对话框，支持搜索、预览、排序
-- ⚙️ **完整设置系统** - 主题切换、编辑器配置、个性化设置
-- 📤 **多格式导出** - HTML/PDF/图片/Word导出，丰富配置选项
-- 📐 **响应式界面** - 可调节分屏布局，适配不同设备
-- 📈 **实时状态显示** - 字符数、光标位置、文档状态
+- ✨ **Professional Markdown Editor** - WYSIWYG with rich toolbar
+- 🔢 **LaTeX Math Formulas** - Inline formulas ($...$) and block formulas ($$...$$)
+- 📊 **Mermaid Chart Rendering** - Flowcharts, sequence diagrams, class diagrams, and 12 other chart types
+- 🌈 **Code Syntax Highlighting** - Support for 27 programming languages, 4 beautiful themes
+- 📱 **Three Editing Modes** - Source, split-screen, preview mode seamless switching
+- 💾 **Smart Document Management** - Auto-save, real-time sync, state management
+- 📂 **File Management Interface** - Friendly document selection dialog with search, preview, sorting
+- ⚙️ **Complete Settings System** - Theme switching, editor configuration, personalization settings
+- 📤 **Multi-format Export** - HTML/PDF/image/Word export with rich configuration options
+- 📐 **Responsive Interface** - Adjustable split-screen layout, adaptive to different devices
+- 📈 **Real-time Status Display** - Character count, cursor position, document status
 
-### 📈 代码实现统计
+### 📈 Code Implementation Statistics
 
-| 功能模块 | 代码行数 | 完成度 | 说明 |
-|---------|---------|--------|------|
-| Markdown编辑器 | 955行 | ✅ 90% | 基础功能完整，缺少撤销/重做 |
-| 预览系统 | 571行 | ✅ 100% | 实时渲染和混合内容支持 |
-| 数学公式 | 413行 | ✅ 100% | LaTeX公式渲染和对话框 |
-| 图表系统 | 860行 | ✅ 100% | Mermaid渲染器和编辑器 |
-| 语法高亮 | 356行 | ✅ 100% | 代码块组件和高亮系统 |
-| 主应用界面 | 446行 | ✅ 95% | Typora风格界面，缺少格式化按钮功能 |
-| 设置系统 | 600行 | ✅ 100% | 完整设置界面和状态管理 |
-| 文件对话框 | 500行 | ✅ 95% | 缺少排序功能 |
-| 导出系统 | 800行 | ✅ 70% | 框架完整，PDF/DOCX导出未实现 |
-| 类型系统 | 5文件 | ✅ 100% | 完整类型定义体系 |
-| 插件系统 | 0行 | ❌ 0% | 尚未开始 |
-| **总计** | **5500+行** | **85%** | **核心功能完整，细节待完善** |
+| Feature Module | Lines of Code | Completion | Notes |
+|----------------|---------------|------------|-------|
+| Markdown Editor | 955 lines | ✅ 90% | Basic functionality complete, missing undo/redo |
+| Preview System | 571 lines | ✅ 100% | Real-time rendering and mixed content support |
+| Math Formulas | 413 lines | ✅ 100% | LaTeX formula rendering and dialog |
+| Chart System | 860 lines | ✅ 100% | Mermaid renderer and editor |
+| Syntax Highlighting | 356 lines | ✅ 100% | Code block components and highlighting system |
+| Main App Interface | 446 lines | ✅ 95% | Typora-style interface, missing formatting button functionality |
+| Settings System | 600 lines | ✅ 100% | Complete settings interface and state management |
+| File Dialog | 500 lines | ✅ 95% | Missing sorting functionality |
+| Export System | 800 lines | ✅ 70% | Framework complete, PDF/DOCX export not implemented |
+| Type System | 5 files | ✅ 100% | Complete type definition system |
+| Plugin System | 0 lines | ❌ 0% | Not started yet |
+| **Total** | **5500+ lines** | **85%** | **Core functionality complete, details to be refined** |
 
-## 🏗️ 技术架构
+## 🏗️ Technical Architecture
 
 ```mermaid
 graph TB
@@ -108,114 +108,114 @@ graph TB
     A --> C[Domain Layer]
     A --> D[Data Layer]
     
-    B --> E[Pages 页面]
-    B --> F[Widgets 组件]
-    B --> G[State Management 状态管理]
+    B --> E[Pages]
+    B --> F[Widgets]
+    B --> G[State Management]
     
-    C --> H[Entities 实体]
-    C --> I[Use Cases 用例]
-    C --> J[Repository Interfaces 仓库接口]
+    C --> H[Entities]
+    C --> I[Use Cases]
+    C --> J[Repository Interfaces]
     
-    D --> K[Data Sources 数据源]
-    D --> L[Repository Implementations 仓库实现]
-    D --> M[Models 数据模型]
+    D --> K[Data Sources]
+    D --> L[Repository Implementations]
+    D --> M[Models]
     
     G --> N[Riverpod]
-    K --> O[Hive 本地存储]
-    K --> P[File System 文件系统]
+    K --> O[Hive Local Storage]
+    K --> P[File System]
     
-    E --> Q[Editor Page 编辑器页面]
-    E --> R[Preview Page 预览页面]
-    E --> S[Settings Page 设置页面]
+    E --> Q[Editor Page]
+    E --> R[Preview Page]
+    E --> S[Settings Page]
     
-    F --> T[Markdown Editor 编辑器组件]
-    F --> U[Math Renderer 公式渲染]
-    F --> V[Chart Renderer 图表渲染]
+    F --> T[Markdown Editor]
+    F --> U[Math Renderer]
+    F --> V[Chart Renderer]
 ```
 
-## 📦 技术栈
+## 📦 Tech Stack
 
-| 组件类别 | 技术选型 | 版本 | 用途 |
-|---------|---------|------|------|
-| **UI框架** | Flutter | 3.32.1 | 跨平台UI开发 |
-| **状态管理** | Riverpod | 2.5.1 | 响应式状态管理 |
-| **路由管理** | GoRouter | 14.3.0 | 声明式路由 |
-| **Markdown渲染** | flutter_markdown | 0.7.4 | 基础Markdown解析 |
-| **代码编辑** | code_text_field | 1.1.0 | 代码编辑器组件 |
-| **数学公式** | flutter_math_fork | 0.7.2 | LaTeX公式渲染 |
-| **图表支持** | webview_flutter | 4.10.0 | Mermaid图表渲染 |
-| **本地存储** | Hive | 2.2.3 | 高性能键值存储 |
-| **文件操作** | file_picker | 8.1.2 | 文件选择和管理 |
+| Component Category | Technology | Version | Purpose |
+|-------------------|------------|---------|----------|
+| **UI Framework** | Flutter | 3.32.1 | Cross-platform UI development |
+| **State Management** | Riverpod | 2.5.1 | Reactive state management |
+| **Routing** | GoRouter | 14.3.0 | Declarative routing |
+| **Markdown Rendering** | flutter_markdown | 0.7.4 | Basic Markdown parsing |
+| **Code Editing** | code_text_field | 1.1.0 | Code editor component |
+| **Math Formulas** | flutter_math_fork | 0.7.2 | LaTeX formula rendering |
+| **Chart Support** | webview_flutter | 4.10.0 | Mermaid chart rendering |
+| **Local Storage** | Hive | 2.2.3 | High-performance key-value storage |
+| **File Operations** | file_picker | 8.1.2 | File selection and management |
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 环境要求
-- Flutter 3.19.0 或更高版本
-- Dart 3.8.0 或更高版本
+### Requirements
+- Flutter 3.19.0 or higher
+- Dart 3.8.0 or higher
 
-### 安装步骤
+### Installation Steps
 
-1. **克隆项目**
+1. **Clone the project**
 ```bash
 git clone https://github.com/your-org/markora.git
 cd markora
 ```
 
-2. **安装依赖**
+2. **Install dependencies**
 ```bash
 flutter pub get
 ```
 
-3. **运行项目**
+3. **Run the project**
 ```bash
-# 桌面端 (Windows/macOS/Linux)
+# Desktop (Windows/macOS/Linux)
 flutter run -d windows
 flutter run -d macos  
 flutter run -d linux
 
-# 移动端
+# Mobile
 flutter run -d ios
 flutter run -d android
 ```
 
-### 开发环境设置
+### Development Environment Setup
 
-1. **代码生成**（用于 Hive 数据模型）
+1. **Code generation** (for Hive data models)
 ```bash
 flutter packages pub run build_runner build
 ```
 
-2. **启用桌面支持**
+2. **Enable desktop support**
 ```bash
 flutter config --enable-windows-desktop
 flutter config --enable-macos-desktop
 flutter config --enable-linux-desktop
 ```
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 lib/
-├── core/                   # 核心模块
-│   ├── constants/         # 常量定义
-│   ├── utils/            # 工具类
-│   ├── errors/           # 错误处理
-│   └── themes/           # 主题配置
-├── features/             # 功能模块
-│   ├── editor/           # 编辑器功能
-│   ├── preview/          # 预览功能
-│   ├── plugins/          # 插件系统
-│   └── settings/         # 设置功能
-├── shared/               # 共享模块
-│   ├── widgets/          # 通用组件
-│   └── services/         # 通用服务
-├── types/                # 类型定义
-└── main.dart             # 应用入口
+├── core/                   # Core modules
+│   ├── constants/         # Constants
+│   ├── utils/            # Utilities
+│   ├── errors/           # Error handling
+│   └── themes/           # Theme configuration
+├── features/             # Feature modules
+│   ├── editor/           # Editor functionality
+│   ├── preview/          # Preview functionality
+│   ├── plugins/          # Plugin system
+│   └── settings/         # Settings functionality
+├── shared/               # Shared modules
+│   ├── widgets/          # Common widgets
+│   └── services/         # Common services
+├── types/                # Type definitions
+└── main.dart             # Application entry point
 ```
 
-## 🔌 插件开发
+## 🔌 Plugin Development
 
-Markora 支持插件扩展，开发者可以创建自定义插件来增强编辑器功能：
+Markora supports plugin extensions. Developers can create custom plugins to enhance editor functionality:
 
 ```dart
 abstract class MarkoraPlugin {
@@ -223,25 +223,25 @@ abstract class MarkoraPlugin {
   String get version;
   String get description;
   
-  // 插件初始化
+  // Plugin initialization
   void onLoad(EditorController controller);
   
-  // 注册自定义语法
+  // Register custom syntax
   void registerSyntax(SyntaxRegistry registry);
   
-  // 注册工具栏按钮
+  // Register toolbar buttons
   void registerToolbarActions(ToolbarRegistry registry);
 }
 ```
 
-## 🎨 主题自定义
+## 🎨 Theme Customization
 
-支持深色/浅色主题切换和自定义CSS样式：
+Supports dark/light theme switching and custom CSS styles:
 
 ```dart
-// 主题配置示例
+// Theme configuration example
 final customTheme = MarkoraTheme(
-  name: '自定义主题',
+  name: 'Custom Theme',
   isDark: true,
   editorBackground: Color(0xFF1E1E1E),
   textColor: Color(0xFFD4D4D4),
@@ -253,33 +253,32 @@ final customTheme = MarkoraTheme(
 );
 ```
 
-## 🤝 贡献指南
+## 🤝 Contributing
 
-我们欢迎所有形式的贡献！
+We welcome all forms of contributions!
 
-### 提交代码
-1. Fork 本仓库
-2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m '添加某个很棒的功能'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 创建 Pull Request
+### Submitting Code
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Create a Pull Request
 
-### 报告问题
-如果发现 bug 或有功能建议，请创建 [Issue](https://github.com/BinaryRisker/Markora/issues)。
+### Reporting Issues
+If you find bugs or have feature suggestions, please create an [Issue](https://github.com/BinaryRisker/Markora/issues).
 
+## 📄 License
 
-## 📄 许可证
+This project is licensed under the GPL-3.0 License. See the [LICENSE](LICENSE) file for details.
 
-本项目采用 GPL-3.0 许可证。详见 [LICENSE](LICENSE) 文件。
+## 🙏 Acknowledgments
 
-## 🙏 致谢
-
-- [Flutter](https://flutter.dev) - 优秀的跨平台框架
-- [Mermaid](https://mermaid-js.github.io) - 图表渲染支持
-- [KaTeX](https://katex.org) - 数学公式渲染
+- [Flutter](https://flutter.dev) - Excellent cross-platform framework
+- [Mermaid](https://mermaid-js.github.io) - Chart rendering support
+- [KaTeX](https://katex.org) - Math formula rendering
 
 ---
 
-**⭐ 如果这个项目对你有帮助，请给我们一个 Star！**
+**⭐ If this project helps you, please give us a Star!**
 
-[English](README_EN.md) | 简体中文
+English | [简体中文](README_CN.md)

@@ -65,7 +65,7 @@ class FileService {
   Future<Document> loadDocumentFromWeb() async {
     try {
       final result = await FilePicker.platform.pickFiles(
-        dialogTitle: '打开Markdown文件',
+        dialogTitle: 'Open Markdown File',
         allowedExtensions: ['md', 'markdown', 'txt'],
         type: FileType.custom,
         allowMultiple: false,
@@ -166,7 +166,7 @@ class FileService {
   }) async {
     try {
       final result = await FilePicker.platform.pickFiles(
-        dialogTitle: dialogTitle ?? '打开文件',
+        dialogTitle: dialogTitle ?? 'Open File',
         allowedExtensions: allowedExtensions,
         type: allowedExtensions != null ? FileType.custom : FileType.any,
         allowMultiple: false,
@@ -180,7 +180,7 @@ class FileService {
         return result?.files.first.path;
       }
     } catch (e) {
-      throw Exception('选择打开路径失败: $e');
+      throw Exception('Failed to select open path: $e');
     }
   }
 

@@ -14,7 +14,7 @@ import '../../../../main.dart';
 import '../../../plugins/domain/plugin_implementations.dart';
 
 
-/// 渲染缓存项
+/// Render cache item
 class _RenderCacheItem {
   const _RenderCacheItem({
     required this.content,
@@ -27,7 +27,7 @@ class _RenderCacheItem {
   final DateTime timestamp;
 }
 
-/// Markdown预览组件
+/// Markdown preview component
 class MarkdownPreview extends ConsumerStatefulWidget {
   const MarkdownPreview({
     super.key,
@@ -36,13 +36,13 @@ class MarkdownPreview extends ConsumerStatefulWidget {
     this.selectable = true,
   });
 
-  /// Markdown内容
+  /// Markdown content
   final String content;
   
-  /// 点击回调
+  /// Click callback
   final VoidCallback? onTap;
   
-  /// 是否可选择文本
+  /// Whether text is selectable
   final bool selectable;
 
   @override
@@ -52,7 +52,7 @@ class MarkdownPreview extends ConsumerStatefulWidget {
 class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   late ScrollController _scrollController;
   
-  // 性能优化相关
+  // Performance optimization related
   Timer? _debounceTimer;
   String _lastRenderedContent = '';
   Widget? _cachedWidget;
@@ -86,10 +86,10 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       ),
       child: Column(
         children: [
-          // 预览工具栏
+          // Preview toolbar
           _buildPreviewToolbar(),
           
-          // 预览内容
+          // Preview content
           Expanded(
             child: _buildOptimizedMarkdownContent(),
           ),
@@ -98,39 +98,39 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// 构建优化的Markdown内容（带缓存和防抖）
+  /// Build optimized Markdown content (with cache and debounce)
   Widget _buildOptimizedMarkdownContent() {
-    // 如果内容没有变化，返回缓存的widget
+    // If content hasn't changed, return cached widget
     if (widget.content == _lastRenderedContent && _cachedWidget != null) {
       return _cachedWidget!;
     }
 
-    // 检查缓存
+    // Check cache
     final cacheKey = widget.content.hashCode.toString();
     final cachedItem = _renderCache[cacheKey];
     
     if (cachedItem != null) {
-      // 检查缓存是否过期
+      // Check if cache is expired
       final now = DateTime.now();
       if (now.difference(cachedItem.timestamp) < _cacheExpiry) {
         _lastRenderedContent = widget.content;
         _cachedWidget = cachedItem.widget;
         return cachedItem.widget;
       } else {
-        // 缓存过期，移除
+        // Cache expired, remove it
         _renderCache.remove(cacheKey);
       }
     }
 
-    // 使用防抖机制
+    // Use debounce mechanism
     _debounceTimer?.cancel();
     
-    // 如果是第一次渲染或内容为空，立即渲染
+    // If first render or content is empty, render immediately
     if (_cachedWidget == null || widget.content.isEmpty) {
       return _renderAndCache();
     }
 
-    // 对于内容变化，使用防抖
+    // For content changes, use debounce
     _debounceTimer = Timer(_debounceDelay, () {
       if (mounted) {
         setState(() {
@@ -139,25 +139,25 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       }
     });
 
-    // 返回当前缓存的widget（防抖期间显示）
+    // Return current cached widget (display during debounce)
     return _cachedWidget ?? _buildLoadingWidget();
   }
 
-  /// 渲染并缓存内容
+  /// Render and cache content
   Widget _renderAndCache() {
     final widget = _buildMarkdownContent();
     final cacheKey = this.widget.content.hashCode.toString();
     
-    // 清理过期缓存
+    // Clean expired cache
     _cleanExpiredCache();
     
-    // 限制缓存大小
+    // Limit cache size
     if (_renderCache.length >= _maxCacheSize) {
       final oldestKey = _renderCache.keys.first;
       _renderCache.remove(oldestKey);
     }
     
-    // 添加到缓存
+    // Add to cache
     _renderCache[cacheKey] = _RenderCacheItem(
       content: this.widget.content,
       widget: widget,
@@ -170,7 +170,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     return widget;
   }
 
-  /// 清理过期缓存
+  /// Clean expired cache
   void _cleanExpiredCache() {
     final now = DateTime.now();
     final expiredKeys = <String>[];
@@ -186,7 +186,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     }
   }
 
-  /// 构建加载widget
+  /// Build loading widget
   Widget _buildLoadingWidget() {
     return const Center(
       child: Padding(
@@ -196,7 +196,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// 构建预览工具栏
+  /// Build preview toolbar
   Widget _buildPreviewToolbar() {
     return Container(
       height: 32,
@@ -219,26 +219,26 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
           ),
           const SizedBox(width: 8),
           Text(
-            '预览',
+            'Preview',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
           const Spacer(),
-          // 导出按钮
+          // Export buttons
           _buildToolbarButton(
             icon: Icons.picture_as_pdf,
-            tooltip: '导出为PDF',
+            tooltip: 'Export as PDF',
             onPressed: () => _exportToPdf(),
           ),
           _buildToolbarButton(
             icon: Icons.html,
-            tooltip: '导出为HTML',
+            tooltip: 'Export as HTML',
             onPressed: () => _exportToHtml(),
           ),
           _buildToolbarButton(
             icon: Icons.refresh,
-            tooltip: '刷新预览',
+            tooltip: 'Refresh Preview',
             onPressed: () => _refreshPreview(),
           ),
           const SizedBox(width: 8),
@@ -247,7 +247,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// 构建工具栏按钮
+  /// Build toolbar button
   Widget _buildToolbarButton({
     required IconData icon,
     required String tooltip,
@@ -270,7 +270,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// 构建Markdown内容
+  /// Build Markdown content
   Widget _buildMarkdownContent() {
     if (widget.content.isEmpty) {
       return Center(
@@ -284,14 +284,14 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
             ),
             const SizedBox(height: 16),
             Text(
-              '在左侧编辑器中输入Markdown内容',
+              'Enter Markdown content in the left editor',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              '预览将在这里显示',
+              'Preview will be displayed here',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),
@@ -311,16 +311,16 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// 构建包含数学公式和插件内容的内容
+  /// Build content with math formulas and plugin content
   Widget _buildContentWithMath() {
-    // 首先处理插件注册的块级语法
+    // First process plugin registered block syntax
     final processedContent = _processPluginSyntax(widget.content);
     
-    // 解析数学公式
+    // Parse math formulas
     final mathFormulas = MathParser.parseFormulas(processedContent.content);
     
     if (mathFormulas.isEmpty && processedContent.pluginWidgets.isEmpty) {
-      // 没有特殊内容，直接使用普通Markdown渲染
+      // No special content, use normal Markdown rendering
       return MarkdownBody(
         data: processedContent.content,
         selectable: widget.selectable,
@@ -338,18 +338,18 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       );
     }
 
-    // 有特殊内容，需要特殊处理
+    // Has special content, needs special handling
     return _buildMixedContent(mathFormulas, processedContent.pluginWidgets);
   }
 
-  /// 构建混合内容（文本+数学公式+插件组件）
+  /// Build mixed content (text + math formulas + plugin components)
   Widget _buildMixedContent(List<MathFormula> mathFormulas, List<_PluginElement> pluginElements) {
     final widgets = <Widget>[];
     
-    // 合并所有特殊元素并按位置排序
+    // Merge all special elements and sort by position
     final allElements = <_SpecialElement>[];
     
-    // 添加数学公式
+    // Add math formulas
     for (final formula in mathFormulas) {
       allElements.add(_SpecialElement(
         type: _SpecialElementType.math,
@@ -359,7 +359,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       ));
     }
     
-    // 添加插件组件
+    // Add plugin components
     for (final pluginElement in pluginElements) {
       allElements.add(_SpecialElement(
         type: _SpecialElementType.plugin,
@@ -369,13 +369,13 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       ));
     }
     
-    // 按位置排序
+    // Sort by position
     allElements.sort((a, b) => a.startIndex.compareTo(b.startIndex));
     
     int currentIndex = 0;
 
     for (final element in allElements) {
-      // 添加元素前的普通文本
+      // Add normal text before element
       if (currentIndex < element.startIndex) {
         final textContent = widget.content.substring(currentIndex, element.startIndex);
         if (textContent.trim().isNotEmpty) {
@@ -397,7 +397,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
         }
       }
 
-      // 添加特殊元素
+      // Add special element
       if (element.type == _SpecialElementType.math) {
         final formula = element.data as MathFormula;
         widgets.add(MathFormulaWidget(
@@ -407,7 +407,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('数学公式渲染错误: $error'),
+                  content: Text('Math formula rendering error: $error'),
                   backgroundColor: Colors.red,
                 ),
               );
@@ -422,7 +422,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       currentIndex = element.endIndex;
     }
 
-    // 添加最后剩余的文本
+    // Add remaining text at the end
     if (currentIndex < widget.content.length) {
       final remainingContent = widget.content.substring(currentIndex);
       if (remainingContent.trim().isNotEmpty) {
@@ -450,19 +450,19 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// 构建Markdown样式表
+  /// Build Markdown style sheet
   MarkdownStyleSheet _buildMarkdownStyleSheet() {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     
     return MarkdownStyleSheet(
-      // 段落样式
+      // Paragraph style
       p: textTheme.bodyLarge?.copyWith(
         height: 1.6,
         color: theme.colorScheme.onSurface,
       ),
       
-      // 标题样式
+      // Heading styles
       h1: textTheme.headlineLarge?.copyWith(
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
@@ -494,7 +494,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
         height: 1.3,
       ),
       
-      // 代码样式
+      // Code style
       code: TextStyle(
         fontFamily: 'monospace',
         fontSize: textTheme.bodyMedium?.fontSize,
@@ -511,7 +511,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       ),
       codeblockPadding: const EdgeInsets.all(12),
       
-      // 引用样式
+      // Quote style
       blockquote: textTheme.bodyLarge?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
         fontStyle: FontStyle.italic,
@@ -526,18 +526,18 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       ),
       blockquotePadding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
       
-      // 链接样式
+      // Link style
       a: TextStyle(
         color: theme.colorScheme.primary,
         decoration: TextDecoration.underline,
       ),
       
-      // 列表样式
+      // List style
       listBullet: textTheme.bodyLarge?.copyWith(
         color: theme.colorScheme.onSurface,
       ),
       
-      // 表格样式
+      // Table style
       tableHead: textTheme.bodyLarge?.copyWith(
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
@@ -552,7 +552,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       tableHeadAlign: TextAlign.center,
       tableCellsPadding: const EdgeInsets.all(8),
       
-      // 水平分割线
+      // Horizontal rule
       horizontalRuleDecoration: BoxDecoration(
         border: Border(
           top: BorderSide(
@@ -564,7 +564,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// 处理链接点击
+  /// Handle link tap
   void _handleLinkTap(String href) async {
     try {
       final uri = Uri.parse(href);
@@ -573,44 +573,44 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('无法打开链接: $href')),
+            SnackBar(content: Text('Cannot open link: $href')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('链接格式错误: $href')),
+          SnackBar(content: Text('Invalid link format: $href')),
         );
       }
     }
   }
 
-  /// 导出为PDF
+  /// Export as PDF
   void _exportToPdf() {
-    // TODO: 实现PDF导出功能
+    // TODO: Implement PDF export functionality
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('PDF导出功能即将推出')),
+      const SnackBar(content: Text('PDF export feature coming soon')),
     );
   }
 
-  /// 导出为HTML
+  /// Export as HTML
   void _exportToHtml() {
-    // TODO: 实现HTML导出功能
+    // TODO: Implement HTML export functionality
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('HTML导出功能即将推出')),
+      const SnackBar(content: Text('HTML export feature coming soon')),
     );
   }
 
-  /// 刷新预览
+  /// Refresh preview
   void _refreshPreview() {
     setState(() {
-      // 强制重建预览
+      // Force rebuild preview
     });
   }
 }
 
-/// 数学公式构建器
+/// Math formula builder
 class MathElementBuilder extends MarkdownElementBuilder {
   @override
   Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
@@ -629,7 +629,7 @@ class MathElementBuilder extends MarkdownElementBuilder {
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(
-            '数学公式解析错误: $mathContent',
+            'Math formula parsing error: $mathContent',
             style: TextStyle(color: Colors.red),
           ),
         );
@@ -639,7 +639,7 @@ class MathElementBuilder extends MarkdownElementBuilder {
   }
 }
 
-/// 代码块构建器
+/// Code block builder
 class CodeElementBuilder extends MarkdownElementBuilder {
   @override
   Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
@@ -658,13 +658,13 @@ class CodeElementBuilder extends MarkdownElementBuilder {
   }
 }
 
-/// 特殊元素类型
+/// Special element type
 enum _SpecialElementType {
-  math,   // 数学公式
-  plugin, // 插件组件
+  math,   // Math formula
+  plugin, // Plugin component
 }
 
-/// 特殊元素
+/// Special element
 class _SpecialElement {
   const _SpecialElement({
     required this.type,
@@ -679,7 +679,7 @@ class _SpecialElement {
   final dynamic data;
 }
 
-/// 插件元素
+/// Plugin element
 class _PluginElement {
   const _PluginElement({
     required this.start,
@@ -694,7 +694,7 @@ class _PluginElement {
   final Widget widget;
 }
 
-/// 处理后的内容
+/// Processed content
 class _ProcessedContent {
   const _ProcessedContent({
     required this.content,
@@ -705,14 +705,14 @@ class _ProcessedContent {
   final List<_PluginElement> pluginWidgets;
 }
 
-/// 处理插件语法
+/// Process plugin syntax
 _ProcessedContent _processPluginSyntax(String content) {
   final pluginWidgets = <_PluginElement>[];
   String processedContent = content;
   int offset = 0;
 
   try {
-    // 获取全局语法注册器
+    // Get global syntax registry
      final syntaxRegistry = globalSyntaxRegistry;
      final blockRules = syntaxRegistry.blockSyntaxRules;
 
@@ -729,13 +729,13 @@ _ProcessedContent _processPluginSyntax(String content) {
             widget: widget,
           ));
           
-          // 从内容中移除匹配的文本
+          // Remove matched text from content
            final before = processedContent.substring(0, match.start - offset);
            final after = processedContent.substring(match.end - offset);
            processedContent = before + after;
            offset += (match.end - match.start);
         } catch (e) {
-          // 插件渲染错误，跳过
+          // Plugin rendering error, skip
           print('Plugin syntax error: $e');
         }
       }

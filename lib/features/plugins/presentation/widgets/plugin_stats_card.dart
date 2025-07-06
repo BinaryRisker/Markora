@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../types/plugin.dart';
 import '../providers/plugin_providers.dart';
 
-/// 插件统计卡片组件
+/// Plugin statistics card component
 class PluginStatsCard extends ConsumerWidget {
   const PluginStatsCard({super.key});
   
@@ -20,20 +20,20 @@ class PluginStatsCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '插件统计',
+              'Plugin Statistics',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
             
-            // 总体统计
+            // Overall statistics
             Row(
               children: [
                 Expanded(
                   child: _StatItem(
                     icon: Icons.extension,
-                    label: '总插件数',
+                    label: 'Total Plugins',
                     value: stats.total.toString(),
                     color: theme.colorScheme.primary,
                   ),
@@ -41,7 +41,7 @@ class PluginStatsCard extends ConsumerWidget {
                 Expanded(
                   child: _StatItem(
                     icon: Icons.check_circle,
-                    label: '已启用',
+                    label: 'Enabled',
                     value: stats.enabled.toString(),
                     color: Colors.green,
                   ),
@@ -49,7 +49,7 @@ class PluginStatsCard extends ConsumerWidget {
                 Expanded(
                   child: _StatItem(
                     icon: Icons.download_done,
-                    label: '已安装',
+                    label: 'Installed',
                     value: stats.installed.toString(),
                     color: theme.colorScheme.secondary,
                   ),
@@ -57,7 +57,7 @@ class PluginStatsCard extends ConsumerWidget {
                 Expanded(
                   child: _StatItem(
                     icon: Icons.error,
-                    label: '错误',
+                    label: 'Errors',
                     value: stats.error.toString(),
                     color: theme.colorScheme.error,
                   ),
@@ -67,9 +67,9 @@ class PluginStatsCard extends ConsumerWidget {
             
             const SizedBox(height: 16),
             
-            // 按类型统计
+            // Statistics by type
             Text(
-              '按类型分布',
+              'Distribution by Type',
               style: theme.textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -92,7 +92,7 @@ class PluginStatsCard extends ConsumerWidget {
   }
 }
 
-/// 统计项组件
+/// Statistics item component
 class _StatItem extends StatelessWidget {
   const _StatItem({
     required this.icon,
@@ -149,7 +149,7 @@ class _StatItem extends StatelessWidget {
   }
 }
 
-/// 类型芯片组件
+/// Type chip component
 class _TypeChip extends StatelessWidget {
   const _TypeChip({
     required this.type,
@@ -211,7 +211,7 @@ class _TypeChip extends StatelessWidget {
     );
   }
   
-  /// 获取插件类型对应的颜色
+  /// Get color corresponding to plugin type
   Color _getTypeColor(PluginType type) {
     switch (type) {
       case PluginType.syntax:
@@ -228,6 +228,8 @@ class _TypeChip extends StatelessWidget {
         return Colors.red;
       case PluginType.widget:
         return Colors.indigo;
+      case PluginType.component:
+        return Colors.amber;
       case PluginType.exporter:
         return Colors.deepOrange;
       case PluginType.integration:
@@ -237,7 +239,7 @@ class _TypeChip extends StatelessWidget {
     }
   }
   
-  /// 获取插件类型对应的图标
+  /// Get icon corresponding to plugin type
   IconData _getTypeIcon(PluginType type) {
     switch (type) {
       case PluginType.syntax:
@@ -254,6 +256,8 @@ class _TypeChip extends StatelessWidget {
         return Icons.build;
       case PluginType.widget:
         return Icons.widgets;
+      case PluginType.component:
+        return Icons.view_module;
       case PluginType.exporter:
         return Icons.upload;
       case PluginType.integration:

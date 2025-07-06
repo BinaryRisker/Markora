@@ -6,25 +6,25 @@ import '../../domain/services/document_service.dart';
 import '../../domain/services/file_service.dart';
 import '../../infrastructure/repositories/hive_document_repository.dart';
 
-/// 文档仓库Provider
+/// Document repository provider
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
   final repo = HiveDocumentRepository();
   // 注意：初始化将在main.dart中完成
   return repo;
 });
 
-/// 文档服务Provider
+/// Document service provider
 final documentServiceProvider = Provider<DocumentService>((ref) {
   final repository = ref.read(documentRepositoryProvider);
   return DocumentService(repository);
 });
 
-/// 文件服务Provider
+/// File service provider
 final fileServiceProvider = Provider<FileService>((ref) {
   return FileService();
 });
 
-/// 文档Tab信息
+/// Document tab information
 class DocumentTab {
   const DocumentTab({
     required this.document,
@@ -49,23 +49,23 @@ class DocumentTab {
   }
 }
 
-/// 文档Tab管理器
+/// Document tabs manager
 class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
   DocumentTabsNotifier(this._documentService) : super([]);
 
   final DocumentService _documentService;
   int _activeTabIndex = -1;
 
-  /// 当前激活的Tab索引
+  /// Current active tab index
   int get activeTabIndex => _activeTabIndex;
 
-  /// 当前激活的文档
+  /// Current active document
   Document? get activeDocument => 
       _activeTabIndex >= 0 && _activeTabIndex < state.length 
           ? state[_activeTabIndex].document 
           : null;
 
-  /// 打开文档Tab
+  /// Open document tab
   void openDocumentTab(Document document) {
     // 检查文档是否已经打开
     final existingIndex = state.indexWhere((tab) => tab.document.id == document.id);
@@ -81,7 +81,7 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
     }
   }
 
-  /// 创建新文档Tab
+  /// Create new document tab
   Future<void> createNewDocumentTab({
     String? title,
     String? content,
@@ -97,7 +97,7 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
     }
   }
 
-  /// 关闭Tab
+  /// Close tab
   void closeTab(int index) {
     if (index < 0 || index >= state.length) return;
 
@@ -119,7 +119,7 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
     }
   }
 
-  /// 设置激活Tab
+  /// Set active tab
   void setActiveTab(int index) {
     if (index >= 0 && index < state.length && _activeTabIndex != index) {
       _activeTabIndex = index;
@@ -128,7 +128,7 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
     }
   }
 
-  /// 更新Tab内容
+  /// Update tab content
   void updateTabContent(int index, String content) {
     if (index < 0 || index >= state.length) return;
 
@@ -149,7 +149,7 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
     state = newState;
   }
 
-  /// 保存Tab文档
+  /// Save tab document
   Future<void> saveTab(int index) async {
     if (index < 0 || index >= state.length) return;
 
@@ -167,20 +167,20 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
     }
   }
 
-  /// 保存当前激活Tab
+  /// Save current active tab
   Future<void> saveActiveTab() async {
     if (_activeTabIndex >= 0) {
       await saveTab(_activeTabIndex);
     }
   }
 
-  /// 关闭所有Tab
+  /// Close all tabs
   void closeAllTabs() {
     state = [];
     _activeTabIndex = -1;
   }
 
-  /// 获取Tab标题（显示修改状态）
+  /// Get tab title (show modification status)
   String getTabTitle(int index) {
     if (index < 0 || index >= state.length) return '';
     
@@ -190,26 +190,26 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
   }
 }
 
-/// 文档Tab管理Provider
+/// Document tabs management provider
 final documentTabsProvider = StateNotifierProvider<DocumentTabsNotifier, List<DocumentTab>>((ref) {
   final documentService = ref.read(documentServiceProvider);
   return DocumentTabsNotifier(documentService);
 });
 
-/// 当前激活文档Provider
+/// Current active document provider
 final activeDocumentProvider = Provider<Document?>((ref) {
   final tabsNotifier = ref.read(documentTabsProvider.notifier);
   ref.watch(documentTabsProvider); // 监听tabs变化
   return tabsNotifier.activeDocument;
 });
 
-/// 当前文档Provider
+/// Current document provider
 class CurrentDocumentNotifier extends StateNotifier<Document?> {
   CurrentDocumentNotifier(this._documentService) : super(null);
 
   final DocumentService _documentService;
 
-  /// 创建新文档
+  /// Create new document
   Future<void> createNewDocument({
     String? title,
     String? content,
@@ -226,7 +226,7 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
     }
   }
 
-  /// 打开文档
+  /// Open document
   Future<void> openDocument(String id) async {
     try {
       final document = await _documentService.openDocument(id);
@@ -236,21 +236,21 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
     }
   }
 
-  /// 更新文档内容
+  /// Update document content
   void updateContent(String content) {
     if (state != null) {
       state = state!.copyWith(content: content);
     }
   }
 
-  /// 更新文档标题
+  /// Update document title
   void updateTitle(String title) {
     if (state != null) {
       state = state!.copyWith(title: title);
     }
   }
 
-  /// 保存文档
+  /// Save document
   Future<void> saveDocument() async {
     if (state != null) {
       try {
@@ -265,7 +265,7 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
     }
   }
 
-  /// 另存为
+  /// Save as
   Future<void> saveAsDocument({
     String? newTitle,
     String? newPath,
@@ -284,7 +284,7 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
     }
   }
 
-  /// 导入文档
+  /// Import document
   Future<void> importDocument(String filePath) async {
     try {
       final document = await _documentService.importDocument(filePath);
@@ -294,7 +294,7 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
     }
   }
 
-  /// 导出文档
+  /// Export document
   Future<String> exportDocument(
     String exportPath, {
     ExportFormat format = ExportFormat.markdown,
@@ -313,12 +313,12 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
     throw Exception('没有可导出的文档');
   }
 
-  /// 设置当前文档
+  /// Set current document
   void setCurrentDocument(Document document) {
     state = document;
   }
 
-  /// 关闭文档
+  /// Close document
   void closeDocument() {
     state = null;
   }
@@ -329,35 +329,35 @@ final currentDocumentProvider = StateNotifierProvider<CurrentDocumentNotifier, D
   return CurrentDocumentNotifier(documentService);
 });
 
-/// 文档列表Provider
+/// Document list provider
 final documentListProvider = FutureProvider<List<Document>>((ref) async {
   final documentService = ref.read(documentServiceProvider);
   return await documentService.getAllDocuments();
 });
 
-/// 文档列表Provider（别名）
+/// Document list provider (alias)
 final documentsListProvider = FutureProvider<List<Document>>((ref) async {
   final documentService = ref.read(documentServiceProvider);
   return await documentService.getAllDocuments();
 });
 
-/// 最近文档Provider
+/// Recent documents provider
 final recentDocumentsProvider = FutureProvider<List<Document>>((ref) async {
   final documentService = ref.read(documentServiceProvider);
   return await documentService.getRecentDocuments();
 });
 
-/// 文档搜索Provider
+/// Document search provider
 final documentSearchProvider = FutureProvider.family<List<Document>, String>((ref, query) async {
   final documentService = ref.read(documentServiceProvider);
   return await documentService.searchDocuments(query);
 });
 
-/// 文档修改状态Provider
+/// Document modification status provider
 final documentModifiedProvider = Provider<bool>((ref) {
   final currentDocument = ref.watch(currentDocumentProvider);
   if (currentDocument == null) return false;
   
   // 检查文档是否已修改（这里简单地检查更新时间）
   return true; // 实际实现中可以比较内容哈希或其他标识
-}); 
+});

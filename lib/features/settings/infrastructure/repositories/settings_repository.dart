@@ -2,29 +2,29 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../domain/entities/app_settings.dart';
 
-/// 设置仓库抽象接口
+/// Settings repository abstract interface
 abstract class SettingsRepository {
-  /// 获取设置
+  /// Get settings
   Future<AppSettings?> getSettings();
 
-  /// 保存设置
+  /// Save settings
   Future<void> saveSettings(AppSettings settings);
 
-  /// 删除设置
+  /// Delete settings
   Future<void> deleteSettings();
 
-  /// 检查设置是否存在
+  /// Check if settings exist
   Future<bool> hasSettings();
 }
 
-/// Hive设置仓库实现
+/// Hive settings repository implementation
 class HiveSettingsRepository implements SettingsRepository {
   static const String _boxName = 'settings';
   static const String _settingsKey = 'app_settings';
 
   Box<AppSettings>? _box;
 
-  /// 获取或打开设置盒子
+  /// Get or open settings box
   Future<Box<AppSettings>> _getBox() async {
     if (_box != null && _box!.isOpen) {
       return _box!;
@@ -34,7 +34,7 @@ class HiveSettingsRepository implements SettingsRepository {
       _box = await Hive.openBox<AppSettings>(_boxName);
       return _box!;
     } catch (e) {
-      // 如果打开失败，尝试删除并重新创建
+      // If opening fails, try to delete and recreate
       await Hive.deleteBoxFromDisk(_boxName);
       _box = await Hive.openBox<AppSettings>(_boxName);
       return _box!;
@@ -47,7 +47,7 @@ class HiveSettingsRepository implements SettingsRepository {
       final box = await _getBox();
       return box.get(_settingsKey);
     } catch (e) {
-      throw SettingsException('获取设置失败: $e');
+      throw SettingsException('Failed to get settings: $e');
     }
   }
 
@@ -57,7 +57,7 @@ class HiveSettingsRepository implements SettingsRepository {
       final box = await _getBox();
       await box.put(_settingsKey, settings);
     } catch (e) {
-      throw SettingsException('保存设置失败: $e');
+      throw SettingsException('Failed to save settings: $e');
     }
   }
 
@@ -67,7 +67,7 @@ class HiveSettingsRepository implements SettingsRepository {
       final box = await _getBox();
       await box.delete(_settingsKey);
     } catch (e) {
-      throw SettingsException('删除设置失败: $e');
+      throw SettingsException('Failed to delete settings: $e');
     }
   }
 
@@ -81,7 +81,7 @@ class HiveSettingsRepository implements SettingsRepository {
     }
   }
 
-  /// 关闭数据库
+  /// Close database
   Future<void> close() async {
     if (_box != null && _box!.isOpen) {
       await _box!.close();
@@ -89,27 +89,27 @@ class HiveSettingsRepository implements SettingsRepository {
     }
   }
 
-  /// 清空所有设置
+  /// Clear all settings
   Future<void> clear() async {
     try {
       final box = await _getBox();
       await box.clear();
     } catch (e) {
-      throw SettingsException('清空设置失败: $e');
+      throw SettingsException('Failed to clear settings: $e');
     }
   }
 
-  /// 获取设置盒子的所有键
+  /// Get all keys from settings box
   Future<List<dynamic>> getAllKeys() async {
     try {
       final box = await _getBox();
       return box.keys.toList();
     } catch (e) {
-      throw SettingsException('获取设置键列表失败: $e');
+      throw SettingsException('Failed to get settings key list: $e');
     }
   }
 
-  /// 获取设置盒子的大小
+  /// Get settings box size
   Future<int> getSettingsCount() async {
     try {
       final box = await _getBox();
@@ -119,7 +119,7 @@ class HiveSettingsRepository implements SettingsRepository {
     }
   }
 
-  /// 备份设置到Map
+  /// Export settings to Map
   Future<Map<String, dynamic>> exportToMap() async {
     try {
       final settings = await getSettings();
@@ -128,32 +128,32 @@ class HiveSettingsRepository implements SettingsRepository {
       }
       return {};
     } catch (e) {
-      throw SettingsException('导出设置失败: $e');
+      throw SettingsException('Failed to export settings: $e');
     }
   }
 
-  /// 从Map恢复设置
+  /// Import settings from Map
   Future<void> importFromMap(Map<String, dynamic> data) async {
     try {
       final settings = AppSettings.fromJson(data);
       await saveSettings(settings);
     } catch (e) {
-      throw SettingsException('导入设置失败: $e');
+      throw SettingsException('Failed to import settings: $e');
     }
   }
 
-  /// 重置为默认设置
+  /// Reset to default settings
   Future<void> resetToDefaults() async {
     try {
       final defaultSettings = AppSettings.defaultSettings();
       await saveSettings(defaultSettings);
     } catch (e) {
-      throw SettingsException('重置设置失败: $e');
+      throw SettingsException('Failed to reset settings: $e');
     }
   }
 }
 
-/// 设置异常类
+/// Settings exception class
 class SettingsException implements Exception {
   final String message;
   
@@ -161,4 +161,4 @@ class SettingsException implements Exception {
   
   @override
   String toString() => 'SettingsException: $message';
-} 
+}

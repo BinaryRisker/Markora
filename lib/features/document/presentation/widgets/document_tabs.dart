@@ -27,7 +27,7 @@ class DocumentTabs extends ConsumerWidget {
         ),
         child: Center(
           child: Text(
-            '没有打开的文档',
+            'No open documents',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
@@ -201,8 +201,8 @@ class _NewTabButton extends ConsumerWidget {
           onTap: () async {
             try {
               await tabsNotifier.createNewDocumentTab(
-                title: '新建文档',
-                content: '# 新建文档\n\n开始编写您的内容...',
+                title: 'New Document',
+      content: '# New Document\n\nStart writing your content...',
               );
             } catch (e) {
               if (context.mounted) {

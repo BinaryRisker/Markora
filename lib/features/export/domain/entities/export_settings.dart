@@ -1,10 +1,10 @@
-/// 导出格式枚举
+/// Export format enumeration
 enum ExportFormat {
-  pdf('PDF', 'pdf', '便携式文档格式'),
-  html('HTML', 'html', '网页格式'),
-  docx('Word', 'docx', 'Microsoft Word文档'),
-  png('PNG', 'png', '便携式网络图形'),
-  jpeg('JPEG', 'jpeg', 'JPEG图像格式');
+  pdf('PDF', 'pdf', 'Portable Document Format'),
+  html('HTML', 'html', 'Web Page Format'),
+  docx('Word', 'docx', 'Microsoft Word Document'),
+  png('PNG', 'png', 'Portable Network Graphics'),
+   jpeg('JPEG', 'jpeg', 'JPEG Image Format');
 
   const ExportFormat(this.displayName, this.extension, this.description);
   
@@ -13,9 +13,9 @@ enum ExportFormat {
   final String description;
 }
 
-/// PDF导出设置
+/// PDF export settings
 class PdfExportSettings {
-  final String pageSize; // A4, A3, Letter等
+  final String pageSize; // A4, A3, Letter, etc.
   final double marginTop;
   final double marginBottom;
   final double marginLeft;
@@ -31,7 +31,7 @@ class PdfExportSettings {
 
   const PdfExportSettings({
     this.pageSize = 'A4',
-    this.marginTop = 72.0, // 1英寸 = 72点
+    this.marginTop = 72.0, // 1 inch = 72 points
     this.marginBottom = 72.0,
     this.marginLeft = 72.0,
     this.marginRight = 72.0,
@@ -78,9 +78,9 @@ class PdfExportSettings {
   }
 }
 
-/// HTML导出设置
+/// HTML export settings
 class HtmlExportSettings {
-  final String theme; // GitHub, Typora, Custom等
+  final String theme; // GitHub, Typora, Custom, etc.
   final bool includeInlineCss;
   final bool includeTableOfContents;
   final bool enableSyntaxHighlighting;
@@ -139,13 +139,13 @@ class HtmlExportSettings {
   }
 }
 
-/// 图像导出设置
+/// Image export settings
 class ImageExportSettings {
   final int width;
   final int height;
-  final double scale; // 缩放比例
-  final int quality; // JPEG质量 (1-100)
-  final bool transparentBackground; // PNG透明背景
+  final double scale; // Scale ratio
+  final int quality; // JPEG quality (1-100)
+  final bool transparentBackground; // PNG transparent background
   final String backgroundColor;
 
   const ImageExportSettings({
@@ -176,7 +176,7 @@ class ImageExportSettings {
   }
 }
 
-/// 综合导出设置
+/// Comprehensive export settings
 class ExportSettings {
   final ExportFormat format;
   final String outputPath;
@@ -216,7 +216,7 @@ class ExportSettings {
     );
   }
 
-  /// 获取完整文件路径
+  /// Get complete file path
   String get fullPath {
     final extension = format.extension;
     final name = fileName.endsWith('.$extension') ? fileName : '$fileName.$extension';
@@ -224,7 +224,7 @@ class ExportSettings {
   }
 }
 
-/// 导出进度信息
+/// Export progress information
 class ExportProgress {
   final double progress; // 0.0 - 1.0
   final String status;
@@ -261,7 +261,7 @@ class ExportProgress {
   }
 }
 
-/// 导出结果
+/// Export result
 class ExportResult {
   final bool success;
   final String? outputPath;
@@ -292,4 +292,4 @@ class ExportResult {
       errorMessage: errorMessage,
     );
   }
-} 
+}

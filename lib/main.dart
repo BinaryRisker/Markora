@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/generated/app_localizations.dart';
 
 import 'core/constants/app_constants.dart';
 import 'core/themes/app_theme.dart';
@@ -15,40 +17,40 @@ import 'features/plugins/domain/plugin_implementations.dart';
 import 'types/document.dart';
 
 
-// 全局文档仓库实例
+// Global document repository instance
 late HiveDocumentRepository globalDocumentRepository;
 
-/// 应用入口函数
+/// Application entry function
 void main() async {
-  // 确保Flutter组件绑定初始化
+  // Ensure Flutter widget binding initialization
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 初始化Hive本地存储
+  // Initialize Hive local storage
   await Hive.initFlutter();
   
-  // 清理可能存在的冲突数据
+  // Clean up possible conflicting data
   await _cleanupHiveData();
   
-  // 注册Hive适配器
+  // Register Hive adapters
   Hive.registerAdapter(ThemeModeAdapter());
   Hive.registerAdapter(AppSettingsAdapter());
   Hive.registerAdapter(DocumentTypeAdapter());
   Hive.registerAdapter(DocumentAdapter());
 
-  // 初始化文档仓库并创建示例数据
+  // Initialize document repository and create sample data
   globalDocumentRepository = HiveDocumentRepository();
   await globalDocumentRepository.init();
   await _createSampleDocuments(globalDocumentRepository);
 
-  // 初始化插件管理器
+  // Initialize plugin manager
   await _initializePluginManager();
 
-  // 运行应用
+  // Run application
   runApp(
-    // Riverpod状态管理容器
+    // Riverpod state management container
     ProviderScope(
       overrides: [
-        // 使用已初始化的仓库实例
+        // Use initialized repository instance
         documentRepositoryProvider.overrideWithValue(globalDocumentRepository),
       ],
       child: const MarkoraApp(),
@@ -56,30 +58,30 @@ void main() async {
   );
 }
 
-/// 清理Hive数据（防止TypeId冲突）
+/// Clean up Hive data (prevent TypeId conflicts)
 Future<void> _cleanupHiveData() async {
   try {
-    // 删除可能存在冲突的Box
+    // Delete potentially conflicting boxes
     if (await Hive.boxExists('documents')) {
       await Hive.deleteBoxFromDisk('documents');
     }
   } catch (e) {
-    // 忽略清理错误
-    print('清理Hive数据时出错: $e');
+    // Ignore cleanup errors
+    print('Hive data cleanup error: $e');
   }
 }
 
-// 全局插件系统实例
+// Global plugin system instance
 late SyntaxRegistryImpl globalSyntaxRegistry;
 late ToolbarRegistryImpl globalToolbarRegistry;
 late MenuRegistryImpl globalMenuRegistry;
 
-/// 初始化插件管理器
+/// Initialize plugin manager
 Future<void> _initializePluginManager() async {
   try {
     final pluginManager = PluginManager.instance;
     
-    // 创建真正的插件系统实例
+    // Create actual plugin system instance
     globalSyntaxRegistry = SyntaxRegistryImpl();
     globalToolbarRegistry = ToolbarRegistryImpl();
     globalMenuRegistry = MenuRegistryImpl();
@@ -91,16 +93,16 @@ Future<void> _initializePluginManager() async {
       menuRegistry: globalMenuRegistry,
     );
     
-    // 初始化插件管理器
+    // Initialize plugin manager
     await pluginManager.initialize(context);
     
-    print('插件管理器初始化完成');
+    print('Plugin manager initialized successfully');
   } catch (e) {
-    print('插件管理器初始化失败: $e');
+    print('Plugin manager initialization failed: $e');
   }
 }
 
-/// 简单的编辑器控制器实现
+/// Simple editor controller implementation
 class _SimpleEditorController implements EditorController {
   @override
   String get content => '';
@@ -126,123 +128,86 @@ class _SimpleEditorController implements EditorController {
 
 
 
-/// 创建示例文档
+/// Create sample documents
 Future<void> _createSampleDocuments(HiveDocumentRepository repo) async {
   final existingDocs = await repo.getAllDocuments();
   
-  // 如果已有文档，则不创建示例文档
+  // Don't create sample documents if documents already exist
   if (existingDocs.isNotEmpty) return;
 
-  // 创建示例文档
+  // Create sample documents - content will be generated dynamically in the app
+  // using the current language setting
   await repo.createDocument(
-    title: '欢迎使用Markora',
-    content: '''# 欢迎使用 Markora
+    title: 'Welcome Document', // This will be replaced by localized content in app.dart
+    content: '''# Welcome Document
 
-这是一个功能强大的 Markdown 编辑器，支持：
-
-## 核心功能
-
-- **实时预览** - 所见即所得的编辑体验
-- **语法高亮** - 支持多种编程语言
-- **数学公式** - 支持 LaTeX 数学公式
-- **图表支持** - 集成 Mermaid 图表
-
-## 快速开始
-
-1. 在左侧编辑器中输入 Markdown 内容
-2. 右侧会实时显示预览效果
-3. 使用工具栏快速插入格式
-
-### 代码示例
-
-```dart
-void main() {
-  print('Hello, Markora!');
-}
-```
-
-### 数学公式
-
-行内公式：\$E = mc^2\$
-
-块级公式：
-\$\$\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}\$\$
-
-### 表格
-
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| 编辑器 | ✅ | 完成 |
-| 预览 | ✅ | 完成 |
-| 数学公式 | ✅ | 完成 |
-
-> 开始你的 Markdown 创作之旅吧！''',
+This document will be replaced with localized content when the app starts.''',
   );
 
   await repo.createDocument(
-    title: '快速入门指南',
-    content: '''# Markora 快速入门指南
+    title: 'Quick Start Guide',
+    content: '''# Markora Quick Start Guide
 
-## 基本操作
+## Basic Operations
 
-### 文件操作
-- **新建文档**: Ctrl+N
-- **打开文档**: Ctrl+O
-- **保存文档**: Ctrl+S
-- **另存为**: Ctrl+Shift+S
+### File Operations
+- **New Document**: Ctrl+N
+- **Open Document**: Ctrl+O
+- **Save Document**: Ctrl+S
+- **Save As**: Ctrl+Shift+S
 
-### 编辑操作
-- **撤销**: Ctrl+Z
-- **重做**: Ctrl+Y
-- **复制**: Ctrl+C
-- **粘贴**: Ctrl+V
+### Edit Operations
+- **Undo**: Ctrl+Z
+- **Redo**: Ctrl+Y
+- **Copy**: Ctrl+C
+- **Paste**: Ctrl+V
 
-### 格式化
-- **粗体**: **文本** 或 Ctrl+B
-- **斜体**: *文本* 或 Ctrl+I
-- **代码**: `代码` 或 Ctrl+`
+### Formatting
+- **Bold**: **text** or Ctrl+B
+- **Italic**: *text* or Ctrl+I
+- **Code**: `code` or Ctrl+`
 
-## 高级功能
+## Advanced Features
 
-### Mermaid 图表
+### Mermaid Charts
 
 ```mermaid
 graph TD
-    A[开始] --> B{是否理解?}
-    B -->|是| C[继续学习]
-    B -->|否| D[重新阅读]
+    A[Start] --> B{Understand?}
+    B -->|Yes| C[Continue Learning]
+    B -->|No| D[Re-read]
     D --> B
-    C --> E[完成]
+    C --> E[Complete]
 ```
 
-### 数学公式
+### Math Formulas
 
-二次方程求根公式：
+Quadratic formula:
 \$\$x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}\$\$
 
-祝你使用愉快！''',
+Enjoy using Markora!''',
   );
 
   await repo.createDocument(
-    title: '我的笔记',
-    content: '''# 我的学习笔记
+    title: 'My Notes',
+    content: '''# My Study Notes
 
-## 今日任务
-- [ ] 学习Flutter开发
-- [ ] 完成项目文档
-- [x] 测试Markora编辑器
+## Today's Tasks
+- [ ] Learn Flutter development
+- [ ] Complete project documentation
+- [x] Test Markora editor
 
-## 重要概念
+## Important Concepts
 
 ### Widget
-Flutter中的一切都是Widget，包括：
-- StatelessWidget: 无状态组件
-- StatefulWidget: 有状态组件
+Everything in Flutter is a Widget, including:
+- StatelessWidget: Stateless component
+- StatefulWidget: Stateful component
 
-### 状态管理
-推荐使用Riverpod进行状态管理。
+### State Management
+Recommend using Riverpod for state management.
 
-## 代码片段
+## Code Snippets
 
 ```dart
 class MyWidget extends StatelessWidget {
@@ -255,32 +220,45 @@ class MyWidget extends StatelessWidget {
 }
 ```
 
-## 总结
-今天学到了很多新知识！''',
+## Summary
+Learned a lot of new knowledge today!''',
   );
 }
 
-/// Markora应用主类
+/// Markora application main class
 class MarkoraApp extends ConsumerWidget {
   const MarkoraApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 监听设置变化
+    // Listen to settings changes
     final settings = ref.watch(settingsProvider);
     
     return MaterialApp(
-      // 应用基本信息
+      // Application basic information
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
 
-      // 主题配置 - 响应设置变化
+      // Internationalization configuration
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''), // English
+        Locale('zh', ''), // Chinese
+      ],
+      locale: Locale(settings.language.split('-')[0]),
+
+      // Theme configuration - respond to settings changes
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: settings.themeMode,
 
-      // 应用主页
-      home: const AppShell(),
+      // Application home page
+      home: Builder(builder: (context) => const AppShell()),
     );
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/plugin_providers.dart';
 
-/// 插件搜索栏组件
+/// Plugin search bar component
 class PluginSearchBar extends ConsumerStatefulWidget {
   const PluginSearchBar({super.key});
   
@@ -18,7 +18,7 @@ class _PluginSearchBarState extends ConsumerState<PluginSearchBar> {
     super.initState();
     _controller = TextEditingController();
     
-    // 监听搜索状态变化
+    // Listen to search state changes
     ref.listenManual(pluginSearchProvider, (previous, next) {
       if (next != _controller.text) {
         _controller.text = next;
@@ -39,18 +39,18 @@ class _PluginSearchBarState extends ConsumerState<PluginSearchBar> {
     return TextField(
       controller: _controller,
       decoration: InputDecoration(
-        hintText: '搜索插件名称、描述或标签...',
+        hintText: 'Search plugin name, description or tags...',
         prefixIcon: const Icon(Icons.search),
         suffixIcon: searchQuery.isNotEmpty
             ? IconButton(
                 icon: const Icon(Icons.clear),
                 onPressed: _clearSearch,
-                tooltip: '清除搜索',
+                tooltip: 'Clear search',
               )
             : IconButton(
                 icon: const Icon(Icons.filter_list),
                 onPressed: _showAdvancedSearch,
-                tooltip: '高级搜索',
+                tooltip: 'Advanced search',
               ),
         border: const OutlineInputBorder(),
         contentPadding: const EdgeInsets.symmetric(
@@ -62,18 +62,18 @@ class _PluginSearchBarState extends ConsumerState<PluginSearchBar> {
         ref.read(pluginSearchProvider.notifier).state = value;
       },
       onSubmitted: (value) {
-        // 可以在这里添加搜索历史记录等功能
+        // Can add search history and other features here
       },
     );
   }
   
-  /// 清除搜索
+  /// Clear search
   void _clearSearch() {
     _controller.clear();
     ref.read(pluginSearchProvider.notifier).state = '';
   }
   
-  /// 显示高级搜索对话框
+  /// Show advanced search dialog
   void _showAdvancedSearch() {
     showDialog(
       context: context,
@@ -82,7 +82,7 @@ class _PluginSearchBarState extends ConsumerState<PluginSearchBar> {
   }
 }
 
-/// 高级搜索对话框
+/// Advanced search dialog
 class _AdvancedSearchDialog extends ConsumerStatefulWidget {
   const _AdvancedSearchDialog();
   
@@ -117,7 +117,7 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('高级搜索'),
+      title: const Text('Advanced Search'),
       content: SizedBox(
         width: 400,
         child: Column(
@@ -126,7 +126,7 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
-                labelText: '插件名称',
+                labelText: 'Plugin Name',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -134,7 +134,7 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
             TextField(
               controller: _authorController,
               decoration: const InputDecoration(
-                labelText: '作者',
+                labelText: 'Author',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -142,7 +142,7 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
             TextField(
               controller: _descriptionController,
               decoration: const InputDecoration(
-                labelText: '描述关键词',
+                labelText: 'Description Keywords',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -150,14 +150,14 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
             TextField(
               controller: _tagsController,
               decoration: const InputDecoration(
-                labelText: '标签 (用逗号分隔)',
+                labelText: 'Tags (comma separated)',
                 border: OutlineInputBorder(),
-                hintText: '例如: markdown, editor, syntax',
+                hintText: 'e.g: markdown, editor, syntax',
               ),
             ),
             const SizedBox(height: 16),
             const Text(
-              '提示: 高级搜索功能即将推出，目前仅支持基础搜索',
+              'Tip: Advanced search feature coming soon, currently only basic search is supported',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey,
@@ -169,21 +169,21 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: const Text('Cancel'),
         ),
         TextButton(
           onPressed: _clearAllFields,
-          child: const Text('清除'),
+          child: const Text('Clear'),
         ),
         FilledButton(
           onPressed: _performAdvancedSearch,
-          child: const Text('搜索'),
+          child: const Text('Search'),
         ),
       ],
     );
   }
   
-  /// 清除所有字段
+  /// Clear all fields
   void _clearAllFields() {
     _nameController.clear();
     _authorController.clear();
@@ -191,9 +191,9 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
     _tagsController.clear();
   }
   
-  /// 执行高级搜索
+  /// Execute advanced search
   void _performAdvancedSearch() {
-    // 构建搜索查询
+    // Build search query
     final searchTerms = <String>[];
     
     if (_nameController.text.isNotEmpty) {
@@ -211,19 +211,19 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
       );
     }
     
-    // 更新搜索查询
+    // Update search query
     final searchQuery = searchTerms.join(' ');
     ref.read(pluginSearchProvider.notifier).state = searchQuery;
     
     Navigator.of(context).pop();
     
-    // 显示搜索结果提示
+    // Show search result hint
     if (searchQuery.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('搜索: $searchQuery'),
+          content: Text('Search: $searchQuery'),
           action: SnackBarAction(
-            label: '清除',
+            label: 'Clear',
             onPressed: () {
               ref.read(pluginSearchProvider.notifier).state = '';
             },

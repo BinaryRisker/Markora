@@ -1,0 +1,779 @@
+{
+  "@@locale": "zh",
+  "appTitle": "Markora",
+  "@appTitle": {
+    "description": "应用程序标题"
+  },
+  
+  "welcomeTitle": "欢迎使用 Markora",
+  "@welcomeTitle": {
+    "description": "欢迎消息标题"
+  },
+  
+  "welcomeDescription": "这是一个功能强大的 Markdown 编辑器，支持：",
+  "@welcomeDescription": {
+    "description": "欢迎消息描述"
+  },
+  
+  "coreFeatures": "核心功能",
+  "@coreFeatures": {
+    "description": "核心功能部分标题"
+  },
+  
+  "realtimePreview": "实时预览",
+  "@realtimePreview": {
+    "description": "实时预览功能"
+  },
+  
+  "realtimePreviewDesc": "所见即所得的编辑体验",
+  "@realtimePreviewDesc": {
+    "description": "实时预览描述"
+  },
+  
+  "syntaxHighlighting": "语法高亮",
+  "@syntaxHighlighting": {
+    "description": "语法高亮功能"
+  },
+  
+  "syntaxHighlightingDesc": "支持多种编程语言",
+  "@syntaxHighlightingDesc": {
+    "description": "语法高亮描述"
+  },
+  
+  "mathFormulas": "数学公式",
+  "@mathFormulas": {
+    "description": "数学公式功能"
+  },
+  
+  "mathFormulasDesc": "支持 LaTeX 数学公式",
+  "@mathFormulasDesc": {
+    "description": "数学公式描述"
+  },
+  
+  "chartSupport": "图表支持",
+  "@chartSupport": {
+    "description": "图表支持功能"
+  },
+  
+  "chartSupportDesc": "集成 Mermaid 图表",
+  "@chartSupportDesc": {
+    "description": "图表支持描述"
+  },
+  
+  "quickStart": "快速开始",
+  "@quickStart": {
+    "description": "快速开始部分标题"
+  },
+  
+  "quickStartStep1": "在左侧编辑器中输入 Markdown 内容",
+  "@quickStartStep1": {
+    "description": "快速开始步骤1"
+  },
+  
+  "quickStartStep2": "右侧会实时显示预览效果",
+  "@quickStartStep2": {
+    "description": "快速开始步骤2"
+  },
+  
+  "quickStartStep3": "使用工具栏快速插入格式",
+  "@quickStartStep3": {
+    "description": "快速开始步骤3"
+  },
+  
+  "codeExample": "代码示例",
+  "@codeExample": {
+    "description": "代码示例部分标题"
+  },
+  
+  "inlineFormula": "行内公式",
+  "@inlineFormula": {
+    "description": "行内公式标签"
+  },
+  
+  "blockFormula": "块级公式",
+  "@blockFormula": {
+    "description": "块级公式标签"
+  },
+  
+  "feature": "功能",
+  "@feature": {
+    "description": "功能列标题"
+  },
+  
+  "status": "状态",
+  "@status": {
+    "description": "状态列标题"
+  },
+  
+  "description": "说明",
+  "@description": {
+    "description": "说明列标题"
+  },
+  
+  "editor": "编辑器",
+  "@editor": {
+    "description": "编辑器功能"
+  },
+  
+  "preview": "预览",
+  "@preview": {
+    "description": "预览功能"
+  },
+  
+  "completed": "完成",
+  "@completed": {
+    "description": "完成状态"
+  },
+  
+  "startJourney": "开始你的 Markdown 创作之旅吧！",
+  "@startJourney": {
+    "description": "开始旅程消息"
+  },
+  
+  "newDocument": "新建文档",
+  "@newDocument": {
+    "description": "新建文档按钮提示"
+  },
+  
+  "openDocument": "打开文档",
+  "@openDocument": {
+    "description": "打开文档按钮提示"
+  },
+  
+  "saveDocument": "保存文档",
+  "@saveDocument": {
+    "description": "保存文档按钮提示"
+  },
+  
+  "saveAs": "另存为",
+  "@saveAs": {
+    "description": "另存为按钮提示"
+  },
+  
+  "exportDocument": "导出文档",
+  "@exportDocument": {
+    "description": "导出文档按钮提示"
+  },
+  
+  "undo": "撤销",
+  "@undo": {
+    "description": "撤销按钮提示"
+  },
+  
+  "redo": "重做",
+  "@redo": {
+    "description": "重做按钮提示"
+  },
+  
+  "pluginManagement": "插件管理",
+  "@pluginManagement": {
+    "description": "插件管理按钮提示"
+  },
+  
+  "settings": "设置",
+  "@settings": {
+    "description": "设置按钮提示"
+  },
+  
+  "sourceMode": "源码",
+  "@sourceMode": {
+    "description": "源码模式标签"
+  },
+  
+  "splitMode": "分屏",
+  "@splitMode": {
+    "description": "分屏模式标签"
+  },
+  
+  "previewMode": "预览",
+  "@previewMode": {
+    "description": "预览模式标签"
+  },
+  
+  "characters": "字符",
+  "@characters": {
+    "description": "字符数标签"
+  },
+  
+  "words": "单词",
+  "@words": {
+    "description": "单词数标签"
+  },
+
+  "welcomeDocument": "欢迎文档",
+  "@welcomeDocument": {
+    "description": "欢迎文档标题"
+  },
+  
+  "lines": "行数",
+  "@lines": {
+    "description": "行数标签"
+  },
+  
+  "line": "行",
+  "@line": {
+    "description": "行位置标签"
+  },
+  
+  "column": "列",
+  "@column": {
+    "description": "列位置标签"
+  },
+  
+  "language": "语言",
+  "@language": {
+    "description": "语言设置标签"
+  },
+  
+  "theme": "主题",
+  "@theme": {
+    "description": "主题设置标签"
+  },
+  
+  "lightTheme": "浅色",
+  "@lightTheme": {
+    "description": "浅色主题选项"
+  },
+  
+  "darkTheme": "深色",
+  "@darkTheme": {
+    "description": "深色主题选项"
+  },
+  
+  "systemTheme": "跟随系统",
+  "@systemTheme": {
+    "description": "系统主题选项"
+  },
+  
+  "english": "English",
+  "@english": {
+    "description": "英语语言选项"
+  },
+  
+  "chinese": "中文",
+  "@chinese": {
+    "description": "中文语言选项"
+  },
+  
+  "startCreating": "开始你的创作...",
+  "@startCreating": {
+    "description": "开始创作提示"
+  },
+  
+  "documentCreated": "已创建新文档",
+  "@documentCreated": {
+    "description": "文档创建成功消息"
+  },
+  
+  "createDocumentFailed": "创建文档失败",
+  "@createDocumentFailed": {
+    "description": "文档创建失败消息"
+  },
+  
+  "openMarkdownFile": "打开Markdown文件",
+  "@openMarkdownFile": {
+    "description": "打开文件对话框标题"
+  },
+  
+  "documentOpened": "已打开文档",
+  "@documentOpened": {
+    "description": "文档打开成功消息"
+  },
+  
+  "openDocumentFailed": "打开文档失败",
+  "@openDocumentFailed": {
+    "description": "文档打开失败消息"
+  },
+  
+  "documentSaved": "文档已保存",
+  "@documentSaved": {
+    "description": "文档保存成功消息"
+  },
+  
+  "saveFailed": "保存失败",
+  "@saveFailed": {
+    "description": "文档保存失败消息"
+  },
+  
+  "documentSavedAs": "文档已保存为",
+  "@documentSavedAs": {
+    "description": "文档另存为成功消息"
+  },
+  
+  "untitledDocument": "未命名文档",
+  "@untitledDocument": {
+    "description": "未命名文档标题"
+  },
+  
+  "cursorPosition": "光标位置",
+  "@cursorPosition": {
+    "description": "光标位置标签"
+  },
+
+  "configure": "配置",
+  "@configure": {
+    "description": "配置按钮"
+  },
+
+  "save": "保存",
+  "@save": {
+    "description": "保存按钮"
+  },
+
+  "failedToLoadConfiguration": "加载配置失败",
+  "@failedToLoadConfiguration": {
+    "description": "加载配置失败错误消息"
+  },
+  "lightMode": "浅色模式",
+  "@lightMode": {
+    "description": "浅色主题模式选项"
+  },
+  "darkMode": "深色模式",
+  "@darkMode": {
+    "description": "深色主题模式选项"
+  },
+  "settingsPage": "设置",
+  "@settingsPage": {
+    "description": "设置页面标题"
+  },
+
+  "configuration": "配置",
+  "@configuration": {
+    "description": "配置标题"
+  },
+
+  "noConfigurableOptions": "此插件没有可配置的选项。",
+  "@noConfigurableOptions": {
+    "description": "无可配置选项消息"
+  },
+
+  "quickStartStep1": "在左侧编辑器中输入 Markdown 内容",
+  "@quickStartStep1": {
+    "description": "快速开始步骤1"
+  },
+
+  "quickStartStep2": "右侧会实时显示预览效果",
+  "@quickStartStep2": {
+    "description": "快速开始步骤2"
+  },
+
+  "quickStartStep3": "使用工具栏快速插入格式",
+  "@quickStartStep3": {
+    "description": "快速开始步骤3"
+  },
+
+  "appearanceSettings": "外观设置",
+  "@appearanceSettings": {
+    "description": "外观设置部分标题"
+  },
+
+  "editorSettings": "编辑器设置",
+  "@editorSettings": {
+    "description": "编辑器设置部分标题"
+  },
+
+  "behaviorSettings": "行为设置",
+  "@behaviorSettings": {
+    "description": "行为设置部分标题"
+  },
+
+  "about": "关于",
+  "@about": {
+    "description": "关于部分标题"
+  },
+
+  "themeMode": "主题模式",
+  "@themeMode": {
+    "description": "主题模式设置标签"
+  },
+
+  "followSystem": "跟随系统",
+  "@followSystem": {
+    "description": "跟随系统主题选项"
+  },
+
+  "light": "浅色",
+  "@light": {
+    "description": "浅色主题选项"
+  },
+
+  "dark": "深色",
+  "@dark": {
+    "description": "深色主题选项"
+  },
+
+  "fontSize": "字体大小",
+  "@fontSize": {
+    "description": "字体大小设置标签"
+  },
+
+  "showLineNumbers": "显示行号",
+  "@showLineNumbers": {
+    "description": "显示行号设置标签"
+  },
+
+  "enabled": "已启用",
+  "@enabled": {
+    "description": "已启用状态"
+  },
+
+  "disabled": "已禁用",
+  "@disabled": {
+    "description": "已禁用状态"
+  },
+
+  "wordWrap": "自动换行",
+  "@wordWrap": {
+    "description": "自动换行设置标签"
+  },
+
+  "defaultViewMode": "默认视图模式",
+  "@defaultViewMode": {
+    "description": "默认视图模式设置标签"
+  },
+
+  "autoSave": "自动保存",
+  "@autoSave": {
+    "description": "自动保存设置标签"
+  },
+
+  "autoSaveInterval": "自动保存间隔",
+  "@autoSaveInterval": {
+    "description": "自动保存间隔设置标签"
+  },
+
+  "seconds": "秒",
+  "@seconds": {
+    "description": "秒单位"
+  },
+
+  "livePreview": "实时预览",
+  "@livePreview": {
+    "description": "实时预览设置标签"
+  },
+
+  "version": "版本",
+  "@version": {
+    "description": "版本标签"
+  },
+
+  "installPlugin": "安装插件",
+  "@installPlugin": {
+    "description": "安装插件按钮提示"
+  },
+
+  "refresh": "刷新",
+  "@refresh": {
+    "description": "刷新按钮提示"
+  },
+
+  "allPlugins": "所有插件",
+  "@allPlugins": {
+    "description": "所有插件标签页标签"
+  },
+
+  "enabledPlugins": "已启用",
+  "@enabledPlugins": {
+    "description": "已启用插件标签页标签"
+  },
+
+  "pluginStore": "商店",
+  "@pluginStore": {
+    "description": "插件商店标签页标签"
+  },
+
+  "noPlugins": "无插件",
+  "@noPlugins": {
+    "description": "无插件消息"
+  },
+
+  "clickToInstallPlugins": "点击右上角的 + 按钮安装插件",
+  "@clickToInstallPlugins": {
+    "description": "安装插件说明"
+  },
+
+  "noEnabledPlugins": "无已启用插件",
+  "@noEnabledPlugins": {
+    "description": "无已启用插件消息"
+  },
+
+  "enablePluginsInAllTab": "在所有插件标签页中启用插件",
+  "@enablePluginsInAllTab": {
+    "description": "启用插件说明"
+  },
+
+  "comingSoon": "即将推出...",
+  "@comingSoon": {
+    "description": "即将推出消息"
+  },
+
+  "installFromFile": "从文件安装",
+  "@installFromFile": {
+    "description": "从文件安装选项"
+  },
+
+  "selectPluginFile": "选择插件文件 (.zip)",
+  "@selectPluginFile": {
+    "description": "选择插件文件描述"
+  },
+
+  "installFromUrl": "从URL安装",
+  "@installFromUrl": {
+    "description": "从URL安装选项"
+  },
+
+  "enterPluginUrl": "输入插件下载链接",
+  "@enterPluginUrl": {
+    "description": "输入插件URL描述"
+  },
+
+  "installFromStore": "从商店安装",
+  "@installFromStore": {
+    "description": "从商店安装选项"
+  },
+
+  "browsePluginStore": "浏览插件商店",
+  "@browsePluginStore": {
+    "description": "浏览插件商店描述"
+  },
+
+  "cancel": "取消",
+  "@cancel": {
+    "description": "取消按钮"
+  },
+
+  "install": "安装",
+  "@install": {
+    "description": "安装按钮"
+  },
+
+  "insert": "插入",
+  "@insert": {
+    "description": "插入按钮"
+  },
+
+  "pluginUrl": "插件URL",
+  "@pluginUrl": {
+    "description": "插件URL输入标签"
+  },
+
+  "pleaseSelectPluginFile": "请选择插件文件",
+  "@pleaseSelectPluginFile": {
+    "description": "选择插件文件提示"
+  },
+
+  "installFailed": "安装失败",
+  "@installFailed": {
+    "description": "安装失败消息"
+  },
+
+  "downloadingPlugin": "正在下载插件...",
+  "@downloadingPlugin": {
+    "description": "下载插件消息"
+  },
+
+  "urlInstallInDevelopment": "URL安装功能正在开发中",
+  "@urlInstallInDevelopment": {
+    "description": "URL安装开发消息"
+  },
+
+  "refreshComplete": "刷新完成",
+  "@refreshComplete": {
+    "description": "刷新完成消息"
+  },
+
+  "refreshFailed": "刷新失败",
+  "@refreshFailed": {
+    "description": "刷新失败消息"
+  },
+
+  "author": "作者",
+  "@author": {
+    "description": "作者标签"
+  },
+
+  "type": "类型",
+  "@type": {
+    "description": "类型标签"
+  },
+
+  "homepage": "主页",
+  "@homepage": {
+    "description": "主页标签"
+  },
+
+  "tags": "标签",
+  "@tags": {
+    "description": "标签标签"
+  },
+
+  "disable": "禁用",
+  "@disable": {
+    "description": "禁用按钮"
+  },
+
+  "enable": "启用",
+  "@enable": {
+    "description": "启用按钮"
+  },
+
+  "uninstall": "卸载",
+  "@uninstall": {
+    "description": "卸载按钮"
+  },
+
+  "close": "关闭",
+  "@close": {
+    "description": "关闭按钮"
+  },
+
+  "confirmUninstall": "确认卸载",
+  "@confirmUninstall": {
+    "description": "确认卸载对话框标题"
+  },
+
+  "uninstallConfirmation": "您确定要卸载插件 \"{pluginName}\" 吗？此操作无法撤销。",
+  "@uninstallConfirmation": {
+    "description": "卸载确认消息",
+    "placeholders": {
+      "pluginName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "pluginDisabled": "插件已禁用",
+  "@pluginDisabled": {
+    "description": "插件禁用成功消息"
+  },
+
+  "disablePluginFailed": "禁用插件失败",
+  "@disablePluginFailed": {
+    "description": "禁用插件失败消息"
+  },
+
+  "pluginEnabled": "插件已启用",
+  "@pluginEnabled": {
+    "description": "插件启用成功消息"
+  },
+
+  "enablePluginFailed": "启用插件失败",
+  "@enablePluginFailed": {
+    "description": "启用插件失败消息"
+  },
+
+  "pluginUninstalled": "插件已卸载",
+  "@pluginUninstalled": {
+    "description": "插件卸载成功消息"
+  },
+
+  "uninstallPluginFailed": "卸载插件失败",
+  "@uninstallPluginFailed": {
+    "description": "卸载插件失败消息"
+  },
+
+  "initializePluginManagerFailed": "初始化插件管理器失败",
+  "@initializePluginManagerFailed": {
+    "description": "初始化插件管理器失败消息"
+  },
+
+  "split": "分屏",
+  "@split": {
+    "description": "分屏视图模式"
+  },
+
+  "selectLanguage": "选择语言",
+  "@selectLanguage": {
+    "description": "选择语言标签"
+  },
+
+  "sourceMode": "源码模式",
+  "@sourceMode": {
+    "description": "源码模式选项"
+  },
+
+  "splitMode": "分屏模式",
+  "@splitMode": {
+    "description": "分屏模式选项"
+  },
+
+  "previewMode": "预览模式",
+  "@previewMode": {
+    "description": "预览模式选项"
+  },
+
+  "language": "语言",
+  "@language": {
+    "description": "语言设置"
+  },
+
+  "english": "英语",
+  "@english": {
+    "description": "英语选项"
+  },
+
+  "chinese": "中文",
+  "@chinese": {
+    "description": "中文选项"
+  },
+
+  "enterMarkdownContent": "在此输入 Markdown 内容...",
+  "@enterMarkdownContent": {
+    "description": "编辑器占位符文本"
+  },
+
+  "insertMathFormula": "插入数学公式",
+  "@insertMathFormula": {
+    "description": "数学公式对话框标题"
+  },
+
+  "formulaType": "公式类型：",
+  "@formulaType": {
+    "description": "公式类型标签"
+  },
+
+  "inlineFormulaOption": "行内公式",
+  "@inlineFormulaOption": {
+    "description": "行内公式选项"
+  },
+
+  "blockFormulaOption": "块级公式",
+  "@blockFormulaOption": {
+    "description": "块级公式选项"
+  },
+
+  "latexFormula": "LaTeX 公式",
+  "@latexFormula": {
+    "description": "LaTeX 公式输入标签"
+  },
+
+  "formulaExample": "例如：E = mc^2",
+  "@formulaExample": {
+    "description": "公式示例提示"
+  },
+
+  "commonFormulas": "常用公式：",
+  "@commonFormulas": {
+    "description": "常用公式标签"
+  },
+
+  "previewWillBeShownHere": "预览将在此处显示",
+  "@previewWillBeShownHere": {
+    "description": "预览占位符文本"
+  },
+
+  "seconds": "秒",
+  "@seconds": {
+    "description": "秒单位"
+  },
+
+  "livePreview": "实时预览",
+  "@livePreview": {
+    "description": "实时预览设置"
+  },
+
+  "editorTheme": "编辑器主题",
+  "@editorTheme": {
+    "description": "编辑器主题设置"
+  }
+}

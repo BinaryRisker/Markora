@@ -1,8 +1,8 @@
 import '../../../../types/syntax_highlighting.dart';
 
-/// 语法解析器服务
+/// Syntax parser service
 class SyntaxParser {
-  /// 解析代码并返回语法元素列表
+  /// Parse code and return syntax element list
   static List<SyntaxElement> parseCode(String code, ProgrammingLanguage? language) {
     if (language == null || code.isEmpty) {
       return [
@@ -19,7 +19,7 @@ class SyntaxParser {
     return _applyRules(code, rules);
   }
 
-  /// 获取指定语言的语法规则
+  /// Get syntax rules for specified language
   static List<SyntaxRule> _getLanguageRules(ProgrammingLanguage language) {
     switch (language) {
       case ProgrammingLanguage.dart:
@@ -44,12 +44,12 @@ class SyntaxParser {
     }
   }
 
-  /// 应用语法规则到代码
+  /// Apply syntax rules to code
   static List<SyntaxElement> _applyRules(String code, List<SyntaxRule> rules) {
     final elements = <SyntaxElement>[];
     final processedRanges = <_Range>[];
 
-    // 按优先级排序规则
+    // Sort rules by priority
     rules.sort((a, b) => b.priority.compareTo(a.priority));
 
     for (final rule in rules) {
@@ -59,7 +59,7 @@ class SyntaxParser {
         final start = match.start;
         final end = match.end;
         
-        // 检查是否与已处理的范围重叠
+        // Check if overlapping with processed ranges
         if (_isOverlapping(start, end, processedRanges)) {
           continue;
         }
@@ -75,16 +75,16 @@ class SyntaxParser {
       }
     }
 
-    // 填充未处理的文本为普通文本
+    // Fill unprocessed text as plain text
     _fillPlainText(code, elements, processedRanges);
 
-    // 按位置排序
+    // Sort by position
     elements.sort((a, b) => a.startIndex.compareTo(b.startIndex));
 
     return elements;
   }
 
-  /// 填充普通文本
+  /// Fill plain text
   static void _fillPlainText(String code, List<SyntaxElement> elements, List<_Range> processedRanges) {
     processedRanges.sort((a, b) => a.start.compareTo(b.start));
     
@@ -105,7 +105,7 @@ class SyntaxParser {
       currentIndex = range.end;
     }
 
-    // 处理最后剩余的文本
+    // Process remaining text at the end
     if (currentIndex < code.length) {
       final plainText = code.substring(currentIndex);
       if (plainText.isNotEmpty) {
@@ -119,7 +119,7 @@ class SyntaxParser {
     }
   }
 
-  /// 检查范围是否重叠
+  /// Check if ranges overlap
   static bool _isOverlapping(int start, int end, List<_Range> ranges) {
     for (final range in ranges) {
       if ((start >= range.start && start < range.end) ||
@@ -131,10 +131,10 @@ class SyntaxParser {
     return false;
   }
 
-  /// Dart语言规则
+  /// Dart language rules
   static List<SyntaxRule> _getDartRules() {
     return [
-      // 字符串 (高优先级)
+      // Strings (high priority)
       SyntaxRule(
         pattern: RegExp(r'"(?:[^"\\]|\\.)*"'),
         elementType: SyntaxElementType.string,
@@ -151,7 +151,7 @@ class SyntaxParser {
         priority: 10,
       ),
       
-      // 注释
+      // Comments
       SyntaxRule(
         pattern: RegExp(r'//.*$', multiLine: true),
         elementType: SyntaxElementType.comment,
@@ -164,42 +164,42 @@ class SyntaxParser {
         isMultiLine: true,
       ),
       
-      // 关键字
+      // Keywords
       SyntaxRule(
         pattern: RegExp(r'\b(abstract|as|assert|async|await|break|case|catch|class|const|continue|default|deferred|do|dynamic|else|enum|export|extends|external|factory|false|final|finally|for|get|hide|if|implements|import|in|interface|is|library|mixin|new|null|on|operator|part|rethrow|return|set|show|static|super|switch|sync|this|throw|true|try|typedef|var|void|while|with|yield)\b'),
         elementType: SyntaxElementType.keyword,
         priority: 8,
       ),
       
-      // 类型
+      // Types
       SyntaxRule(
         pattern: RegExp(r'\b(bool|int|double|num|String|List|Map|Set|Future|Stream|Object|Function)\b'),
         elementType: SyntaxElementType.type,
         priority: 7,
       ),
       
-      // 数字
+      // Numbers
       SyntaxRule(
         pattern: RegExp(r'\b\d+\.?\d*\b'),
         elementType: SyntaxElementType.number,
         priority: 6,
       ),
       
-      // 函数名
+      // Function names
       SyntaxRule(
         pattern: RegExp(r'\b[a-zA-Z_][a-zA-Z0-9_]*(?=\s*\()'),
         elementType: SyntaxElementType.function,
         priority: 5,
       ),
       
-      // 操作符
+      // Operators
       SyntaxRule(
         pattern: RegExp(r'[+\-*/=<>!&|^%~?:]'),
         elementType: SyntaxElementType.operator,
         priority: 4,
       ),
       
-      // 标点符号
+      // Punctuation
       SyntaxRule(
         pattern: RegExp(r'[{}()\[\];,.]'),
         elementType: SyntaxElementType.punctuation,
@@ -208,10 +208,10 @@ class SyntaxParser {
     ];
   }
 
-  /// JavaScript/TypeScript语言规则
+  /// JavaScript/TypeScript language rules
   static List<SyntaxRule> _getJavaScriptRules() {
     return [
-      // 字符串
+      // String
       SyntaxRule(
         pattern: RegExp(r'"(?:[^"\\]|\\.)*"'),
         elementType: SyntaxElementType.string,
@@ -228,7 +228,7 @@ class SyntaxParser {
         priority: 10,
       ),
       
-      // 注释
+      // Comment
       SyntaxRule(
         pattern: RegExp(r'//.*$', multiLine: true),
         elementType: SyntaxElementType.comment,
@@ -241,35 +241,35 @@ class SyntaxParser {
         isMultiLine: true,
       ),
       
-      // 关键字
+      // Keyword
       SyntaxRule(
         pattern: RegExp(r'\b(abstract|arguments|await|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|eval|export|extends|false|final|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|synchronized|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)\b'),
         elementType: SyntaxElementType.keyword,
         priority: 8,
       ),
       
-      // 数字
+      // Number
       SyntaxRule(
         pattern: RegExp(r'\b\d+\.?\d*\b'),
         elementType: SyntaxElementType.number,
         priority: 6,
       ),
       
-      // 函数名
+      // Function name
       SyntaxRule(
         pattern: RegExp(r'\b[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()'),
         elementType: SyntaxElementType.function,
         priority: 5,
       ),
       
-      // 操作符
+      // Operator
       SyntaxRule(
         pattern: RegExp(r'[+\-*/=<>!&|^%~?:]'),
         elementType: SyntaxElementType.operator,
         priority: 4,
       ),
       
-      // 标点符号
+      // Punctuation
       SyntaxRule(
         pattern: RegExp(r'[{}()\[\];,.]'),
         elementType: SyntaxElementType.punctuation,
@@ -278,10 +278,10 @@ class SyntaxParser {
     ];
   }
 
-  /// Python语言规则
+  /// Python language rules
   static List<SyntaxRule> _getPythonRules() {
     return [
-      // 字符串
+      // String
       SyntaxRule(
         pattern: RegExp(r'""".*?"""', multiLine: true, dotAll: true),
         elementType: SyntaxElementType.string,
@@ -305,42 +305,42 @@ class SyntaxParser {
         priority: 10,
       ),
       
-      // 注释
+      // Comment
       SyntaxRule(
         pattern: RegExp(r'#.*$', multiLine: true),
         elementType: SyntaxElementType.comment,
         priority: 9,
       ),
       
-      // 关键字
+      // Keyword
       SyntaxRule(
         pattern: RegExp(r'\b(False|None|True|and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield)\b'),
         elementType: SyntaxElementType.keyword,
         priority: 8,
       ),
       
-      // 数字
+      // Number
       SyntaxRule(
         pattern: RegExp(r'\b\d+\.?\d*\b'),
         elementType: SyntaxElementType.number,
         priority: 6,
       ),
       
-      // 函数名
+      // Function name
       SyntaxRule(
         pattern: RegExp(r'\b[a-zA-Z_][a-zA-Z0-9_]*(?=\s*\()'),
         elementType: SyntaxElementType.function,
         priority: 5,
       ),
       
-      // 操作符
+      // Operator
       SyntaxRule(
         pattern: RegExp(r'[+\-*/=<>!&|^%~]'),
         elementType: SyntaxElementType.operator,
         priority: 4,
       ),
       
-      // 标点符号
+      // Punctuation
       SyntaxRule(
         pattern: RegExp(r'[{}()\[\];,.:@]'),
         elementType: SyntaxElementType.punctuation,
@@ -349,10 +349,10 @@ class SyntaxParser {
     ];
   }
 
-  /// Java语言规则
+  /// Java language rules
   static List<SyntaxRule> _getJavaRules() {
     return [
-      // 字符串
+      // String
       SyntaxRule(
         pattern: RegExp(r'"(?:[^"\\]|\\.)*"'),
         elementType: SyntaxElementType.string,
@@ -364,7 +364,7 @@ class SyntaxParser {
         priority: 10,
       ),
       
-      // 注释
+      // Comment
       SyntaxRule(
         pattern: RegExp(r'//.*$', multiLine: true),
         elementType: SyntaxElementType.comment,
@@ -377,35 +377,35 @@ class SyntaxParser {
         isMultiLine: true,
       ),
       
-      // 关键字
+      // Keyword
       SyntaxRule(
         pattern: RegExp(r'\b(abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|extends|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|native|new|package|private|protected|public|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|void|volatile|while)\b'),
         elementType: SyntaxElementType.keyword,
         priority: 8,
       ),
       
-      // 数字
+      // Number
       SyntaxRule(
         pattern: RegExp(r'\b\d+\.?\d*[fFdDlL]?\b'),
         elementType: SyntaxElementType.number,
         priority: 6,
       ),
       
-      // 函数名
+      // Function name
       SyntaxRule(
         pattern: RegExp(r'\b[a-zA-Z_][a-zA-Z0-9_]*(?=\s*\()'),
         elementType: SyntaxElementType.function,
         priority: 5,
       ),
       
-      // 操作符
+      // Operator
       SyntaxRule(
         pattern: RegExp(r'[+\-*/=<>!&|^%~?:]'),
         elementType: SyntaxElementType.operator,
         priority: 4,
       ),
       
-      // 标点符号
+      // Punctuation
       SyntaxRule(
         pattern: RegExp(r'[{}()\[\];,.]'),
         elementType: SyntaxElementType.punctuation,
@@ -414,10 +414,10 @@ class SyntaxParser {
     ];
   }
 
-  /// HTML语言规则
+  /// HTML language rules
   static List<SyntaxRule> _getHtmlRules() {
     return [
-      // 注释
+      // Comment
       SyntaxRule(
         pattern: RegExp(r'<!--.*?-->', multiLine: true, dotAll: true),
         elementType: SyntaxElementType.comment,
@@ -425,21 +425,21 @@ class SyntaxParser {
         isMultiLine: true,
       ),
       
-      // 标签
+      // Tags
       SyntaxRule(
         pattern: RegExp(r'</?[a-zA-Z][a-zA-Z0-9]*'),
         elementType: SyntaxElementType.tag,
         priority: 8,
       ),
       
-      // 属性
+      // Attributes
       SyntaxRule(
         pattern: RegExp(r'\b[a-zA-Z-]+(?==)'),
         elementType: SyntaxElementType.attribute,
         priority: 7,
       ),
       
-      // 字符串（属性值）
+      // Strings (attribute values)
       SyntaxRule(
         pattern: RegExp(r'"[^"]*"'),
         elementType: SyntaxElementType.string,
@@ -451,7 +451,7 @@ class SyntaxParser {
         priority: 6,
       ),
       
-      // 标点符号
+      // Punctuation
       SyntaxRule(
         pattern: RegExp(r'[<>/=]'),
         elementType: SyntaxElementType.punctuation,
@@ -460,10 +460,10 @@ class SyntaxParser {
     ];
   }
 
-  /// CSS语言规则
+  /// CSS language rules
   static List<SyntaxRule> _getCssRules() {
     return [
-      // 注释
+      // Comment
       SyntaxRule(
         pattern: RegExp(r'/\*.*?\*/', multiLine: true, dotAll: true),
         elementType: SyntaxElementType.comment,
@@ -471,21 +471,21 @@ class SyntaxParser {
         isMultiLine: true,
       ),
       
-      // 选择器
+      // Selectors
       SyntaxRule(
         pattern: RegExp(r'[.#]?[a-zA-Z][a-zA-Z0-9-_]*(?=\s*{)'),
         elementType: SyntaxElementType.selector,
         priority: 8,
       ),
       
-      // 属性
+      // Property
       SyntaxRule(
         pattern: RegExp(r'\b[a-zA-Z-]+(?=\s*:)'),
         elementType: SyntaxElementType.property,
         priority: 7,
       ),
       
-      // 字符串
+      // String
       SyntaxRule(
         pattern: RegExp(r'"[^"]*"'),
         elementType: SyntaxElementType.string,
@@ -497,14 +497,14 @@ class SyntaxParser {
         priority: 6,
       ),
       
-      // 数字和单位
+      // Numbers and units
       SyntaxRule(
         pattern: RegExp(r'\b\d+\.?\d*[a-zA-Z%]*\b'),
         elementType: SyntaxElementType.number,
         priority: 5,
       ),
       
-      // 标点符号
+      // Punctuation
       SyntaxRule(
         pattern: RegExp(r'[{}();:,]'),
         elementType: SyntaxElementType.punctuation,
@@ -513,31 +513,31 @@ class SyntaxParser {
     ];
   }
 
-  /// JSON语言规则
+  /// JSON language rules
   static List<SyntaxRule> _getJsonRules() {
     return [
-      // 字符串
+      // String
       SyntaxRule(
         pattern: RegExp(r'"(?:[^"\\]|\\.)*"'),
         elementType: SyntaxElementType.string,
         priority: 10,
       ),
       
-      // 数字
+      // Number
       SyntaxRule(
         pattern: RegExp(r'-?\d+\.?\d*([eE][+-]?\d+)?'),
         elementType: SyntaxElementType.number,
         priority: 8,
       ),
       
-      // 关键字
+      // Keyword
       SyntaxRule(
         pattern: RegExp(r'\b(true|false|null)\b'),
         elementType: SyntaxElementType.keyword,
         priority: 7,
       ),
       
-      // 标点符号
+      // Punctuation
       SyntaxRule(
         pattern: RegExp(r'[{}\[\]:,]'),
         elementType: SyntaxElementType.punctuation,
@@ -546,24 +546,24 @@ class SyntaxParser {
     ];
   }
 
-  /// YAML语言规则
+  /// YAML language rules
   static List<SyntaxRule> _getYamlRules() {
     return [
-      // 注释
+      // Comment
       SyntaxRule(
         pattern: RegExp(r'#.*$', multiLine: true),
         elementType: SyntaxElementType.comment,
         priority: 9,
       ),
       
-      // 键
+      // Keys
       SyntaxRule(
         pattern: RegExp(r'^[a-zA-Z0-9_-]+(?=\s*:)', multiLine: true),
         elementType: SyntaxElementType.property,
         priority: 8,
       ),
       
-      // 字符串
+      // String
       SyntaxRule(
         pattern: RegExp(r'"[^"]*"'),
         elementType: SyntaxElementType.string,
@@ -575,21 +575,21 @@ class SyntaxParser {
         priority: 7,
       ),
       
-      // 数字
+      // Number
       SyntaxRule(
         pattern: RegExp(r'\b\d+\.?\d*\b'),
         elementType: SyntaxElementType.number,
         priority: 6,
       ),
       
-      // 关键字
+      // Keyword
       SyntaxRule(
         pattern: RegExp(r'\b(true|false|null|yes|no|on|off)\b'),
         elementType: SyntaxElementType.keyword,
         priority: 5,
       ),
       
-      // 标点符号
+      // Punctuation
       SyntaxRule(
         pattern: RegExp(r'[:\-|>]'),
         elementType: SyntaxElementType.punctuation,
@@ -598,10 +598,10 @@ class SyntaxParser {
     ];
   }
 
-  /// 基础语法规则（用于不支持的语言）
+  /// Basic syntax rules (for unsupported languages)
   static List<SyntaxRule> _getBasicRules() {
     return [
-      // 字符串
+      // String
       SyntaxRule(
         pattern: RegExp(r'"[^"]*"'),
         elementType: SyntaxElementType.string,
@@ -613,14 +613,14 @@ class SyntaxParser {
         priority: 10,
       ),
       
-      // 数字
+      // Number
       SyntaxRule(
         pattern: RegExp(r'\b\d+\.?\d*\b'),
         elementType: SyntaxElementType.number,
         priority: 6,
       ),
       
-      // 标点符号
+      // Punctuation
       SyntaxRule(
         pattern: RegExp(r'[{}()\[\];,.]'),
         elementType: SyntaxElementType.punctuation,
@@ -630,10 +630,10 @@ class SyntaxParser {
   }
 }
 
-/// 范围类
+/// Range class
 class _Range {
   const _Range(this.start, this.end);
   
   final int start;
   final int end;
-} 
+}

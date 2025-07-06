@@ -8,7 +8,7 @@ import '../../../../types/document.dart';
 import '../providers/document_providers.dart';
 import '../../../export/domain/entities/export_settings.dart';
 
-/// 文件保存格式
+/// File save format
 enum SaveFormat {
   markdown('Markdown', '.md', 'Markdown文件'),
   html('HTML', '.html', 'HTML文件'),
@@ -22,7 +22,7 @@ enum SaveFormat {
   final String extension;
   final String description;
   
-  /// 转换为ExportFormat（如果适用）
+  /// Convert to ExportFormat (if applicable)
   ExportFormat? toExportFormat() {
     switch (this) {
       case SaveFormat.html:
@@ -33,12 +33,12 @@ enum SaveFormat {
         return ExportFormat.docx;
       case SaveFormat.markdown:
       case SaveFormat.txt:
-        return null; // 这些格式直接保存，不需要导出
+        return null; // These formats are saved directly, no export needed
     }
   }
 }
 
-/// 文件保存结果
+/// File save result
 class SaveResult {
   const SaveResult({
     required this.filePath,
@@ -51,7 +51,7 @@ class SaveResult {
   final String fileName;
 }
 
-/// 文件另存为对话框
+/// File save as dialog
 class SaveAsDialog extends ConsumerStatefulWidget {
   const SaveAsDialog({
     super.key,
@@ -81,11 +81,11 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
     super.initState();
     _selectedFormat = widget.initialFormat;
     
-    // 初始化文件名（去掉扩展名）
+    // Initialize filename (remove extension)
     final baseName = path.basenameWithoutExtension(widget.document.title);
     _fileNameController = TextEditingController(text: baseName);
     
-    // 初始化路径
+    // Initialize path
     _selectedDirectory = widget.initialPath ?? _getDefaultSaveDirectory();
     _pathController = TextEditingController(text: _selectedDirectory);
   }
@@ -97,10 +97,10 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
     super.dispose();
   }
 
-  /// 获取默认保存目录
+  /// Get default save directory
   String _getDefaultSaveDirectory() {
     try {
-      // 尝试获取用户文档目录
+      // Try to get user documents directory
       final homeDir = Platform.environment['USERPROFILE'] ?? 
                      Platform.environment['HOME'] ?? 
                      Directory.current.path;
@@ -116,14 +116,14 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
     }
   }
 
-  /// 选择保存目录
+  /// Select save directory
   Future<void> _selectDirectory() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 这里应该使用文件选择器，暂时使用简单的目录输入
+      // Should use file picker here, temporarily use simple directory input
       final result = await showDialog<String>(
         context: context,
         builder: (context) => _DirectoryPickerDialog(
@@ -153,7 +153,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
     }
   }
 
-  /// 验证输入
+  /// Validate input
   String? _validateInput() {
     final fileName = _fileNameController.text.trim();
     if (fileName.isEmpty) {
@@ -169,7 +169,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
       return '选择的目录不存在';
     }
 
-    // 检查文件名是否包含非法字符
+    // Check if filename contains illegal characters
     final invalidChars = RegExp(r'[<>:"/\\|?*]');
     if (invalidChars.hasMatch(fileName)) {
       return '文件名包含非法字符';
@@ -178,7 +178,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
     return null;
   }
 
-  /// 保存文件
+  /// Save file
   void _saveFile() async {
     final error = _validateInput();
     if (error != null) {
@@ -200,12 +200,12 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
       final fullFileName = '$fileName${_selectedFormat.extension}';
       final filePath = path.join(_selectedDirectory!, fullFileName);
 
-      // 根据格式选择保存方式
+      // Choose save method based on format
       final fileService = ref.read(fileServiceProvider);
       final exportFormat = _selectedFormat.toExportFormat();
       
       if (exportFormat != null) {
-        // 需要导出的格式（HTML、PDF、DOCX）
+        // Formats that need export (HTML, PDF, DOCX)
         final settings = ExportSettings(
           format: exportFormat,
           outputPath: '',
@@ -213,7 +213,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
         );
         await fileService.exportDocument(widget.document, settings, targetPath: filePath);
       } else {
-        // 直接保存的格式（Markdown、纯文本）
+        // Formats that save directly (Markdown, plain text)
         await fileService.saveDocumentToFile(widget.document, filePath);
       }
 
@@ -266,7 +266,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 文件名输入
+            // Filename input
             Text(
               '文件名',
               style: theme.textTheme.labelMedium,
@@ -281,7 +281,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
             ),
             const SizedBox(height: 16),
             
-            // 保存格式选择
+            // Save format selection
             Text(
               '保存格式',
               style: theme.textTheme.labelMedium,
@@ -319,7 +319,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
             ),
             const SizedBox(height: 16),
             
-            // 保存路径选择
+            // Save path selection
             Text(
               '保存位置',
               style: theme.textTheme.labelMedium,
@@ -355,7 +355,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
               ],
             ),
             
-            // 预览完整路径
+            // Preview full path
             if (_selectedDirectory != null && _fileNameController.text.isNotEmpty) ...[
               const SizedBox(height: 16),
               Container(
@@ -410,7 +410,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
   }
 }
 
-/// 简单的目录选择对话框
+/// Simple directory selection dialog
 class _DirectoryPickerDialog extends StatefulWidget {
   const _DirectoryPickerDialog({
     required this.initialPath,
@@ -469,7 +469,7 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 路径输入
+            // Path input
             TextField(
               controller: _pathController,
               decoration: const InputDecoration(
@@ -480,7 +480,7 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog> {
             ),
             const SizedBox(height: 16),
             
-            // 常用路径
+            // Common paths
             Text(
               '常用位置',
               style: theme.textTheme.labelMedium,

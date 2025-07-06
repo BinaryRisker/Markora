@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-/// 数学公式类型
+/// Math formula type
 enum MathType {
-  /// 行内公式 $...$
+  /// Inline formula $...$
   inline,
-  /// 块级公式 $$...$$
+  /// Block formula $$...$$
   block,
 }
 
-/// 数学公式实体
+/// Math formula entity
 class MathFormula {
   const MathFormula({
     required this.type,
@@ -18,19 +18,19 @@ class MathFormula {
     required this.endIndex,
   });
 
-  /// 公式类型
+  /// Formula type
   final MathType type;
   
-  /// 解析后的LaTeX内容
+  /// Parsed LaTeX content
   final String content;
   
-  /// 原始内容（包含$符号）
+  /// Original content (including $ symbols)
   final String rawContent;
   
-  /// 在原文本中的开始位置
+  /// Start position in original text
   final int startIndex;
   
-  /// 在原文本中的结束位置
+  /// End position in original text
   final int endIndex;
 
   @override
@@ -39,25 +39,25 @@ class MathFormula {
   }
 }
 
-/// 数学公式解析器
+/// Math formula parser
 class MathParser {
-  /// 解析文本中的数学公式
+  /// Parse math formulas in text
   static List<MathFormula> parseFormulas(String text) {
     final formulas = <MathFormula>[];
     
-    // 先解析块级公式 $$...$$
+    // Parse block formulas $$...$$ first
     formulas.addAll(_parseBlockFormulas(text));
     
-    // 再解析行内公式 $...$（避免与块级公式冲突）
+    // Then parse inline formulas $...$ (avoid conflicts with block formulas)
     formulas.addAll(_parseInlineFormulas(text, formulas));
     
-    // 按位置排序
+    // Sort by position
     formulas.sort((a, b) => a.startIndex.compareTo(b.startIndex));
     
     return formulas;
   }
 
-  /// 解析块级公式 $$...$$
+  /// Parse block formulas $$...$$
   static List<MathFormula> _parseBlockFormulas(String text) {
     final formulas = <MathFormula>[];
     final regex = RegExp(r'\$\$(.+?)\$\$', multiLine: true, dotAll: true);
@@ -80,7 +80,7 @@ class MathParser {
     return formulas;
   }
 
-  /// 解析行内公式 $...$
+  /// Parse inline formulas $...$
   static List<MathFormula> _parseInlineFormulas(String text, List<MathFormula> existingFormulas) {
     final formulas = <MathFormula>[];
     final regex = RegExp(r'\$([^\$\n]+?)\$');
@@ -89,7 +89,7 @@ class MathParser {
       final startIndex = match.start;
       final endIndex = match.end;
       
-      // 检查是否与已有的块级公式重叠
+      // Check if overlaps with existing block formulas
       bool isOverlapping = false;
       for (final existing in existingFormulas) {
         if (startIndex >= existing.startIndex && endIndex <= existing.endIndex) {
@@ -117,14 +117,14 @@ class MathParser {
     return formulas;
   }
 
-  /// 验证是否为有效的数学内容
+  /// Validate if it's valid math content
   static bool _isValidMathContent(String content) {
-    // 基本验证：包含数学符号或函数
+    // Basic validation: contains math symbols or functions
     final mathSymbols = RegExp(r'[\+\-\*\/\=\^\{\}\(\)\[\]\\]|\\[a-zA-Z]+|\d');
     return mathSymbols.hasMatch(content);
   }
 
-  /// 替换文本中的数学公式为占位符
+  /// Replace math formulas in text with placeholders
   static String replaceMathWithPlaceholders(String text, List<MathFormula> formulas) {
     String result = text;
     int offset = 0;
@@ -146,10 +146,10 @@ class MathParser {
     return result;
   }
 
-  /// 验证LaTeX语法
+  /// Validate LaTeX syntax
   static bool validateLatex(String latex) {
     try {
-      // 基本的括号匹配检查
+      // Basic bracket matching check
       int braceCount = 0;
       int parenCount = 0;
       int bracketCount = 0;
@@ -186,48 +186,48 @@ class MathParser {
     }
   }
 
-  /// 预处理LaTeX内容
+  /// Preprocess LaTeX content
   static String preprocessLatex(String latex) {
     return latex
-        .replaceAll('\\\\', '\\\\\\\\') // 转义反斜杠
-        .replaceAll('\n', ' ') // 将换行转为空格
+        .replaceAll('\\\\', '\\\\\\\\') // Escape backslashes
+        .replaceAll('\n', ' ') // Convert newlines to spaces
         .trim();
   }
 
-  /// 获取常用的数学公式示例
+  /// Get common math formula examples
   static List<String> getMathExamples() {
     return [
-      // 基础数学
+      // Basic math
       'E = mc^2',
       'a^2 + b^2 = c^2',
       '\\pi r^2',
       
-      // 分数
+      // Fractions
       '\\frac{1}{2}',
       '\\frac{a}{b}',
       
-      // 根号
+      // Square roots
       '\\sqrt{x}',
       '\\sqrt[3]{x}',
       
-      // 积分
+      // Integrals
       '\\int_0^\\infty e^{-x^2} dx',
       '\\int_a^b f(x) dx',
       
-      // 求和
+      // Summation
       '\\sum_{i=1}^n i = \\frac{n(n+1)}{2}',
       '\\sum_{k=0}^\\infty \\frac{x^k}{k!} = e^x',
       
-      // 极限
+      // Limits
       '\\lim_{x \\to 0} \\frac{\\sin x}{x} = 1',
       '\\lim_{n \\to \\infty} \\left(1 + \\frac{1}{n}\\right)^n = e',
       
-      // 矩阵
+      // Matrices
       '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}',
       
-      // 希腊字母
+      // Greek letters
       '\\alpha, \\beta, \\gamma, \\delta',
       '\\sin(\\theta), \\cos(\\phi)',
     ];
   }
-} 
+}

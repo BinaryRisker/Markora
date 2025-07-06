@@ -1,19 +1,19 @@
 import '../../../types/plugin.dart';
 
-/// 示例插件数据
+/// Sample plugin data
 class SamplePlugins {
   static List<Plugin> getSamplePlugins() {
     return [
-      // 语法插件
+      // Syntax plugin
       Plugin(
         metadata: PluginMetadata(
           id: 'syntax-highlight-plus',
-          name: '语法高亮增强',
+          name: 'Enhanced Syntax Highlighting',
           version: '1.2.0',
-          description: '为 Markdown 编辑器提供更丰富的语法高亮支持，包括多种编程语言和主题。',
+          description: 'Provides richer syntax highlighting support for Markdown editor, including multiple programming languages and themes.',
           author: 'Markora Team',
           type: PluginType.syntax,
-          tags: ['语法高亮', '编程语言', '主题'],
+          tags: ['Syntax Highlighting', 'Programming Languages', 'Themes'],
           homepage: 'https://github.com/markora/syntax-highlight-plus',
           repository: 'https://github.com/markora/syntax-highlight-plus',
           license: 'MIT',
@@ -26,16 +26,16 @@ class SamplePlugins {
         lastUpdated: DateTime.now().subtract(const Duration(days: 25)),
       ),
       
-      // 主题插件
+      // Theme plugin
       Plugin(
         metadata: PluginMetadata(
           id: 'dark-theme-pro',
-          name: '专业暗色主题',
+          name: 'Professional Dark Theme',
           version: '2.1.3',
-          description: '精心设计的暗色主题，提供舒适的夜间编辑体验，支持多种配色方案。',
+          description: 'Carefully designed dark theme providing comfortable night editing experience with multiple color schemes.',
           author: 'ThemeStudio',
           type: PluginType.theme,
-          tags: ['暗色主题', '夜间模式', '护眼'],
+          tags: ['Dark Theme', 'Night Mode', 'Eye Protection'],
           homepage: 'https://themestudio.com/dark-theme-pro',
           repository: 'https://github.com/themestudio/dark-theme-pro',
           license: 'Apache-2.0',
@@ -48,16 +48,16 @@ class SamplePlugins {
         lastUpdated: DateTime.now().subtract(const Duration(days: 10)),
       ),
       
-      // 工具插件
+      // Tool plugin
       Plugin(
         metadata: PluginMetadata(
           id: 'table-editor',
-          name: '表格编辑器',
+          name: 'Table Editor',
           version: '1.5.2',
-          description: '可视化表格编辑工具，支持拖拽调整、快速插入和格式化表格。',
+          description: 'Visual table editing tool supporting drag-and-drop adjustment, quick insertion and table formatting.',
           author: 'TableTools Inc.',
           type: PluginType.tool,
-          tags: ['表格', '编辑器', '可视化'],
+          tags: ['Table', 'Editor', 'Visual'],
           homepage: 'https://tabletools.com/editor',
           repository: 'https://github.com/tabletools/table-editor',
           license: 'MIT',
@@ -69,16 +69,16 @@ class SamplePlugins {
         installDate: DateTime.now().subtract(const Duration(days: 7)),
       ),
       
-      // 导出插件
+      // Export plugin
       Plugin(
         metadata: PluginMetadata(
           id: 'pdf-exporter',
-          name: 'PDF 导出器',
+          name: 'PDF Exporter',
           version: '3.0.1',
-          description: '高质量 PDF 导出功能，支持自定义样式、页眉页脚和水印。',
+          description: 'High-quality PDF export functionality supporting custom styles, headers, footers and watermarks.',
           author: 'ExportMaster',
           type: PluginType.export,
-          tags: ['PDF', '导出', '打印'],
+          tags: ['PDF', 'Export', 'Print'],
           homepage: 'https://exportmaster.com/pdf',
           repository: 'https://github.com/exportmaster/pdf-exporter',
           license: 'Commercial',
@@ -91,16 +91,16 @@ class SamplePlugins {
         lastUpdated: DateTime.now().subtract(const Duration(days: 5)),
       ),
       
-      // 渲染器插件
+      // Renderer plugin
       Plugin(
         metadata: PluginMetadata(
           id: 'math-renderer',
-          name: '数学公式渲染器',
+          name: 'Math Formula Renderer',
           version: '2.3.0',
-          description: '支持 LaTeX 数学公式的实时渲染，包括行内公式和块级公式。',
+          description: 'Supports real-time rendering of LaTeX mathematical formulas, including inline and block formulas.',
           author: 'MathWorks',
           type: PluginType.renderer,
-          tags: ['数学', 'LaTeX', '公式'],
+          tags: ['Math', 'LaTeX', 'Formula'],
           homepage: 'https://mathworks.com/renderer',
           repository: 'https://github.com/mathworks/math-renderer',
           license: 'BSD-3-Clause',
@@ -113,16 +113,16 @@ class SamplePlugins {
         lastUpdated: DateTime.now().subtract(const Duration(days: 40)),
       ),
       
-      // 导入插件
+      // Import plugin
       Plugin(
         metadata: PluginMetadata(
           id: 'docx-importer',
-          name: 'Word 文档导入器',
+          name: 'Word Document Importer',
           version: '1.8.5',
-          description: '将 Microsoft Word 文档转换为 Markdown 格式，保持原有格式和结构。',
+          description: 'Converts Microsoft Word documents to Markdown format while preserving original formatting and structure.',
           author: 'ConvertPro',
           type: PluginType.import,
-          tags: ['Word', 'DOCX', '导入', '转换'],
+          tags: ['Word', 'DOCX', 'Import', 'Convert'],
           homepage: 'https://convertpro.com/docx',
           repository: 'https://github.com/convertpro/docx-importer',
           license: 'GPL-3.0',
@@ -134,16 +134,16 @@ class SamplePlugins {
         installDate: DateTime.now().subtract(const Duration(days: 12)),
       ),
       
-      // 组件插件
+      // Widget plugin
       Plugin(
         metadata: PluginMetadata(
           id: 'mermaid-diagrams',
-          name: 'Mermaid 图表',
+          name: 'Mermaid Diagrams',
           version: '4.2.1',
-          description: '支持 Mermaid 语法的流程图、时序图、甘特图等多种图表类型。',
+          description: 'Supports various diagram types including flowcharts, sequence diagrams, and Gantt charts using Mermaid syntax.',
           author: 'DiagramStudio',
           type: PluginType.widget,
-          tags: ['图表', 'Mermaid', '流程图', '时序图'],
+          tags: ['Diagrams', 'Mermaid', 'Flowchart', 'Sequence'],
           homepage: 'https://diagramstudio.com/mermaid',
           repository: 'https://github.com/diagramstudio/mermaid-diagrams',
           license: 'MIT',
@@ -156,16 +156,16 @@ class SamplePlugins {
         lastUpdated: DateTime.now().subtract(const Duration(days: 55)),
       ),
       
-      // 错误状态插件
+      // Error status plugin
       Plugin(
         metadata: PluginMetadata(
           id: 'broken-plugin',
-          name: '损坏的插件',
+          name: 'Broken Plugin',
           version: '0.1.0',
-          description: '这是一个用于测试错误状态的示例插件。',
+          description: 'This is a sample plugin for testing error status.',
           author: 'Test Author',
           type: PluginType.other,
-          tags: ['测试', '错误'],
+          tags: ['Test', 'Error'],
           license: 'MIT',
           minVersion: '1.0.0',
           maxVersion: '2.0.0',
@@ -173,19 +173,19 @@ class SamplePlugins {
         status: PluginStatus.error,
         installPath: '/plugins/broken-plugin',
         installDate: DateTime.now().subtract(const Duration(days: 3)),
-        errorMessage: '插件初始化失败：缺少必要的依赖项',
+        errorMessage: 'Plugin initialization failed: missing required dependencies',
       ),
       
-      // 加载中状态插件
+      // Loading status plugin
       Plugin(
         metadata: PluginMetadata(
           id: 'loading-plugin',
-          name: '正在加载的插件',
+          name: 'Loading Plugin',
           version: '1.0.0',
-          description: '这是一个用于测试加载状态的示例插件。',
+          description: 'This is a sample plugin for testing loading status.',
           author: 'Test Author',
           type: PluginType.tool,
-          tags: ['测试', '加载'],
+          tags: ['Test', 'Loading'],
           license: 'MIT',
           minVersion: '1.0.0',
           maxVersion: '2.0.0',
@@ -197,7 +197,7 @@ class SamplePlugins {
     ];
   }
   
-  /// 获取插件配置示例
+  /// Get sample plugin configurations
   static Map<String, PluginConfig> getSampleConfigs() {
     return {
       'syntax-highlight-plus': PluginConfig(

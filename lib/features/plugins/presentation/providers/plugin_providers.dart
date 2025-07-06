@@ -4,30 +4,30 @@ import '../../../../types/plugin.dart';
 import '../../domain/plugin_manager.dart';
 import '../../domain/plugin_interface.dart';
 
-/// 插件管理器Provider
+/// Plugin manager Provider
 final pluginManagerProvider = ChangeNotifierProvider<PluginManager>((ref) {
   return PluginManager.instance;
 });
 
-/// 所有插件列表
+/// All plugins list
 final pluginsProvider = Provider<List<Plugin>>((ref) {
   final manager = ref.watch(pluginManagerProvider);
   return manager.plugins;
 });
 
-/// 已加载插件列表Provider
+/// Loaded plugins list Provider
 final loadedPluginsProvider = Provider<List<Plugin>>((ref) {
   final manager = ref.watch(pluginManagerProvider);
   return manager.loadedPlugins;
 });
 
-/// 已启用插件列表Provider
+/// Enabled plugins list Provider
 final enabledPluginsProvider = Provider<List<Plugin>>((ref) {
   final manager = ref.watch(pluginManagerProvider);
   return manager.enabledPlugins;
 });
 
-/// 按类型分组的插件Provider
+/// Plugins grouped by type Provider
 final pluginsByTypeProvider = Provider<Map<PluginType, List<Plugin>>>((ref) {
   final plugins = ref.watch(pluginsProvider);
   final Map<PluginType, List<Plugin>> grouped = {};
@@ -40,10 +40,10 @@ final pluginsByTypeProvider = Provider<Map<PluginType, List<Plugin>>>((ref) {
   return grouped;
 });
 
-/// 插件搜索Provider
+/// Plugin search Provider
 final pluginSearchProvider = StateProvider<String>((ref) => '');
 
-/// 过滤后的插件列表Provider
+/// Filtered plugins list Provider
 final filteredPluginsProvider = Provider<List<Plugin>>((ref) {
   final plugins = ref.watch(pluginsProvider);
   final searchQuery = ref.watch(pluginSearchProvider);
@@ -61,13 +61,13 @@ final filteredPluginsProvider = Provider<List<Plugin>>((ref) {
   }).toList();
 });
 
-/// 插件类型过滤Provider
+/// Plugin type filter Provider
 final pluginTypeFilterProvider = StateProvider<PluginType?>((ref) => null);
 
-/// 插件状态过滤Provider
+/// Plugin status filter Provider
 final pluginStatusFilterProvider = StateProvider<PluginStatus?>((ref) => null);
 
-/// 应用过滤器后的插件列表Provider
+/// Plugins list after applying filters Provider
 final filteredPluginsByFiltersProvider = Provider<List<Plugin>>((ref) {
   final plugins = ref.watch(filteredPluginsProvider);
   final typeFilter = ref.watch(pluginTypeFilterProvider);
@@ -86,29 +86,29 @@ final filteredPluginsByFiltersProvider = Provider<List<Plugin>>((ref) {
   return filtered;
 });
 
-/// 单个插件Provider
+/// Single plugin Provider
 final pluginProvider = Provider.family<Plugin?, String>((ref, pluginId) {
   final manager = ref.watch(pluginManagerProvider);
   return manager.getPlugin(pluginId);
 });
 
-/// 插件配置Provider
+/// Plugin configuration Provider
 final pluginConfigProvider = FutureProvider.family<PluginConfig?, String>((ref, pluginId) async {
   final manager = ref.watch(pluginManagerProvider);
   return manager.getPluginConfig(pluginId);
 });
 
-/// 插件操作Provider
+/// Plugin actions Provider
 final pluginActionsProvider = Provider<PluginActions>((ref) {
   final manager = ref.watch(pluginManagerProvider);
   return PluginActions(manager);
 });
 
-/// 插件统计信息Provider
+/// Plugin statistics Provider
 final pluginStatsProvider = Provider<PluginStats>((ref) {
   final plugins = ref.watch(pluginsProvider);
   
-  // 按类型统计
+  // Statistics by type
   final pluginsByType = <PluginType, int>{};
   for (final type in PluginType.values) {
     pluginsByType[type] = plugins.where((p) => p.metadata.type == type).length;
@@ -126,79 +126,79 @@ final pluginStatsProvider = Provider<PluginStats>((ref) {
   return stats;
 });
 
-/// 插件操作类
+/// Plugin actions class
 class PluginActions {
   final PluginManager _manager;
   
   PluginActions(this._manager);
   
-  /// 启用插件
+  /// Enable plugin
   Future<bool> enablePlugin(String pluginId) async {
     try {
       await _manager.enablePlugin(pluginId);
       return true;
     } catch (e) {
-      debugPrint('启用插件失败: $e');
+      debugPrint('Failed to enable plugin: $e');
       return false;
     }
   }
   
-  /// 禁用插件
+  /// Disable plugin
   Future<bool> disablePlugin(String pluginId) async {
     try {
       await _manager.disablePlugin(pluginId);
       return true;
     } catch (e) {
-      debugPrint('禁用插件失败: $e');
+      debugPrint('Failed to disable plugin: $e');
       return false;
     }
   }
   
-  /// 安装插件
+  /// Install plugin
   Future<bool> installPlugin(String pluginPath) async {
     try {
       await _manager.installPlugin(pluginPath);
       return true;
     } catch (e) {
-      debugPrint('安装插件失败: $e');
+      debugPrint('Failed to install plugin: $e');
       return false;
     }
   }
   
-  /// 卸载插件
+  /// Uninstall plugin
   Future<bool> uninstallPlugin(String pluginId) async {
     try {
       await _manager.uninstallPlugin(pluginId);
       return true;
     } catch (e) {
-      debugPrint('卸载插件失败: $e');
+      debugPrint('Failed to uninstall plugin: $e');
       return false;
     }
   }
   
-  /// 重新加载插件
+  /// Reload plugin
   Future<bool> reloadPlugin(String pluginId) async {
     try {
       await _manager.reloadPlugin(pluginId);
       return true;
     } catch (e) {
-      debugPrint('重新加载插件失败: $e');
+      debugPrint('Failed to reload plugin: $e');
       return false;
     }
   }
   
-  /// 更新插件配置
+  /// Update plugin configuration
   Future<void> updateConfig(String pluginId, Map<String, dynamic> config) async {
     try {
       await _manager.updatePluginConfig(pluginId, config);
     } catch (e) {
-      debugPrint('更新插件配置失败: $e');
+      debugPrint('Failed to update plugin configuration: $e');
       rethrow;
     }
   }
 }
 
-/// 插件统计信息
+/// Plugin statistics
 class PluginStats {
   const PluginStats({
     required this.total,
@@ -219,7 +219,7 @@ class PluginStats {
   int get inactive => disabled + installed;
 }
 
-/// 插件排序方式
+/// Plugin sort method
 enum PluginSortBy {
   name,
   author,
@@ -229,13 +229,13 @@ enum PluginSortBy {
   lastUpdated,
 }
 
-/// 插件排序Provider
+/// Plugin sort Provider
 final pluginSortProvider = StateProvider<PluginSortBy>((ref) => PluginSortBy.name);
 
-/// 排序方向Provider
+/// Sort direction Provider
 final pluginSortAscendingProvider = StateProvider<bool>((ref) => true);
 
-/// 排序后的插件列表Provider
+/// Sorted plugins list Provider
 final sortedPluginsProvider = Provider<List<Plugin>>((ref) {
   final plugins = ref.watch(filteredPluginsByFiltersProvider);
   final sortBy = ref.watch(pluginSortProvider);

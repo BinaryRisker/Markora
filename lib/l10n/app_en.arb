@@ -1,0 +1,796 @@
+{
+  "@@locale": "en",
+  "appTitle": "Markora",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  
+  "welcomeTitle": "Welcome to Markora",
+  "@welcomeTitle": {
+    "description": "Welcome message title"
+  },
+  
+  "welcomeDescription": "A powerful Markdown editor that supports:",
+  "@welcomeDescription": {
+    "description": "Welcome message description"
+  },
+  
+  "coreFeatures": "Core Features",
+  "@coreFeatures": {
+    "description": "Core features section title"
+  },
+  
+  "realtimePreview": "Real-time Preview",
+  "@realtimePreview": {
+    "description": "Real-time preview feature"
+  },
+  
+  "realtimePreviewDesc": "WYSIWYG editing experience",
+  "@realtimePreviewDesc": {
+    "description": "Real-time preview description"
+  },
+  
+  "syntaxHighlighting": "Syntax Highlighting",
+  "@syntaxHighlighting": {
+    "description": "Syntax highlighting feature"
+  },
+  
+  "syntaxHighlightingDesc": "Support for multiple programming languages",
+  "@syntaxHighlightingDesc": {
+    "description": "Syntax highlighting description"
+  },
+  
+  "mathFormulas": "Math Formulas",
+  "@mathFormulas": {
+    "description": "Math formulas feature"
+  },
+  
+  "mathFormulasDesc": "Support for LaTeX math formulas",
+  "@mathFormulasDesc": {
+    "description": "Math formulas description"
+  },
+  
+  "chartSupport": "Chart Support",
+  "@chartSupport": {
+    "description": "Chart support feature"
+  },
+  
+  "chartSupportDesc": "Integrated Mermaid charts",
+  "@chartSupportDesc": {
+    "description": "Chart support description"
+  },
+  
+  "quickStart": "Quick Start",
+  "@quickStart": {
+    "description": "Quick start section title"
+  },
+  
+  "quickStartStep1": "Enter Markdown content in the left editor",
+  "@quickStartStep1": {
+    "description": "Quick start step 1"
+  },
+  
+  "quickStartStep2": "The right side will show real-time preview",
+  "@quickStartStep2": {
+    "description": "Quick start step 2"
+  },
+  
+  "quickStartStep3": "Use the toolbar to quickly insert formats",
+  "@quickStartStep3": {
+    "description": "Quick start step 3"
+  },
+  
+  "codeExample": "Code Example",
+  "@codeExample": {
+    "description": "Code example section title"
+  },
+  
+  "inlineFormula": "Inline formula",
+  "@inlineFormula": {
+    "description": "Inline formula label"
+  },
+  
+  "blockFormula": "Block formula",
+  "@blockFormula": {
+    "description": "Block formula label"
+  },
+  
+  "feature": "Feature",
+  "@feature": {
+    "description": "Feature column header"
+  },
+  
+  "status": "Status",
+  "@status": {
+    "description": "Status column header"
+  },
+  
+  "description": "Description",
+  "@description": {
+    "description": "Description column header"
+  },
+  
+  "editor": "Editor",
+  "@editor": {
+    "description": "Editor feature"
+  },
+  
+  "preview": "Preview",
+  "@preview": {
+    "description": "Preview feature"
+  },
+  
+  "completed": "Completed",
+  "@completed": {
+    "description": "Completed status"
+  },
+  
+  "startJourney": "Start your Markdown creation journey!",
+  "@startJourney": {
+    "description": "Start journey message"
+  },
+  
+  "newDocument": "New Document",
+  "@newDocument": {
+    "description": "New document button tooltip"
+  },
+  
+  "openDocument": "Open Document",
+  "@openDocument": {
+    "description": "Open document button tooltip"
+  },
+  
+  "saveDocument": "Save Document",
+  "@saveDocument": {
+    "description": "Save document button tooltip"
+  },
+  
+  "saveAs": "Save As",
+  "@saveAs": {
+    "description": "Save as button tooltip"
+  },
+  
+  "exportDocument": "Export Document",
+  "@exportDocument": {
+    "description": "Export document button tooltip"
+  },
+  
+  "undo": "Undo",
+  "@undo": {
+    "description": "Undo button tooltip"
+  },
+  
+  "redo": "Redo",
+  "@redo": {
+    "description": "Redo button tooltip"
+  },
+  
+  "pluginManagement": "Plugin Management",
+  "@pluginManagement": {
+    "description": "Plugin management button tooltip"
+  },
+  
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings button tooltip"
+  },
+  
+  "sourceMode": "Source",
+  "@sourceMode": {
+    "description": "Source mode label"
+  },
+  
+  "splitMode": "Split",
+  "@splitMode": {
+    "description": "Split mode label"
+  },
+  
+  "previewMode": "Preview",
+  "@previewMode": {
+    "description": "Preview mode label"
+  },
+  
+  "characters": "Characters",
+  "@characters": {
+    "description": "Characters count label"
+  },
+  
+  "words": "Words",
+  "@words": {
+    "description": "Words count label"
+  },
+  
+  "lines": "Lines",
+  "@lines": {
+    "description": "Lines count label"
+  },
+  
+  "line": "Line",
+  "@line": {
+    "description": "Line position label"
+  },
+  
+  "column": "Column",
+  "@column": {
+    "description": "Column position label"
+  },
+  
+  "cursorPosition": "Cursor Position",
+  "@cursorPosition": {
+    "description": "Cursor position label"
+  },
+  
+  "startCreating": "Start your creation...",
+  "@startCreating": {
+    "description": "Start creating placeholder text"
+  },
+  
+  "documentCreated": "Document created",
+  "@documentCreated": {
+    "description": "Document created success message"
+  },
+  
+  "createDocumentFailed": "Failed to create document",
+  "@createDocumentFailed": {
+    "description": "Create document failed error message"
+  },
+  
+  "openMarkdownFile": "Open Markdown File",
+  "@openMarkdownFile": {
+    "description": "Open markdown file dialog title"
+  },
+  
+  "documentOpened": "Document opened",
+  "@documentOpened": {
+    "description": "Document opened success message"
+  },
+  
+  "openDocumentFailed": "Failed to open document",
+  "@openDocumentFailed": {
+    "description": "Open document failed error message"
+  },
+  
+  "documentSaved": "Document saved",
+  "@documentSaved": {
+    "description": "Document saved success message"
+  },
+  
+  "saveFailed": "Save failed",
+  "@saveFailed": {
+    "description": "Save failed error message"
+  },
+  
+  "documentSavedAs": "Document saved as",
+  "@documentSavedAs": {
+    "description": "Document saved as success message"
+  },
+  
+  "untitledDocument": "Untitled Document",
+  "@untitledDocument": {
+    "description": "Untitled document default name"
+  },
+  
+  "language": "Language",
+  "@language": {
+    "description": "Language setting label"
+  },
+  
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme setting label"
+  },
+  
+  "lightTheme": "Light",
+  "@lightTheme": {
+    "description": "Light theme option"
+  },
+  
+  "darkTheme": "Dark",
+  "@darkTheme": {
+    "description": "Dark theme option"
+  },
+  
+  "systemTheme": "System",
+  "@systemTheme": {
+    "description": "System theme option"
+  },
+  
+  "english": "English",
+  "@english": {
+    "description": "English language option"
+  },
+  
+  "chinese": "Chinese",
+  "@chinese": {
+    "description": "Chinese language option"
+  },
+
+  "appearanceSettings": "Appearance Settings",
+  "@appearanceSettings": {
+    "description": "Appearance settings section title"
+  },
+
+  "editorSettings": "Editor Settings",
+  "@editorSettings": {
+    "description": "Editor settings section title"
+  },
+
+  "behaviorSettings": "Behavior Settings",
+  "@behaviorSettings": {
+    "description": "Behavior settings section title"
+  },
+
+  "about": "About",
+  "@about": {
+    "description": "About section title"
+  },
+
+  "themeMode": "Theme Mode",
+  "@themeMode": {
+    "description": "Theme mode setting label"
+  },
+
+  "followSystem": "Follow System",
+  "@followSystem": {
+    "description": "Follow system theme option"
+  },
+
+  "light": "Light",
+  "@light": {
+    "description": "Light theme option"
+  },
+
+  "dark": "Dark",
+  "@dark": {
+    "description": "Dark theme option"
+  },
+
+  "editorTheme": "Editor Theme",
+  "@editorTheme": {
+    "description": "Editor theme setting label"
+  },
+
+  "fontSize": "Font Size",
+  "@fontSize": {
+    "description": "Font size setting label"
+  },
+
+  "showLineNumbers": "Show Line Numbers",
+  "@showLineNumbers": {
+    "description": "Show line numbers setting label"
+  },
+
+  "enabled": "Enabled",
+  "@enabled": {
+    "description": "Enabled status"
+  },
+
+  "disabled": "Disabled",
+  "@disabled": {
+    "description": "Disabled status"
+  },
+
+  "wordWrap": "Word Wrap",
+  "@wordWrap": {
+    "description": "Word wrap setting label"
+  },
+
+  "defaultViewMode": "Default View Mode",
+  "@defaultViewMode": {
+    "description": "Default view mode setting label"
+  },
+
+  "autoSave": "Auto Save",
+  "@autoSave": {
+    "description": "Auto save setting label"
+  },
+
+  "autoSaveInterval": "Auto Save Interval",
+  "@autoSaveInterval": {
+    "description": "Auto save interval setting label"
+  },
+
+  "seconds": "seconds",
+  "@seconds": {
+    "description": "Seconds unit"
+  },
+
+  "livePreview": "Live Preview",
+  "@livePreview": {
+    "description": "Live preview setting label"
+  },
+
+  "version": "Version",
+  "@version": {
+    "description": "Version label"
+  },
+
+  "installPlugin": "Install Plugin",
+  "@installPlugin": {
+    "description": "Install plugin button tooltip"
+  },
+
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Refresh button tooltip"
+  },
+
+  "allPlugins": "All Plugins",
+  "@allPlugins": {
+    "description": "All plugins tab label"
+  },
+
+  "enabledPlugins": "Enabled",
+  "@enabledPlugins": {
+    "description": "Enabled plugins tab label"
+  },
+
+  "pluginStore": "Store",
+  "@pluginStore": {
+    "description": "Plugin store tab label"
+  },
+
+  "noPlugins": "No plugins",
+  "@noPlugins": {
+    "description": "No plugins message"
+  },
+
+  "clickToInstallPlugins": "Click the + button in the top right to install plugins",
+  "@clickToInstallPlugins": {
+    "description": "Install plugins instruction"
+  },
+
+  "noEnabledPlugins": "No enabled plugins",
+  "@noEnabledPlugins": {
+    "description": "No enabled plugins message"
+  },
+
+  "enablePluginsInAllTab": "Enable plugins in the All Plugins tab",
+  "@enablePluginsInAllTab": {
+    "description": "Enable plugins instruction"
+  },
+
+  "comingSoon": "Coming soon...",
+  "@comingSoon": {
+    "description": "Coming soon message"
+  },
+
+  "installFromFile": "Install from File",
+  "@installFromFile": {
+    "description": "Install from file option"
+  },
+
+  "selectPluginFile": "Select plugin file (.zip)",
+  "@selectPluginFile": {
+    "description": "Select plugin file description"
+  },
+
+  "installFromUrl": "Install from URL",
+  "@installFromUrl": {
+    "description": "Install from URL option"
+  },
+
+  "enterPluginUrl": "Enter plugin download link",
+  "@enterPluginUrl": {
+    "description": "Enter plugin URL description"
+  },
+
+  "installFromStore": "Install from Store",
+  "@installFromStore": {
+    "description": "Install from store option"
+  },
+
+  "browsePluginStore": "Browse plugin store",
+  "@browsePluginStore": {
+    "description": "Browse plugin store description"
+  },
+
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+
+  "install": "Install",
+  "@install": {
+    "description": "Install button"
+  },
+
+  "insert": "Insert",
+  "@insert": {
+    "description": "Insert button"
+  },
+
+  "pluginUrl": "Plugin URL",
+  "@pluginUrl": {
+    "description": "Plugin URL input label"
+  },
+
+  "pleaseSelectPluginFile": "Please select plugin file",
+  "@pleaseSelectPluginFile": {
+    "description": "Select plugin file prompt"
+  },
+
+  "installFailed": "Installation failed",
+  "@installFailed": {
+    "description": "Installation failed message"
+  },
+
+  "downloadingPlugin": "Downloading plugin...",
+  "@downloadingPlugin": {
+    "description": "Downloading plugin message"
+  },
+
+  "urlInstallInDevelopment": "URL installation feature is under development",
+  "@urlInstallInDevelopment": {
+    "description": "URL install development message"
+  },
+
+  "refreshComplete": "Refresh complete",
+  "@refreshComplete": {
+    "description": "Refresh complete message"
+  },
+
+  "refreshFailed": "Refresh failed",
+  "@refreshFailed": {
+    "description": "Refresh failed message"
+  },
+
+  "author": "Author",
+  "@author": {
+    "description": "Author label"
+  },
+
+  "type": "Type",
+  "@type": {
+    "description": "Type label"
+  },
+
+  "homepage": "Homepage",
+  "@homepage": {
+    "description": "Homepage label"
+  },
+
+  "tags": "Tags",
+  "@tags": {
+    "description": "Tags label"
+  },
+
+  "disable": "Disable",
+  "@disable": {
+    "description": "Disable button"
+  },
+
+  "enable": "Enable",
+  "@enable": {
+    "description": "Enable button"
+  },
+
+  "uninstall": "Uninstall",
+  "@uninstall": {
+    "description": "Uninstall button"
+  },
+
+  "close": "Close",
+  "@close": {
+    "description": "Close button"
+  },
+
+  "confirmUninstall": "Confirm Uninstall",
+  "@confirmUninstall": {
+    "description": "Confirm uninstall dialog title"
+  },
+
+  "uninstallConfirmation": "Are you sure you want to uninstall plugin \"{pluginName}\"? This action cannot be undone.",
+  "@uninstallConfirmation": {
+    "description": "Uninstall confirmation message",
+    "placeholders": {
+      "pluginName": {
+        "type": "String"
+      }
+    }
+  },
+
+  "pluginDisabled": "Plugin disabled",
+  "@pluginDisabled": {
+    "description": "Plugin disabled success message"
+  },
+
+  "disablePluginFailed": "Failed to disable plugin",
+  "@disablePluginFailed": {
+    "description": "Disable plugin failed message"
+  },
+
+  "pluginEnabled": "Plugin enabled",
+  "@pluginEnabled": {
+    "description": "Plugin enabled success message"
+  },
+
+  "enablePluginFailed": "Failed to enable plugin",
+  "@enablePluginFailed": {
+    "description": "Enable plugin failed message"
+  },
+
+  "pluginUninstalled": "Plugin uninstalled",
+  "@pluginUninstalled": {
+    "description": "Plugin uninstalled success message"
+  },
+
+  "uninstallPluginFailed": "Failed to uninstall plugin",
+  "@uninstallPluginFailed": {
+    "description": "Uninstall plugin failed message"
+  },
+
+  "initializePluginManagerFailed": "Failed to initialize plugin manager",
+  "@initializePluginManagerFailed": {
+    "description": "Initialize plugin manager failed message"
+  },
+
+  "enabled": "Enabled",
+  "@enabled": {
+    "description": "Enabled status"
+  },
+
+  "disabled": "Disabled",
+  "@disabled": {
+    "description": "Disabled status"
+  },
+
+  "editorTheme": "Editor Theme",
+  "@editorTheme": {
+    "description": "Editor theme setting"
+  },
+
+  "wordWrap": "Word Wrap",
+  "@wordWrap": {
+    "description": "Word wrap setting"
+  },
+
+  "defaultViewMode": "Default View Mode",
+  "@defaultViewMode": {
+    "description": "Default view mode setting"
+  },
+
+  "editor": "Editor",
+  "@editor": {
+    "description": "Editor view mode"
+  },
+
+  "split": "Split",
+  "@split": {
+    "description": "Split view mode"
+  },
+
+  "preview": "Preview",
+  "@preview": {
+    "description": "Preview view mode"
+  },
+
+  "sourceMode": "Source mode",
+  "@sourceMode": {
+    "description": "Source mode option"
+  },
+
+  "splitMode": "Split mode",
+  "@splitMode": {
+    "description": "Split mode option"
+  },
+
+  "previewMode": "Preview mode",
+  "@previewMode": {
+    "description": "Preview mode option"
+  },
+
+  "enterMarkdownContent": "Enter Markdown content here...",
+  "@enterMarkdownContent": {
+    "description": "Editor placeholder text"
+  },
+
+  "insertMathFormula": "Insert Math Formula",
+  "@insertMathFormula": {
+    "description": "Math formula dialog title"
+  },
+
+  "formulaType": "Formula type: ",
+  "@formulaType": {
+    "description": "Formula type label"
+  },
+
+  "inlineFormulaOption": "Inline formula",
+  "@inlineFormulaOption": {
+    "description": "Inline formula option"
+  },
+
+  "blockFormulaOption": "Block formula",
+  "@blockFormulaOption": {
+    "description": "Block formula option"
+  },
+
+  "latexFormula": "LaTeX Formula",
+  "@latexFormula": {
+    "description": "LaTeX formula input label"
+  },
+
+  "formulaExample": "e.g.: E = mc^2",
+  "@formulaExample": {
+    "description": "Formula example hint"
+  },
+
+  "commonFormulas": "Common formulas:",
+  "@commonFormulas": {
+    "description": "Common formulas label"
+  },
+
+  "previewWillBeShownHere": "Preview will be shown here",
+  "@previewWillBeShownHere": {
+    "description": "Preview placeholder text"
+  },
+
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Select language option"
+  },
+
+  "autoSaveInterval": "Auto Save Interval",
+  "@autoSaveInterval": {
+    "description": "Auto save interval setting"
+  },
+
+  "seconds": "s",
+  "@seconds": {
+    "description": "Seconds unit"
+  },
+
+  "livePreview": "Live Preview",
+  "@livePreview": {
+    "description": "Live preview setting"
+  },
+
+  "pluginManagement": "Plugin Management",
+  "@pluginManagement": {
+    "description": "Plugin management page title"
+  },
+
+  "configure": "Configure",
+  "@configure": {
+    "description": "Configure button"
+  },
+
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+
+  "failedToLoadConfiguration": "Failed to load configuration",
+  "@failedToLoadConfiguration": {
+    "description": "Failed to load configuration error message"
+  },
+
+  "lightMode": "Light Mode",
+  "@lightMode": {
+    "description": "Light theme mode option"
+  },
+
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Dark mode theme option"
+  },
+  "settingsPage": "Settings",
+  "@settingsPage": {
+    "description": "Settings page title"
+  },
+
+  "configuration": "Configuration",
+  "@configuration": {
+    "description": "Configuration title"
+  },
+
+  "noConfigurableOptions": "No configurable options available for this plugin.",
+  "@noConfigurableOptions": {
+    "description": "No configurable options message"
+  },
+
+  "welcomeDocument": "Welcome Document",
+  "@welcomeDocument": {
+    "description": "Welcome document title"
+  }
+}

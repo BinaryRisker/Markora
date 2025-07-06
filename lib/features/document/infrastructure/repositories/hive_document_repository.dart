@@ -3,12 +3,12 @@ import 'package:hive/hive.dart';
 import '../../../../types/document.dart';
 import '../../domain/repositories/document_repository.dart';
 
-/// Hive文档仓库实现
+/// Hive document repository implementation
 class HiveDocumentRepository implements DocumentRepository {
   static const String _boxName = 'documents';
   Box<Document>? _box;
 
-  /// 确保Box已初始化
+  /// Ensure Box is initialized
   Future<Box<Document>> _getBox() async {
     if (_box == null || !_box!.isOpen) {
       _box = await Hive.openBox<Document>(_boxName);
@@ -16,7 +16,7 @@ class HiveDocumentRepository implements DocumentRepository {
     return _box!;
   }
 
-  /// 初始化
+  /// Initialize
   Future<void> init() async {
     await _getBox();
   }
@@ -68,14 +68,14 @@ class HiveDocumentRepository implements DocumentRepository {
 
   @override
   Future<Document> importDocument(String filePath) async {
-    // 这里的实现将在DocumentService中处理
-    // 此方法主要用于保存导入的文档
+    // Implementation will be handled in DocumentService
+    // This method is mainly used to save imported documents
     throw UnimplementedError('请使用DocumentService的importDocument方法');
   }
 
   @override
   Future<String> exportDocument(Document document, String exportPath) async {
-    // 这里的实现将在DocumentService中处理
+    // Implementation will be handled in DocumentService
     throw UnimplementedError('请使用DocumentService的exportDocument方法');
   }
 
@@ -95,22 +95,22 @@ class HiveDocumentRepository implements DocumentRepository {
   Future<List<Document>> getRecentDocuments({int limit = 10}) async {
     final allDocuments = await getAllDocuments();
     
-    // 按更新时间排序
+    // Sort by update time
     allDocuments.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     
     return allDocuments.take(limit).toList();
   }
 
-  /// 统计单词数
+  /// Count words
   int _countWords(String text) {
     if (text.trim().isEmpty) return 0;
     return text.trim().split(RegExp(r'\s+')).length;
   }
 
-  /// 关闭数据库
+  /// Close database
   Future<void> close() async {
     if (_box != null && _box!.isOpen) {
       await _box!.close();
     }
   }
-} 
+}

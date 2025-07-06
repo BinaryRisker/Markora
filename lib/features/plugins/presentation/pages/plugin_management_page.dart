@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../providers/plugin_providers.dart';
 import '../widgets/plugin_card.dart';
 import '../widgets/plugin_stats_card.dart';
@@ -8,7 +9,7 @@ import '../widgets/plugin_filters.dart';
 import '../../../../types/plugin.dart';
 import '../../domain/plugin_interface.dart';
 
-/// 插件管理页面
+/// Plugin management page
 class PluginManagementPage extends ConsumerStatefulWidget {
   const PluginManagementPage({super.key});
   
@@ -28,16 +29,16 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     _initializePluginManager();
   }
   
-  /// 初始化插件管理器
+  /// Initialize plugin manager
   Future<void> _initializePluginManager() async {
     if (_isInitialized) return;
     
     try {
       final manager = ref.read(pluginManagerProvider);
-      // 创建简单的插件上下文
+      // Create simple plugin context
       final context = _createPluginContext();
       
-      // 初始化插件管理器
+      // Initialize plugin manager
       await manager.initialize(context);
       
       if (mounted) {
@@ -46,16 +47,16 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
         });
       }
     } catch (e) {
-      debugPrint('初始化插件管理器失败: $e');
+      debugPrint('Failed to initialize plugin manager: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('初始化插件管理器失败: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.initializePluginManagerFailed)),
         );
       }
     }
   }
   
-  /// 创建插件上下文
+  /// Create plugin context
   PluginContext _createPluginContext() {
     return PluginContext(
       editorController: _SimpleEditorController(),
@@ -71,42 +72,47 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     super.dispose();
   }
   
+  /// Build tabs for TabBar
+  List<Tab> _buildTabs(BuildContext context) {
+    return [
+      Tab(text: AppLocalizations.of(context)!.allPlugins, icon: const Icon(Icons.extension)),
+      Tab(text: AppLocalizations.of(context)!.enabledPlugins, icon: const Icon(Icons.check_circle)),
+      Tab(text: AppLocalizations.of(context)!.pluginStore, icon: const Icon(Icons.store)),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('插件管理'),
+        title: Text(AppLocalizations.of(context)!.pluginManagement),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _showInstallPluginDialog,
-            tooltip: '安装插件',
+            tooltip: AppLocalizations.of(context)!.installPlugin,
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshPlugins,
-            tooltip: '刷新',
+            tooltip: AppLocalizations.of(context)!.refresh,
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: '所有插件', icon: Icon(Icons.extension)),
-            Tab(text: '已启用', icon: Icon(Icons.check_circle)),
-            Tab(text: '商店', icon: Icon(Icons.store)),
-          ],
+          tabs: _buildTabs(context),
         ),
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // 统计信息卡片
+            // Statistics card
             const Padding(
               padding: EdgeInsets.all(16.0),
               child: PluginStatsCard(),
             ),
             
-            // 搜索和过滤
+            // Search and filter
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -120,7 +126,7 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
             
             const SizedBox(height: 16),
             
-            // 插件列表
+            // Plugin list
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -137,27 +143,27 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     );
   }
   
-  /// 构建所有插件标签页
+  /// Build all plugins tab
   Widget _buildAllPluginsTab() {
     return Consumer(
       builder: (context, ref, child) {
         final plugins = ref.watch(sortedPluginsProvider);
         
         if (plugins.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.extension_off, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
+                const Icon(Icons.extension_off, size: 64, color: Colors.grey),
+                const SizedBox(height: 16),
                 Text(
-                  '暂无插件',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  AppLocalizations.of(context)!.noPlugins,
+                  style: const TextStyle(fontSize: 18, color: Colors.grey),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  '点击右上角的 + 按钮安装插件',
-                  style: TextStyle(color: Colors.grey),
+                  AppLocalizations.of(context)!.clickToInstallPlugins,
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ],
             ),
@@ -182,27 +188,27 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     );
   }
   
-  /// 构建已启用插件标签页
+  /// Build enabled plugins tab
   Widget _buildEnabledPluginsTab() {
     return Consumer(
       builder: (context, ref, child) {
         final enabledPlugins = ref.watch(enabledPluginsProvider);
         
         if (enabledPlugins.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.check_circle_outline, size: 64, color: Colors.grey),
-                SizedBox(height: 16),
+                const Icon(Icons.check_circle_outline, size: 64, color: Colors.grey),
+                const SizedBox(height: 16),
                 Text(
-                  '暂无已启用的插件',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
+                  AppLocalizations.of(context)!.noEnabledPlugins,
+                  style: const TextStyle(fontSize: 18, color: Colors.grey),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
-                  '在所有插件页面启用插件',
-                  style: TextStyle(color: Colors.grey),
+                  AppLocalizations.of(context)!.enablePluginsInAllTab,
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ],
             ),
@@ -227,41 +233,41 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     );
   }
   
-  /// 构建插件商店标签页
+  /// Build plugin store tab
   Widget _buildPluginStoreTab() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.store, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
+          const Icon(Icons.store, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
           Text(
-            '插件商店',
-            style: TextStyle(fontSize: 18, color: Colors.grey),
+            AppLocalizations.of(context)!.pluginStore,
+            style: const TextStyle(fontSize: 18, color: Colors.grey),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            '即将推出...',
-            style: TextStyle(color: Colors.grey),
+            AppLocalizations.of(context)!.comingSoon,
+            style: const TextStyle(color: Colors.grey),
           ),
         ],
       ),
     );
   }
   
-  /// 显示安装插件对话框
+  /// Show install plugin dialog
   void _showInstallPluginDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('安装插件'),
+        title: Text(AppLocalizations.of(context)!.installPlugin),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.file_upload),
-              title: const Text('从文件安装'),
-              subtitle: const Text('选择插件文件(.zip)'),
+              title: Text(AppLocalizations.of(context)!.installFromFile),
+              subtitle: Text(AppLocalizations.of(context)!.selectPluginFile),
               onTap: () {
                 Navigator.of(context).pop();
                 _installFromFile();
@@ -269,8 +275,8 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
             ),
             ListTile(
               leading: const Icon(Icons.link),
-              title: const Text('从URL安装'),
-              subtitle: const Text('输入插件下载链接'),
+              title: Text(AppLocalizations.of(context)!.installFromUrl),
+              subtitle: Text(AppLocalizations.of(context)!.enterPluginUrl),
               onTap: () {
                 Navigator.of(context).pop();
                 _installFromUrl();
@@ -278,8 +284,8 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
             ),
             ListTile(
               leading: const Icon(Icons.store),
-              title: const Text('从商店安装'),
-              subtitle: const Text('浏览插件商店'),
+              title: Text(AppLocalizations.of(context)!.installFromStore),
+              subtitle: Text(AppLocalizations.of(context)!.browsePluginStore),
               onTap: () {
                 Navigator.of(context).pop();
                 _tabController.animateTo(2);
@@ -290,20 +296,20 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
         ],
       ),
     );
   }
   
-  /// 从文件安装插件
+  /// Install plugin from file
   void _installFromFile() async {
     try {
-      // TODO: 实现文件选择器
-      // 这里暂时使用模拟路径
+      // TODO: Implement file picker
+      // Use mock path for now
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请选择插件文件')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseSelectPluginFile)),
       );
       
       // final result = await FilePicker.platform.pickFiles(
@@ -317,42 +323,42 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
       //   
       //   if (mounted) {
       //     ScaffoldMessenger.of(context).showSnackBar(
-      //       SnackBar(content: Text(success ? '插件安装成功' : '插件安装失败')),
+      //       SnackBar(content: Text(success ? 'Plugin installed successfully' : 'Plugin installation failed')),
       //     );
       //   }
       // }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('安装失败: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)!.installFailed}: $e')),
         );
       }
     }
   }
   
-  /// 从URL安装插件
+  /// Install plugin from URL
   void _installFromUrl() async {
     final controller = TextEditingController();
     
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('从URL安装插件'),
+        title: Text(AppLocalizations.of(context)!.installFromUrl),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: '插件URL',
+          decoration: InputDecoration(
+            labelText: AppLocalizations.of(context)!.pluginUrl,
             hintText: 'https://example.com/plugin.zip',
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('取消'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(controller.text),
-            child: const Text('安装'),
+            child: Text(AppLocalizations.of(context)!.install),
           ),
         ],
       ),
@@ -360,59 +366,59 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     
     if (result != null && result.isNotEmpty) {
       try {
-        // TODO: 实现URL下载逻辑
+        // TODO: Implement URL download logic
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('正在下载插件...')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.downloadingPlugin)),
         );
         
-        // 这里需要实现下载逻辑
+        // Download logic needs to be implemented here
         // final downloadPath = await downloadPlugin(result);
         // final actions = ref.read(pluginActionsProvider);
         // final success = await actions.installPlugin(downloadPath);
         // 
         // if (mounted) {
         //   ScaffoldMessenger.of(context).showSnackBar(
-        //     SnackBar(content: Text(success ? '插件安装成功' : '插件安装失败')),
+        //     SnackBar(content: Text(success ? 'Plugin installed successfully' : 'Plugin installation failed')),
         //   );
         // }
         
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('URL安装功能开发中')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.urlInstallInDevelopment)),
         );
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('安装失败: $e')),
+            SnackBar(content: Text('${AppLocalizations.of(context)!.installFailed}: $e')),
           );
         }
       }
     }
   }
   
-  /// 刷新插件列表
+  /// Refresh plugin list
   void _refreshPlugins() async {
     try {
       final manager = ref.read(pluginManagerProvider);
       
-      // 重新扫描插件目录
+      // Rescan plugin directory
       await manager.initialize(manager.context ?? _createPluginContext());
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('刷新完成')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.refreshComplete)),
         );
       }
     } catch (e) {
-      debugPrint('刷新插件失败: $e');
+      debugPrint('Refresh plugins failed: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('刷新失败: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)!.refreshFailed}: $e')),
         );
       }
     }
   }
   
-  /// 显示插件详情
+  /// Show plugin details
   void _showPluginDetails(Plugin plugin) {
     showDialog(
       context: context,
@@ -421,7 +427,7 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
   }
 }
 
-/// 简单的编辑器控制器实现
+/// Simple editor controller implementation
 class _SimpleEditorController implements EditorController {
   String _content = '';
   int _cursorPosition = 0;
@@ -437,7 +443,7 @@ class _SimpleEditorController implements EditorController {
 
   @override
   void insertText(String text) {
-    // 简单实现
+    // Simple implementation
   }
 
   @override
@@ -445,7 +451,7 @@ class _SimpleEditorController implements EditorController {
 
   @override
   void replaceSelection(String text) {
-    // 简单实现
+    // Simple implementation
   }
 
   @override
@@ -457,61 +463,61 @@ class _SimpleEditorController implements EditorController {
   }
 }
 
-/// 简单的语法注册器实现
+/// Simple syntax registry implementation
 class _SimpleSyntaxRegistry implements SyntaxRegistry {
   @override
   void registerSyntax(String name, RegExp pattern, String replacement) {
-    // 简单实现
+    // Simple implementation
   }
 
   @override
   void registerBlockSyntax(String name, RegExp pattern, Widget Function(String content) builder) {
-    // 简单实现
+    // Simple implementation
   }
 
   @override
   void registerInlineSyntax(String name, RegExp pattern, Widget Function(String content) builder) {
-    // 简单实现
+    // Simple implementation
   }
 }
 
-/// 简单的工具栏注册器实现
+/// Simple toolbar registry implementation
 class _SimpleToolbarRegistry implements ToolbarRegistry {
   @override
   void registerAction(PluginAction action, VoidCallback callback) {
-    // 简单实现
+    // Simple implementation
   }
 
   @override
   void registerGroup(String groupId, String title, List<PluginAction> actions) {
-    // 简单实现
+    // Simple implementation
   }
 
   @override
   void unregisterAction(String actionId) {
-    // 简单实现
+    // Simple implementation
   }
 }
 
-/// 简单的菜单注册器实现
+/// Simple menu registry implementation
 class _SimpleMenuRegistry implements MenuRegistry {
   @override
   void registerMenuItem(String menuId, String title, VoidCallback callback, {String? icon, String? shortcut}) {
-    // 简单实现
+    // Simple implementation
   }
 
   @override
   void registerSubMenu(String parentId, String menuId, String title, List<String> items) {
-    // 简单实现
+    // Simple implementation
   }
 
   @override
   void unregisterMenuItem(String menuId) {
-    // 简单实现
+    // Simple implementation
   }
 }
 
-/// 插件详情对话框
+/// Plugin details dialog
 class _PluginDetailsDialog extends ConsumerWidget {
   const _PluginDetailsDialog({required this.plugin});
   
@@ -529,15 +535,15 @@ class _PluginDetailsDialog extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow('版本', plugin.metadata.version),
-            _buildInfoRow('作者', plugin.metadata.author),
-            _buildInfoRow('类型', plugin.metadata.type.displayName),
-            _buildInfoRow('状态', plugin.status.displayName),
+            _buildInfoRow(AppLocalizations.of(context)!.version, plugin.metadata.version),
+            _buildInfoRow(AppLocalizations.of(context)!.author, plugin.metadata.author),
+            _buildInfoRow(AppLocalizations.of(context)!.type, plugin.metadata.type.displayName),
+            _buildInfoRow('Status', plugin.status.displayName),
             if (plugin.metadata.homepage != null)
-              _buildInfoRow('主页', plugin.metadata.homepage!),
+              _buildInfoRow(AppLocalizations.of(context)!.homepage, plugin.metadata.homepage!),
             const SizedBox(height: 16),
             Text(
-              '描述',
+              AppLocalizations.of(context)!.description,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -546,7 +552,7 @@ class _PluginDetailsDialog extends ConsumerWidget {
             [
               const SizedBox(height: 16),
               Text(
-                '标签',
+                AppLocalizations.of(context)!.tags,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
@@ -570,13 +576,13 @@ class _PluginDetailsDialog extends ConsumerWidget {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success ? '插件已禁用' : '禁用插件失败'),
+                    content: Text(success ? AppLocalizations.of(context)!.pluginDisabled : AppLocalizations.of(context)!.disablePluginFailed),
                     backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
               }
             },
-            child: const Text('禁用'),
+            child: Text(AppLocalizations.of(context)!.disable),
           )
         else if (plugin.status == PluginStatus.installed || plugin.status == PluginStatus.disabled)
           TextButton(
@@ -586,32 +592,32 @@ class _PluginDetailsDialog extends ConsumerWidget {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success ? '插件已启用' : '启用插件失败'),
+                    content: Text(success ? AppLocalizations.of(context)!.pluginEnabled : AppLocalizations.of(context)!.enablePluginFailed),
                     backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
               }
             },
-            child: const Text('启用'),
+            child: Text(AppLocalizations.of(context)!.enable),
           ),
         TextButton(
           onPressed: () async {
             final confirmed = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text('确认卸载'),
-                content: Text('确定要卸载插件 "${plugin.metadata.name}" 吗？此操作不可撤销。'),
+                title: Text(AppLocalizations.of(context)!.confirmUninstall),
+                content: Text(AppLocalizations.of(context)!.uninstallConfirmation(plugin.metadata.name)),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('取消'),
+                    child: Text(AppLocalizations.of(context)!.cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.red,
                     ),
-                    child: const Text('卸载'),
+                    child: Text(AppLocalizations.of(context)!.uninstall),
                   ),
                 ],
               ),
@@ -623,18 +629,18 @@ class _PluginDetailsDialog extends ConsumerWidget {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success ? '插件已卸载' : '卸载插件失败'),
+                    content: Text(success ? AppLocalizations.of(context)!.pluginUninstalled : AppLocalizations.of(context)!.uninstallPluginFailed),
                     backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
               }
             }
           },
-          child: const Text('卸载'),
+          child: Text(AppLocalizations.of(context)!.uninstall),
         ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
+          child: Text(AppLocalizations.of(context)!.close),
         ),
       ],
     );
