@@ -4,22 +4,19 @@ import 'dart:convert';
 
 import '../../../../types/charts.dart';
 
-/// Mermaid图表渲染器
+/// Mermaid渲染器 - 使用WebView渲染真正的Mermaid图表
 class MermaidRenderer extends StatefulWidget {
   const MermaidRenderer({
     super.key,
     required this.chart,
-    this.renderOptions,
+    this.height = 400,
+    this.theme = 'default',
     this.onError,
   });
 
-  /// Mermaid图表
   final MermaidChart chart;
-  
-  /// 渲染选项
-  final MermaidRenderOptions? renderOptions;
-  
-  /// 错误回调
+  final double height;
+  final String theme;
   final ValueChanged<String>? onError;
 
   @override
@@ -29,7 +26,8 @@ class MermaidRenderer extends StatefulWidget {
 class _MermaidRendererState extends State<MermaidRenderer> {
   late WebViewController _controller;
   bool _isLoading = true;
-  String? _error;
+  bool _hasError = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -38,42 +36,65 @@ class _MermaidRendererState extends State<MermaidRenderer> {
   }
 
   void _initializeWebView() {
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.transparent)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (String url) {
-            _renderMermaidChart();
-          },
-          onWebResourceError: (WebResourceError error) {
-            setState(() {
-              _error = error.description;
-              _isLoading = false;
-            });
-            widget.onError?.call(error.description);
-          },
-        ),
-      );
-      
-    _loadHtmlContent();
+    try {
+      _controller = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setBackgroundColor(Colors.transparent)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onProgress: (int progress) {
+              // 更新加载进度
+            },
+            onPageStarted: (String url) {
+              setState(() {
+                _isLoading = true;
+                _hasError = false;
+              });
+            },
+            onPageFinished: (String url) {
+              setState(() {
+                _isLoading = false;
+              });
+              _renderMermaid();
+            },
+            onWebResourceError: (WebResourceError error) {
+              setState(() {
+                _isLoading = false;
+                _hasError = true;
+                _errorMessage = error.description;
+              });
+              widget.onError?.call(error.description);
+            },
+          ),
+        )
+        ..loadHtmlString(_generateHtmlContent());
+    } catch (e) {
+      // WebView初始化失败，通知父组件
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _hasError = true;
+            _errorMessage = 'WebView初始化失败: $e';
+          });
+        }
+      });
+      widget.onError?.call('WebView不可用，将使用备用渲染器');
+    }
   }
 
-  void _loadHtmlContent() {
-    final htmlContent = _generateHtml();
-    _controller.loadHtmlString(htmlContent);
-  }
-
-  String _generateHtml() {
-    final backgroundColor = widget.renderOptions?.backgroundColor ?? '#ffffff';
-    final theme = widget.renderOptions?.theme ?? 'default';
+  /// 生成包含Mermaid的HTML内容
+  String _generateHtmlContent() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark ? '#1e1e1e' : '#ffffff';
+    final textColor = isDark ? '#ffffff' : '#000000';
     
     return '''
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mermaid Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
     <style>
@@ -81,17 +102,17 @@ class _MermaidRendererState extends State<MermaidRenderer> {
             margin: 0;
             padding: 16px;
             background-color: $backgroundColor;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            overflow: auto;
+            color: $textColor;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            overflow: hidden;
         }
         
         .mermaid-container {
-            width: 100%;
-            height: auto;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 200px;
+            min-height: 100vh;
+            width: 100%;
         }
         
         .mermaid {
@@ -99,29 +120,56 @@ class _MermaidRendererState extends State<MermaidRenderer> {
             height: auto;
         }
         
-        .error {
-            color: #d32f2f;
-            background-color: #ffebee;
-            border: 1px solid #ffcdd2;
-            border-radius: 4px;
-            padding: 16px;
-            font-family: monospace;
-            white-space: pre-wrap;
-        }
-        
-        .loading {
+        .error-container {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 200px;
+            min-height: 200px;
+            padding: 20px;
+            background-color: #fee;
+            border: 2px dashed #f88;
+            border-radius: 8px;
+            color: #c33;
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
             color: #666;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div id="loading" class="loading">正在加载图表...</div>
-    <div id="error" class="error" style="display: none;"></div>
-    <div id="mermaid-container" class="mermaid-container">
+    <div id="loading" class="loading-container">
+        <div class="spinner"></div>
+        <div>正在渲染图表...</div>
+    </div>
+    
+    <div id="error" class="error-container" style="display: none;">
+        <div style="font-size: 18px; margin-bottom: 8px;">⚠️ 渲染错误</div>
+        <div id="error-message"></div>
+    </div>
+    
+    <div id="mermaid-container" class="mermaid-container" style="display: none;">
         <div class="mermaid" id="mermaid-chart"></div>
     </div>
 
@@ -129,201 +177,201 @@ class _MermaidRendererState extends State<MermaidRenderer> {
         // 配置Mermaid
         mermaid.initialize({
             startOnLoad: false,
-            theme: '$theme',
+            theme: '${isDark ? 'dark' : widget.theme}',
             securityLevel: 'loose',
-            fontFamily: '"Helvetica Neue", Arial, sans-serif',
-            fontSize: 14,
+            fontFamily: 'monospace',
             flowchart: {
                 useMaxWidth: true,
                 htmlLabels: true,
-                curve: 'linear'
+                curve: 'basis'
             },
             sequence: {
+                diagramMarginX: 50,
+                diagramMarginY: 10,
+                actorMargin: 50,
+                width: 150,
+                height: 65,
+                boxMargin: 10,
+                boxTextMargin: 5,
+                noteMargin: 10,
+                messageMargin: 35,
+                messageAlign: 'center',
+                mirrorActors: true,
+                bottomMarginAdj: 1,
                 useMaxWidth: true,
-                showSequenceNumbers: true
+                rightAngles: false,
+                showSequenceNumbers: false
             },
             gantt: {
-                useMaxWidth: true,
-                fontSize: 12
+                titleTopMargin: 25,
+                barHeight: 20,
+                fontSizeName: 12,
+                fontSizeTitle: 16,
+                fontSizeSection: 12,
+                bottomPadding: 4,
+                leftPadding: 75,
+                gridLineStartPadding: 35,
+                fontSize: 11,
+                fontFamily: '"Open Sans", sans-serif',
+                numberSectionStyles: 4,
+                axisFormat: '%Y-%m-%d',
+                topAxis: false
             }
         });
 
-        // 渲染图表的函数
-        function renderChart(chartCode) {
-            const loadingEl = document.getElementById('loading');
-            const errorEl = document.getElementById('error');
-            const chartEl = document.getElementById('mermaid-chart');
-            
-            // 隐藏加载和错误信息
-            loadingEl.style.display = 'none';
-            errorEl.style.display = 'none';
+        // 渲染Mermaid图表的函数
+        function renderMermaid() {
+            const chartContent = `${widget.chart.content}`;
+            const container = document.getElementById('mermaid-container');
+            const chart = document.getElementById('mermaid-chart');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
             
             try {
-                // 清空之前的内容
-                chartEl.innerHTML = '';
+                // 验证Mermaid语法
+                mermaid.parse(chartContent);
                 
-                // 渲染Mermaid图表
-                mermaid.render('mermaid-svg', chartCode).then((result) => {
-                    chartEl.innerHTML = result.svg;
+                // 渲染图表
+                chart.textContent = chartContent;
+                
+                mermaid.run({
+                    nodes: [chart]
+                }).then(() => {
+                    loading.style.display = 'none';
+                    error.style.display = 'none';
+                    container.style.display = 'flex';
                     
                     // 通知Flutter渲染完成
-                    window.postMessage({
-                        type: 'mermaid-rendered',
-                        success: true
-                    }, '*');
-                }).catch((error) => {
-                    console.error('Mermaid render error:', error);
-                    showError('图表渲染失败: ' + error.message);
-                    
-                    // 通知Flutter渲染失败
-                    window.postMessage({
-                        type: 'mermaid-rendered',
-                        success: false,
-                        error: error.message
-                    }, '*');
+                    if (window.flutter_inappwebview) {
+                        window.flutter_inappwebview.callHandler('onRenderComplete');
+                    }
+                }).catch((err) => {
+                    showError('渲染失败: ' + err.message);
                 });
-            } catch (error) {
-                console.error('Mermaid error:', error);
-                showError('图表解析失败: ' + error.message);
                 
-                // 通知Flutter渲染失败
-                window.postMessage({
-                    type: 'mermaid-rendered',
-                    success: false,
-                    error: error.message
-                }, '*');
+            } catch (err) {
+                showError('语法错误: ' + err.message);
             }
         }
         
         function showError(message) {
-            const loadingEl = document.getElementById('loading');
-            const errorEl = document.getElementById('error');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const errorMessage = document.getElementById('error-message');
             
-            loadingEl.style.display = 'none';
-            errorEl.style.display = 'block';
-            errorEl.textContent = message;
+            loading.style.display = 'none';
+            errorMessage.textContent = message;
+            error.style.display = 'flex';
+            
+            // 通知Flutter渲染错误
+            if (window.flutter_inappwebview) {
+                window.flutter_inappwebview.callHandler('onRenderError', message);
+            }
         }
         
-        // 页面加载完成后的回调
-        window.onload = function() {
-            // 通知Flutter页面已准备就绪
-            window.postMessage({
-                type: 'mermaid-ready'
-            }, '*');
-        };
+        // 页面加载完成后渲染图表
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(renderMermaid, 100);
+        });
     </script>
 </body>
 </html>
-    ''';
+''';
   }
 
-  void _renderMermaidChart() async {
-    if (_error != null) return;
-    
-    try {
-      // 转义图表代码中的特殊字符
-      final escapedCode = widget.chart.content
-          .replaceAll('\\', '\\\\')
-          .replaceAll('"', '\\"')
-          .replaceAll('\n', '\\n')
-          .replaceAll('\r', '');
-      
-      // 调用JavaScript函数渲染图表
-      await _controller.runJavaScript('renderChart("$escapedCode");');
-      
-      setState(() {
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
-      widget.onError?.call(e.toString());
+  /// 渲染Mermaid图表
+  void _renderMermaid() {
+    _controller.runJavaScript('renderMermaid()');
+  }
+
+  @override
+  void didUpdateWidget(MermaidRenderer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.chart.content != widget.chart.content ||
+        oldWidget.theme != widget.theme) {
+      _controller.loadHtmlString(_generateHtmlContent());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_error != null) {
-      return _buildErrorWidget();
-    }
-
-    return Stack(
-      children: [
-        // WebView
-        WebViewWidget(controller: _controller),
-        
-        // 加载指示器
-        if (_isLoading)
-          Container(
-            color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
-            child: const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('正在渲染图表...'),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildErrorWidget() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      height: widget.height,
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.red.withOpacity(0.3),
+          color: Theme.of(context).dividerColor,
           width: 1,
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red[700],
-            size: 48,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '图表渲染失败',
-            style: TextStyle(
-              color: Colors.red[700],
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _error ?? '未知错误',
-            style: TextStyle(
-              color: Colors.red[600],
-              fontSize: 12,
-              fontFamily: 'monospace',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                _error = null;
-                _isLoading = true;
-              });
-              _loadHtmlContent();
-            },
-            icon: const Icon(Icons.refresh),
-            label: const Text('重试'),
-          ),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Stack(
+          children: [
+            WebViewWidget(controller: _controller),
+            
+            // 加载指示器
+            if (_isLoading)
+              Container(
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('正在渲染图表...'),
+                    ],
+                  ),
+                ),
+              ),
+            
+            // 错误提示
+            if (_hasError)
+              Container(
+                color: Theme.of(context).colorScheme.surface,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '图表渲染失败',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      if (_errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            _errorMessage!,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _hasError = false;
+                            _isLoading = true;
+                          });
+                          _controller.loadHtmlString(_generateHtmlContent());
+                        },
+                        child: const Text('重试'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -366,11 +414,8 @@ class SimpleMermaidRenderer extends StatelessWidget {
       height: height ?? 200,
       child: MermaidRenderer(
         chart: chart,
-        renderOptions: MermaidRenderOptions(
-          width: width,
-          height: height,
-          theme: theme,
-        ),
+        height: height ?? 400,
+        theme: theme,
       ),
     );
   }

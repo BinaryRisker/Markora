@@ -157,22 +157,7 @@ void main() {
           
           const VerticalDivider(),
           
-          // 格式化按钮
-          _buildToolbarButton(
-            icon: Icon(PhosphorIcons.textB()),
-            tooltip: '粗体',
-            onPressed: () => _handleBold(),
-          ),
-          _buildToolbarButton(
-            icon: Icon(PhosphorIcons.textItalic()),
-            tooltip: '斜体',
-            onPressed: () => _handleItalic(),
-          ),
-          _buildToolbarButton(
-            icon: Icon(PhosphorIcons.link()),
-            tooltip: '插入链接',
-            onPressed: () => _handleInsertLink(),
-          ),
+
           
           const Spacer(),
           
@@ -567,23 +552,13 @@ void main() {
   }
 
   void _handleUndo() {
-    // TODO: 实现撤销
+    // 撤销功能由编辑器内部处理
+    // 这里可以添加全局撤销逻辑（如果需要）
   }
 
   void _handleRedo() {
-    // TODO: 实现重做
-  }
-
-  void _handleBold() {
-    // TODO: 实现粗体格式化
-  }
-
-  void _handleItalic() {
-    // TODO: 实现斜体格式化
-  }
-
-  void _handleInsertLink() {
-    // TODO: 实现插入链接
+    // 重做功能由编辑器内部处理
+    // 这里可以添加全局重做逻辑（如果需要）
   }
 
   void _handleSettings() {

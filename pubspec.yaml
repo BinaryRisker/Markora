@@ -54,6 +54,7 @@ dependencies:
   
   # WebView支持（用于Mermaid等）
   webview_flutter: ^4.10.0
+  webview_win_floating: ^2.3.1
   
   # 文件操作
   file_picker: ^8.1.2

@@ -11,6 +11,7 @@ import '../../../charts/domain/services/mermaid_parser.dart';
 import '../../../charts/presentation/widgets/mermaid_chart_widget.dart';
 import '../../../../types/charts.dart';
 import '../../../document/presentation/providers/document_providers.dart';
+import '../../domain/services/undo_redo_manager.dart';
 
 /// Markdown编辑器组件
 class MarkdownEditor extends ConsumerStatefulWidget {
@@ -41,17 +42,29 @@ class MarkdownEditor extends ConsumerStatefulWidget {
 class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
   late TextEditingController _controller;
   late FocusNode _focusNode;
+  late UndoRedoManager _undoRedoManager;
   String _lastSyncedContent = '';
+  bool _isApplyingUndoRedo = false;
   
   @override
   void initState() {
     super.initState();
     
     _focusNode = FocusNode();
+    _undoRedoManager = UndoRedoManager();
     
     // 初始化文本编辑器控制器
     _controller = TextEditingController(text: widget.initialContent);
     _lastSyncedContent = widget.initialContent;
+    
+    // 添加初始状态到撤销管理器
+    if (widget.initialContent.isNotEmpty) {
+      _undoRedoManager.addState(EditorHistoryState(
+        text: widget.initialContent,
+        selection: TextSelection.collapsed(offset: widget.initialContent.length),
+        timestamp: DateTime.now(),
+      ));
+    }
     
     // 监听文本变化
     _controller.addListener(_onTextChanged);
@@ -79,6 +92,15 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     if (activeIndex >= 0 && text != _lastSyncedContent) {
       tabsNotifier.updateTabContent(activeIndex, text);
       _lastSyncedContent = text;
+    }
+    
+    // 添加到撤销历史（如果不是撤销/重做操作）
+    if (!_isApplyingUndoRedo) {
+      _undoRedoManager.addState(EditorHistoryState(
+        text: text,
+        selection: _controller.selection,
+        timestamp: DateTime.now(),
+      ));
     }
     
     // 计算光标位置
@@ -213,20 +235,16 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       child: Row(
         children: [
           const SizedBox(width: 8),
+          // 撤销/重做按钮
           _buildToolbarButton(
-            icon: Icons.format_bold,
-            tooltip: '粗体 (Ctrl+B)',
-            onPressed: isEnabled ? () => _insertMarkdown('**', '**') : null,
+            icon: Icons.undo,
+            tooltip: '撤销 (Ctrl+Z)',
+            onPressed: isEnabled && _undoRedoManager.canUndo ? _undo : null,
           ),
           _buildToolbarButton(
-            icon: Icons.format_italic,
-            tooltip: '斜体 (Ctrl+I)',
-            onPressed: isEnabled ? () => _insertMarkdown('*', '*') : null,
-          ),
-          _buildToolbarButton(
-            icon: Icons.format_strikethrough,
-            tooltip: '删除线',
-            onPressed: isEnabled ? () => _insertMarkdown('~~', '~~') : null,
+            icon: Icons.redo,
+            tooltip: '重做 (Ctrl+Y)',
+            onPressed: isEnabled && _undoRedoManager.canRedo ? _redo : null,
           ),
           const VerticalDivider(width: 1),
           _buildToolbarButton(
@@ -318,32 +336,88 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       decoration: BoxDecoration(
         color: editorTheme.backgroundColor,
       ),
-      child: TextField(
-        controller: _controller,
-        focusNode: _focusNode,
-        readOnly: widget.readOnly,
-        style: TextStyle(
-          fontFamily: 'monospace',
-          fontSize: 14,
-          color: editorTheme.textColor,
-          height: 1.5,
+      child: RawKeyboardListener(
+        focusNode: FocusNode(),
+        onKey: _handleKeyEvent,
+        child: TextField(
+          controller: _controller,
+          focusNode: _focusNode,
+          readOnly: widget.readOnly,
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontSize: 14,
+            color: editorTheme.textColor,
+            height: 1.5,
+          ),
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            hintText: '在此输入Markdown内容...',
+            contentPadding: EdgeInsets.zero,
+          ),
+          cursorColor: editorTheme.cursorColor,
+          enabled: !widget.readOnly,
+          expands: true,
+          maxLines: null,
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
+          onChanged: (value) {
+            // 由_onTextChanged处理
+          },
         ),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          hintText: '在此输入Markdown内容...',
-          contentPadding: EdgeInsets.zero,
-        ),
-        cursorColor: editorTheme.cursorColor,
-        enabled: !widget.readOnly,
-        expands: true,
-        maxLines: null,
-        keyboardType: TextInputType.multiline,
-        textInputAction: TextInputAction.newline,
-        onChanged: (value) {
-          // 由_onTextChanged处理
-        },
       ),
     );
+  }
+
+  /// 处理键盘事件
+  void _handleKeyEvent(RawKeyEvent event) {
+    if (event is RawKeyDownEvent) {
+      final isCtrlPressed = event.logicalKey == LogicalKeyboardKey.controlLeft ||
+          event.logicalKey == LogicalKeyboardKey.controlRight ||
+          event.isControlPressed;
+      
+      if (isCtrlPressed) {
+        if (event.logicalKey == LogicalKeyboardKey.keyZ) {
+          _undo();
+        } else if (event.logicalKey == LogicalKeyboardKey.keyY) {
+          _redo();
+        }
+      }
+    }
+  }
+
+  /// 撤销操作
+  void _undo() {
+    final state = _undoRedoManager.undo();
+    if (state != null) {
+      _applyEditorState(state);
+    }
+  }
+
+  /// 重做操作
+  void _redo() {
+    final state = _undoRedoManager.redo();
+    if (state != null) {
+      _applyEditorState(state);
+    }
+  }
+
+  /// 应用编辑器状态
+  void _applyEditorState(EditorHistoryState state) {
+    _isApplyingUndoRedo = true;
+    
+    _controller.text = state.text;
+    _controller.selection = state.selection;
+    
+    // 更新Tab内容
+    final tabsNotifier = ref.read(documentTabsProvider.notifier);
+    final activeIndex = tabsNotifier.activeTabIndex;
+    if (activeIndex >= 0) {
+      tabsNotifier.updateTabContent(activeIndex, state.text);
+    }
+    _lastSyncedContent = state.text;
+    
+    // 延迟重置标志
+    Future.microtask(() => _isApplyingUndoRedo = false);
   }
 
   /// 插入Markdown格式

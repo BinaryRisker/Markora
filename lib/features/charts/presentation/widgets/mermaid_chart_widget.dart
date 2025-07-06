@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../types/charts.dart';
 import '../../domain/services/mermaid_parser.dart';
+import '../../presentation/widgets/simple_mermaid_renderer.dart';
 
 /// Mermaid图表渲染组件
 class MermaidChartWidget extends StatefulWidget {
@@ -198,76 +199,9 @@ class _MermaidChartWidgetState extends State<MermaidChartWidget> {
   Widget _buildChartView() {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // 图表占位符（实际项目中这里会是真正的图表渲染）
-          _buildChartPlaceholder(),
-          
-          const SizedBox(height: 12),
-          
-          // 图表信息
-          _buildChartInfo(),
-        ],
-      ),
-    );
-  }
-
-  /// 构建图表占位符
-  Widget _buildChartPlaceholder() {
-    final type = widget.chart.type ?? MermaidChartType.flowchart;
-    
-    return Container(
-      width: double.infinity,
-      height: 200,
-      decoration: BoxDecoration(
-        color: _getTypeColor(type).withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: _getTypeColor(type).withOpacity(0.2),
-          width: 2,
-          style: BorderStyle.solid,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            _getTypeIcon(type),
-            size: 64,
-            color: _getTypeColor(type).withOpacity(0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '${type.displayName}渲染',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: _getTypeColor(type).withOpacity(0.7),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '点击查看源码或长按切换视图',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: _getTypeColor(type).withOpacity(0.5),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '🚧 图表渲染功能开发中',
-              style: TextStyle(
-                color: Colors.blue[700],
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
+      child: SimpleMermaidRenderer(
+        chart: widget.chart,
+        height: 300,
       ),
     );
   }
