@@ -8,7 +8,7 @@ part of 'document.dart';
 
 class DocumentAdapter extends TypeAdapter<Document> {
   @override
-  final int typeId = 3;
+  final int typeId = 11;
 
   @override
   Document read(BinaryReader reader) {
@@ -69,7 +69,7 @@ class DocumentAdapter extends TypeAdapter<Document> {
 
 class DocumentTypeAdapter extends TypeAdapter<DocumentType> {
   @override
-  final int typeId = 2;
+  final int typeId = 10;
 
   @override
   DocumentType read(BinaryReader reader) {
