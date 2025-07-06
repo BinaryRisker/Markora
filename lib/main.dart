@@ -7,6 +7,7 @@ import 'core/themes/app_theme.dart';
 import 'app.dart';
 import 'features/settings/domain/entities/app_settings.dart';
 import 'features/settings/presentation/providers/settings_providers.dart';
+import 'features/document/infrastructure/repositories/hive_document_repository.dart';
 import 'types/document.dart';
 
 /// 应用入口函数
@@ -20,8 +21,13 @@ void main() async {
   // 注册Hive适配器
   Hive.registerAdapter(ThemeModeAdapter());
   Hive.registerAdapter(AppSettingsAdapter());
-  // 注意：Document类还没有Hive适配器，需要后续添加
-  // Hive.registerAdapter(DocumentAdapter());
+  Hive.registerAdapter(DocumentTypeAdapter());
+  Hive.registerAdapter(DocumentAdapter());
+
+  // 初始化文档仓库并创建示例数据
+  final documentRepo = HiveDocumentRepository();
+  await documentRepo.init();
+  await _createSampleDocuments(documentRepo);
 
   // 运行应用
   runApp(
@@ -29,6 +35,140 @@ void main() async {
     const ProviderScope(
       child: MarkoraApp(),
     ),
+  );
+}
+
+/// 创建示例文档
+Future<void> _createSampleDocuments(HiveDocumentRepository repo) async {
+  final existingDocs = await repo.getAllDocuments();
+  
+  // 如果已有文档，则不创建示例文档
+  if (existingDocs.isNotEmpty) return;
+
+  // 创建示例文档
+  await repo.createDocument(
+    title: '欢迎使用Markora',
+    content: '''# 欢迎使用 Markora
+
+这是一个功能强大的 Markdown 编辑器，支持：
+
+## 核心功能
+
+- **实时预览** - 所见即所得的编辑体验
+- **语法高亮** - 支持多种编程语言
+- **数学公式** - 支持 LaTeX 数学公式
+- **图表支持** - 集成 Mermaid 图表
+
+## 快速开始
+
+1. 在左侧编辑器中输入 Markdown 内容
+2. 右侧会实时显示预览效果
+3. 使用工具栏快速插入格式
+
+### 代码示例
+
+```dart
+void main() {
+  print('Hello, Markora!');
+}
+```
+
+### 数学公式
+
+行内公式：\$E = mc^2\$
+
+块级公式：
+\$\$\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}\$\$
+
+### 表格
+
+| 功能 | 状态 | 说明 |
+|------|------|------|
+| 编辑器 | ✅ | 完成 |
+| 预览 | ✅ | 完成 |
+| 数学公式 | ✅ | 完成 |
+
+> 开始你的 Markdown 创作之旅吧！''',
+  );
+
+  await repo.createDocument(
+    title: '快速入门指南',
+    content: '''# Markora 快速入门指南
+
+## 基本操作
+
+### 文件操作
+- **新建文档**: Ctrl+N
+- **打开文档**: Ctrl+O
+- **保存文档**: Ctrl+S
+- **另存为**: Ctrl+Shift+S
+
+### 编辑操作
+- **撤销**: Ctrl+Z
+- **重做**: Ctrl+Y
+- **复制**: Ctrl+C
+- **粘贴**: Ctrl+V
+
+### 格式化
+- **粗体**: **文本** 或 Ctrl+B
+- **斜体**: *文本* 或 Ctrl+I
+- **代码**: `代码` 或 Ctrl+`
+
+## 高级功能
+
+### Mermaid 图表
+
+```mermaid
+graph TD
+    A[开始] --> B{是否理解?}
+    B -->|是| C[继续学习]
+    B -->|否| D[重新阅读]
+    D --> B
+    C --> E[完成]
+```
+
+### 数学公式
+
+二次方程求根公式：
+\$\$x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}\$\$
+
+祝你使用愉快！''',
+  );
+
+  await repo.createDocument(
+    title: '我的笔记',
+    content: '''# 我的学习笔记
+
+## 今日任务
+- [ ] 学习Flutter开发
+- [ ] 完成项目文档
+- [x] 测试Markora编辑器
+
+## 重要概念
+
+### Widget
+Flutter中的一切都是Widget，包括：
+- StatelessWidget: 无状态组件
+- StatefulWidget: 有状态组件
+
+### 状态管理
+推荐使用Riverpod进行状态管理。
+
+## 代码片段
+
+```dart
+class MyWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Text('Hello World'),
+    );
+  }
+}
+```
+
+## 总结
+今天学到了很多新知识！''',
   );
 }
 

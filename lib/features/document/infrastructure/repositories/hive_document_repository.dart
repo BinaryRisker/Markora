@@ -6,11 +6,19 @@ import '../../domain/repositories/document_repository.dart';
 /// Hive文档仓库实现
 class HiveDocumentRepository implements DocumentRepository {
   static const String _boxName = 'documents';
-  late Box<Document> _box;
+  Box<Document>? _box;
+
+  /// 确保Box已初始化
+  Future<Box<Document>> _getBox() async {
+    if (_box == null || !_box!.isOpen) {
+      _box = await Hive.openBox<Document>(_boxName);
+    }
+    return _box!;
+  }
 
   /// 初始化
   Future<void> init() async {
-    _box = await Hive.openBox<Document>(_boxName);
+    await _getBox();
   }
 
   @override
@@ -19,6 +27,7 @@ class HiveDocumentRepository implements DocumentRepository {
     String? content,
     DocumentType type = DocumentType.markdown,
   }) async {
+    final box = await _getBox();
     final now = DateTime.now();
     final document = Document(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -29,28 +38,32 @@ class HiveDocumentRepository implements DocumentRepository {
       updatedAt: now,
     );
 
-    await _box.put(document.id, document);
+    await box.put(document.id, document);
     return document;
   }
 
   @override
   Future<Document?> getDocument(String id) async {
-    return _box.get(id);
+    final box = await _getBox();
+    return box.get(id);
   }
 
   @override
   Future<List<Document>> getAllDocuments() async {
-    return _box.values.toList();
+    final box = await _getBox();
+    return box.values.toList();
   }
 
   @override
   Future<void> saveDocument(Document document) async {
-    await _box.put(document.id, document);
+    final box = await _getBox();
+    await box.put(document.id, document);
   }
 
   @override
   Future<void> deleteDocument(String id) async {
-    await _box.delete(id);
+    final box = await _getBox();
+    await box.delete(id);
   }
 
   @override
@@ -96,6 +109,8 @@ class HiveDocumentRepository implements DocumentRepository {
 
   /// 关闭数据库
   Future<void> close() async {
-    await _box.close();
+    if (_box != null && _box!.isOpen) {
+      await _box!.close();
+    }
   }
 } 

@@ -1,10 +1,18 @@
 import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
+
+part 'document.g.dart';
 
 /// 文档类型枚举
+@HiveType(typeId: 0)
 enum DocumentType {
+  @HiveField(0)
   markdown('md', '普通Markdown文档'),
+  @HiveField(1)
   notebook('mdnb', 'Markora笔记本'),
+  @HiveField(2)
   text('txt', '纯文本文档'),
+  @HiveField(3)
   html('html', 'HTML文档');
 
   const DocumentType(this.extension, this.description);
@@ -14,6 +22,7 @@ enum DocumentType {
 }
 
 /// 文档实体类
+@HiveType(typeId: 1)
 class Document extends Equatable {
   const Document({
     required this.id,
@@ -29,33 +38,43 @@ class Document extends Equatable {
   });
 
   /// 文档唯一标识
+  @HiveField(0)
   final String id;
   
   /// 文档标题
+  @HiveField(1)
   final String title;
   
   /// 文档内容（Markdown格式）
+  @HiveField(2)
   final String content;
   
   /// 文档类型
+  @HiveField(3)
   final DocumentType type;
   
   /// 文件路径（本地文件）
+  @HiveField(4)
   final String? filePath;
   
   /// 创建时间
+  @HiveField(5)
   final DateTime createdAt;
   
   /// 更新时间
+  @HiveField(6)
   final DateTime updatedAt;
   
   /// 标签列表
+  @HiveField(7)
   final List<String> tags;
   
   /// 是否收藏
+  @HiveField(8)
   final bool isFavorite;
   
   /// 是否只读
+  @HiveField(9)
   final bool isReadOnly;
 
   /// 复制并更新文档
