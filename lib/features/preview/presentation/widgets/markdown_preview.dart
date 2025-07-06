@@ -10,9 +10,7 @@ import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../syntax_highlighting/presentation/widgets/code_block_widget.dart';
 import '../../../../types/syntax_highlighting.dart';
-import '../../../charts/domain/services/mermaid_parser.dart';
-import '../../../charts/presentation/widgets/mermaid_chart_widget.dart';
-import '../../../../types/charts.dart';
+
 
 /// 渲染缓存项
 class _RenderCacheItem {
@@ -311,13 +309,12 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// 构建包含数学公式和图表的内容
+  /// 构建包含数学公式的内容
   Widget _buildContentWithMath() {
-    // 解析数学公式和Mermaid图表
+    // 解析数学公式
     final mathFormulas = MathParser.parseFormulas(widget.content);
-    final mermaidCharts = MermaidParser.parseCharts(widget.content);
     
-    if (mathFormulas.isEmpty && mermaidCharts.isEmpty) {
+    if (mathFormulas.isEmpty) {
       // 没有特殊内容，直接使用普通Markdown渲染
       return MarkdownBody(
         data: widget.content,
@@ -337,11 +334,11 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     }
 
     // 有特殊内容，需要特殊处理
-    return _buildMixedContent(mathFormulas, mermaidCharts);
+    return _buildMixedContent(mathFormulas);
   }
 
-  /// 构建混合内容（文本+数学公式+图表）
-  Widget _buildMixedContent(List<MathFormula> mathFormulas, List<MermaidChart> mermaidCharts) {
+  /// 构建混合内容（文本+数学公式）
+  Widget _buildMixedContent(List<MathFormula> mathFormulas) {
     final widgets = <Widget>[];
     
     // 合并所有特殊元素并按位置排序
@@ -354,16 +351,6 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
         startIndex: formula.startIndex,
         endIndex: formula.endIndex,
         data: formula,
-      ));
-    }
-    
-    // 添加Mermaid图表
-    for (final chart in mermaidCharts) {
-      allElements.add(_SpecialElement(
-        type: _SpecialElementType.chart,
-        startIndex: chart.startIndex,
-        endIndex: chart.endIndex,
-        data: chart,
       ));
     }
     
@@ -411,24 +398,6 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
               );
             }
           },
-        ));
-      } else if (element.type == _SpecialElementType.chart) {
-        final chart = element.data as MermaidChart;
-        widgets.add(Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: MermaidChartWidget(
-            chart: chart,
-            onError: (error) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('图表渲染错误: $error'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-          ),
         ));
       }
 
@@ -674,7 +643,6 @@ class CodeElementBuilder extends MarkdownElementBuilder {
 /// 特殊元素类型
 enum _SpecialElementType {
   math,   // 数学公式
-  chart,  // Mermaid图表
 }
 
 /// 特殊元素

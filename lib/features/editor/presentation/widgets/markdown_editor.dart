@@ -7,9 +7,7 @@ import '../../../../core/themes/app_theme.dart';
 import '../../../../types/editor.dart';
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
-import '../../../charts/domain/services/mermaid_parser.dart';
-import '../../../charts/presentation/widgets/mermaid_chart_widget.dart';
-import '../../../../types/charts.dart';
+
 import '../../../document/presentation/providers/document_providers.dart';
 import '../../domain/services/undo_redo_manager.dart';
 import '../../domain/services/global_editor_manager.dart';
@@ -341,8 +339,8 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           ),
           _buildToolbarButton(
             icon: Icons.account_tree,
-            tooltip: 'Mermaid图表',
-            onPressed: isEnabled ? () => _insertMermaidChart() : null,
+            tooltip: 'Mermaid图表 (插件)',
+                    onPressed: null, // 功能已移至插件
           ),
           _buildToolbarButton(
             icon: Icons.format_quote,
@@ -586,10 +584,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     _showMathFormulaDialog();
   }
 
-  /// 插入Mermaid图表
-  void _insertMermaidChart() {
-    _showMermaidChartDialog();
-  }
+
 
   /// 显示数学公式输入对话框
   void _showMathFormulaDialog() {
@@ -633,33 +628,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     );
   }
 
-  /// 显示Mermaid图表输入对话框
-  void _showMermaidChartDialog() {
-    showDialog<String>(
-      context: context,
-      builder: (context) => _MermaidChartDialog(
-        onInsert: (mermaidCode) {
-          final chartText = '\n```mermaid\n${mermaidCode}\n```\n';
-          final selection = _controller.selection;
-          
-          if (selection.isValid) {
-            final beforeSelection = _controller.text.substring(0, selection.start);
-            final afterSelection = _controller.text.substring(selection.end);
-            
-            _controller.text = beforeSelection + chartText + afterSelection;
-            
-            // 设置光标位置到图表后面
-            final newCursorPosition = selection.start + chartText.length;
-            _controller.selection = TextSelection.collapsed(
-              offset: newCursorPosition,
-            );
-            
-            widget.onChanged?.call(_controller.text);
-          }
-        },
-      ),
-    );
-  }
+
 
   /// 插入引用
   void _insertQuote() {
@@ -929,276 +898,5 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
         },
       ),
     );
-  }
-}
-
-/// Mermaid图表输入对话框
-class _MermaidChartDialog extends StatefulWidget {
-  const _MermaidChartDialog({
-    required this.onInsert,
-  });
-
-  final Function(String mermaidCode) onInsert;
-
-  @override
-  State<_MermaidChartDialog> createState() => _MermaidChartDialogState();
-}
-
-class _MermaidChartDialogState extends State<_MermaidChartDialog> {
-  late TextEditingController _controller;
-  MermaidChartType _selectedType = MermaidChartType.flowchart;
-  String _selectedExample = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-    _controller.addListener(_onTextChanged);
-    
-    // 设置默认示例
-    final examples = MermaidParser.getExamples();
-    if (examples.isNotEmpty) {
-      final defaultExample = examples.first;
-      _controller.text = defaultExample.code;
-      _selectedExample = defaultExample.code;
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.removeListener(_onTextChanged);
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onTextChanged() {
-    setState(() {
-      // 触发重建以更新预览
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      child: Container(
-        width: 800,
-        height: 600,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 标题
-            Text(
-              '插入Mermaid图表',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 16),
-            
-            // 图表类型选择
-            Text('图表类型:', style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: MermaidChartType.values.map((type) {
-                return ChoiceChip(
-                  label: Text(type.displayName),
-                  selected: _selectedType == type,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() {
-                        _selectedType = type;
-                        _loadExampleForType(type);
-                      });
-                    }
-                  },
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            
-            // 内容区域
-            Expanded(
-              child: Row(
-                children: [
-                  // 示例和编辑器
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 示例选择
-                        Text('示例模板:', style: Theme.of(context).textTheme.bodyMedium),
-                        const SizedBox(height: 8),
-                        Container(
-                          height: 120,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Theme.of(context).dividerColor),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: _buildExamplesList(),
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // 代码编辑器
-                        Text('Mermaid代码:', style: Theme.of(context).textTheme.bodyMedium),
-                        const SizedBox(height: 8),
-                        Expanded(
-                          child: TextField(
-                            controller: _controller,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: '输入Mermaid代码...',
-                            ),
-                            maxLines: null,
-                            expands: true,
-                            style: const TextStyle(
-                              fontFamily: 'monospace',
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  
-                  // 预览
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('预览:', style: Theme.of(context).textTheme.bodyMedium),
-                        const SizedBox(height: 8),
-                        Expanded(
-                          child: _buildPreview(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // 按钮
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('取消'),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _controller.text.trim().isNotEmpty
-                      ? () {
-                          widget.onInsert(_controller.text.trim());
-                          Navigator.of(context).pop();
-                        }
-                      : null,
-                  child: const Text('插入'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExamplesList() {
-    final examples = MermaidParser.getExamples()
-        .where((example) => example.type == _selectedType)
-        .toList();
-    
-    if (examples.isEmpty) {
-      return const Center(
-        child: Text('暂无示例'),
-      );
-    }
-    
-    return ListView.builder(
-      itemCount: examples.length,
-      itemBuilder: (context, index) {
-        final example = examples[index];
-        return ListTile(
-          dense: true,
-          title: Text(
-            example.title,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          subtitle: Text(
-            example.description,
-            style: Theme.of(context).textTheme.bodySmall,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          selected: _selectedExample == example.code,
-          onTap: () {
-            setState(() {
-              _selectedExample = example.code;
-              _controller.text = example.code;
-            });
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildPreview() {
-    if (_controller.text.trim().isEmpty) {
-      return Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).dividerColor),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Center(
-          child: Text('预览将在这里显示'),
-        ),
-      );
-    }
-
-    final charts = MermaidParser.parseCharts('```mermaid\n${_controller.text.trim()}\n```');
-    
-    if (charts.isEmpty) {
-      return Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).dividerColor),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Center(
-          child: Text(
-            '无法解析Mermaid代码',
-            style: TextStyle(color: Colors.red),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: MermaidChartWidget(
-        chart: charts.first,
-      ),
-    );
-  }
-
-  void _loadExampleForType(MermaidChartType type) {
-    final examples = MermaidParser.getExamples()
-        .where((example) => example.type == type)
-        .toList();
-    
-    if (examples.isNotEmpty) {
-      final example = examples.first;
-      _controller.text = example.code;
-      _selectedExample = example.code;
-    }
   }
 }
