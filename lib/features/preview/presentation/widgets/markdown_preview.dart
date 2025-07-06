@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -12,6 +13,19 @@ import '../../../../types/syntax_highlighting.dart';
 import '../../../charts/domain/services/mermaid_parser.dart';
 import '../../../charts/presentation/widgets/mermaid_chart_widget.dart';
 import '../../../../types/charts.dart';
+
+/// 渲染缓存项
+class _RenderCacheItem {
+  const _RenderCacheItem({
+    required this.content,
+    required this.widget,
+    required this.timestamp,
+  });
+
+  final String content;
+  final Widget widget;
+  final DateTime timestamp;
+}
 
 /// Markdown预览组件
 class MarkdownPreview extends ConsumerStatefulWidget {
@@ -37,6 +51,15 @@ class MarkdownPreview extends ConsumerStatefulWidget {
 
 class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   late ScrollController _scrollController;
+  
+  // 性能优化相关
+  Timer? _debounceTimer;
+  String _lastRenderedContent = '';
+  Widget? _cachedWidget;
+  final Map<String, _RenderCacheItem> _renderCache = {};
+  static const int _maxCacheSize = 10;
+  static const Duration _debounceDelay = Duration(milliseconds: 300);
+  static const Duration _cacheExpiry = Duration(minutes: 5);
 
   @override
   void initState() {
@@ -46,6 +69,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -65,11 +89,109 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
           // 预览工具栏
           _buildPreviewToolbar(),
           
-          // Markdown内容
+          // 预览内容
           Expanded(
-            child: _buildMarkdownContent(),
+            child: _buildOptimizedMarkdownContent(),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 构建优化的Markdown内容（带缓存和防抖）
+  Widget _buildOptimizedMarkdownContent() {
+    // 如果内容没有变化，返回缓存的widget
+    if (widget.content == _lastRenderedContent && _cachedWidget != null) {
+      return _cachedWidget!;
+    }
+
+    // 检查缓存
+    final cacheKey = widget.content.hashCode.toString();
+    final cachedItem = _renderCache[cacheKey];
+    
+    if (cachedItem != null) {
+      // 检查缓存是否过期
+      final now = DateTime.now();
+      if (now.difference(cachedItem.timestamp) < _cacheExpiry) {
+        _lastRenderedContent = widget.content;
+        _cachedWidget = cachedItem.widget;
+        return cachedItem.widget;
+      } else {
+        // 缓存过期，移除
+        _renderCache.remove(cacheKey);
+      }
+    }
+
+    // 使用防抖机制
+    _debounceTimer?.cancel();
+    
+    // 如果是第一次渲染或内容为空，立即渲染
+    if (_cachedWidget == null || widget.content.isEmpty) {
+      return _renderAndCache();
+    }
+
+    // 对于内容变化，使用防抖
+    _debounceTimer = Timer(_debounceDelay, () {
+      if (mounted) {
+        setState(() {
+          _renderAndCache();
+        });
+      }
+    });
+
+    // 返回当前缓存的widget（防抖期间显示）
+    return _cachedWidget ?? _buildLoadingWidget();
+  }
+
+  /// 渲染并缓存内容
+  Widget _renderAndCache() {
+    final widget = _buildMarkdownContent();
+    final cacheKey = this.widget.content.hashCode.toString();
+    
+    // 清理过期缓存
+    _cleanExpiredCache();
+    
+    // 限制缓存大小
+    if (_renderCache.length >= _maxCacheSize) {
+      final oldestKey = _renderCache.keys.first;
+      _renderCache.remove(oldestKey);
+    }
+    
+    // 添加到缓存
+    _renderCache[cacheKey] = _RenderCacheItem(
+      content: this.widget.content,
+      widget: widget,
+      timestamp: DateTime.now(),
+    );
+    
+    _lastRenderedContent = this.widget.content;
+    _cachedWidget = widget;
+    
+    return widget;
+  }
+
+  /// 清理过期缓存
+  void _cleanExpiredCache() {
+    final now = DateTime.now();
+    final expiredKeys = <String>[];
+    
+    for (final entry in _renderCache.entries) {
+      if (now.difference(entry.value.timestamp) >= _cacheExpiry) {
+        expiredKeys.add(entry.key);
+      }
+    }
+    
+    for (final key in expiredKeys) {
+      _renderCache.remove(key);
+    }
+  }
+
+  /// 构建加载widget
+  Widget _buildLoadingWidget() {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: CircularProgressIndicator(),
       ),
     );
   }
@@ -568,4 +690,4 @@ class _SpecialElement {
   final int startIndex;
   final int endIndex;
   final dynamic data;
-} 
+}
