@@ -18,7 +18,7 @@ import 'app_localizations_zh.dart';
 /// `supportedLocales` list. For example:
 ///
 /// ```dart
-/// import 'generated/app_localizations.dart';
+/// import 'l10n/app_localizations.dart';
 ///
 /// return MaterialApp(
 ///   localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -680,7 +680,7 @@ abstract class AppLocalizations {
   /// **'Browse plugin store'**
   String get browsePluginStore;
 
-  /// Cancel button
+  /// Cancel button text
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
@@ -740,7 +740,7 @@ abstract class AppLocalizations {
   /// **'Refresh failed'**
   String get refreshFailed;
 
-  /// Author label
+  /// Author field label
   ///
   /// In en, this message translates to:
   /// **'Author'**
@@ -758,7 +758,7 @@ abstract class AppLocalizations {
   /// **'Homepage'**
   String get homepage;
 
-  /// Tags label
+  /// Tags field label
   ///
   /// In en, this message translates to:
   /// **'Tags'**
@@ -902,6 +902,48 @@ abstract class AppLocalizations {
   /// **'Preview will be shown here'**
   String get previewWillBeShownHere;
 
+  /// Preview empty state message
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Markdown content in the left editor'**
+  String get enterMarkdownContentInLeftEditor;
+
+  /// Preview empty state description
+  ///
+  /// In en, this message translates to:
+  /// **'Preview will be displayed here'**
+  String get previewWillBeDisplayedHere;
+
+  /// Export as PDF tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Export as PDF'**
+  String get exportAsPdf;
+
+  /// Export as HTML tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Export as HTML'**
+  String get exportAsHtml;
+
+  /// Refresh preview tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Preview'**
+  String get refreshPreview;
+
+  /// No open documents message
+  ///
+  /// In en, this message translates to:
+  /// **'No open documents'**
+  String get noOpenDocuments;
+
+  /// Instructions for creating new document
+  ///
+  /// In en, this message translates to:
+  /// **'Click the + button above to create a new document, or open an existing document from the file menu'**
+  String get clickPlusButtonToCreate;
+
   /// Select language option
   ///
   /// In en, this message translates to:
@@ -961,6 +1003,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Welcome Document'**
   String get welcomeDocument;
+
+  /// Heading toolbar button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Heading'**
+  String get heading;
+
+  /// Link toolbar button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get link;
+
+  /// Image toolbar button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get image;
+
+  /// Code block toolbar button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Code block'**
+  String get codeBlock;
+
+  /// Math formula toolbar button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Math formula'**
+  String get mathFormula;
+
+  /// Quote toolbar button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Quote'**
+  String get quote;
+
+  /// Unordered list toolbar button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Unordered list'**
+  String get unorderedList;
+
+  /// Ordered list toolbar button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Ordered list'**
+  String get orderedList;
+
+  /// Plugin statistics card title
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin Statistics'**
+  String get pluginStatistics;
+
+  /// Total plugins count label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Plugins'**
+  String get totalPlugins;
+
+  /// Plugin distribution by type section title
+  ///
+  /// In en, this message translates to:
+  /// **'Distribution by Type'**
+  String get distributionByType;
+
+  /// Error count label
+  ///
+  /// In en, this message translates to:
+  /// **'Errors'**
+  String get errors;
+
+  /// Syntax plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Syntax Plugin'**
+  String get syntaxPlugin;
+
+  /// Renderer plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Renderer Plugin'**
+  String get rendererPlugin;
+
+  /// Theme plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Plugin'**
+  String get themePlugin;
+
+  /// Export plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Export Plugin'**
+  String get exportPlugin;
+
+  /// Exporter plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Exporter Plugin'**
+  String get exporterPlugin;
+
+  /// Import plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Import Plugin'**
+  String get importPlugin;
+
+  /// Tool plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Tool Plugin'**
+  String get toolPlugin;
+
+  /// Widget plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Widget Plugin'**
+  String get widgetPlugin;
+
+  /// Component plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Component Plugin'**
+  String get componentPlugin;
+
+  /// Integration plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Integration Plugin'**
+  String get integrationPlugin;
+
+  /// Other plugin type
+  ///
+  /// In en, this message translates to:
+  /// **'Other Plugin'**
+  String get otherPlugin;
+
+  /// Enabled plugin status
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabledStatus;
+
+  /// Disabled plugin status
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabledStatus;
+
+  /// Installed plugin status
+  ///
+  /// In en, this message translates to:
+  /// **'Installed'**
+  String get installedStatus;
+
+  /// Error plugin status
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorStatus;
+
+  /// Loading plugin status
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get loadingStatus;
+
+  /// All status filter option
+  ///
+  /// In en, this message translates to:
+  /// **'All Status'**
+  String get allStatus;
+
+  /// Filter and sort section title
+  ///
+  /// In en, this message translates to:
+  /// **'Filter and Sort'**
+  String get filterAndSort;
+
+  /// Plugin type filter label
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin Type'**
+  String get pluginType;
+
+  /// All types filter option
+  ///
+  /// In en, this message translates to:
+  /// **'All Types'**
+  String get allTypes;
+
+  /// All filter option
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// Ascending sort order
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get ascending;
+
+  /// Descending sort order
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get descending;
+
+  /// Plugin search input hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Search plugin name, description or tags...'**
+  String get searchPluginHint;
+
+  /// Clear search button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearch;
+
+  /// Advanced search button tooltip and dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced search'**
+  String get advancedSearch;
+
+  /// Plugin name field label
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin Name'**
+  String get pluginName;
+
+  /// Description keywords field label
+  ///
+  /// In en, this message translates to:
+  /// **'Description Keywords'**
+  String get descriptionKeywords;
+
+  /// Tags field hint text
+  ///
+  /// In en, this message translates to:
+  /// **'e.g: markdown, editor, syntax'**
+  String get tagsHint;
+
+  /// Tags field label with comma separated note
+  ///
+  /// In en, this message translates to:
+  /// **'Tags (comma separated)'**
+  String get tagsCommaSeparated;
+
+  /// Advanced search tip message
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Advanced search feature coming soon, currently only basic search is supported'**
+  String get advancedSearchTip;
+
+  /// Clear button text
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// Search button text
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// Sort by label
+  ///
+  /// In en, this message translates to:
+  /// **'Sort By'**
+  String get sortBy;
+
+  /// Last updated label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Updated'**
+  String get lastUpdated;
+
+  /// Name label
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get name;
 }
 
 class _AppLocalizationsDelegate

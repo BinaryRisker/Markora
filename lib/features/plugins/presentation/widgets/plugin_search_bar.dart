@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../providers/plugin_providers.dart';
 
 /// Plugin search bar component
@@ -39,18 +40,18 @@ class _PluginSearchBarState extends ConsumerState<PluginSearchBar> {
     return TextField(
       controller: _controller,
       decoration: InputDecoration(
-        hintText: 'Search plugin name, description or tags...',
+        hintText: AppLocalizations.of(context)!.searchPluginHint,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: searchQuery.isNotEmpty
             ? IconButton(
                 icon: const Icon(Icons.clear),
                 onPressed: _clearSearch,
-                tooltip: 'Clear search',
+                tooltip: AppLocalizations.of(context)!.clearSearch,
               )
             : IconButton(
                 icon: const Icon(Icons.filter_list),
                 onPressed: _showAdvancedSearch,
-                tooltip: 'Advanced search',
+                tooltip: AppLocalizations.of(context)!.advancedSearch,
               ),
         border: const OutlineInputBorder(),
         contentPadding: const EdgeInsets.symmetric(
@@ -117,7 +118,7 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Advanced Search'),
+      title: Text(AppLocalizations.of(context)!.advancedSearch),
       content: SizedBox(
         width: 400,
         child: Column(
@@ -125,40 +126,40 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Plugin Name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.pluginName,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _authorController,
-              decoration: const InputDecoration(
-                labelText: 'Author',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.author,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description Keywords',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.descriptionKeywords,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _tagsController,
-              decoration: const InputDecoration(
-                labelText: 'Tags (comma separated)',
-                border: OutlineInputBorder(),
-                hintText: 'e.g: markdown, editor, syntax',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)!.tagsCommaSeparated,
+                border: const OutlineInputBorder(),
+                hintText: AppLocalizations.of(context)!.tagsHint,
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Tip: Advanced search feature coming soon, currently only basic search is supported',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context)!.advancedSearchTip,
+              style: const TextStyle(
                 fontSize: 12,
                 color: Colors.grey,
               ),
@@ -169,15 +170,15 @@ class _AdvancedSearchDialogState extends ConsumerState<_AdvancedSearchDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         TextButton(
           onPressed: _clearAllFields,
-          child: const Text('Clear'),
+          child: Text(AppLocalizations.of(context)!.clear),
         ),
         FilledButton(
           onPressed: _performAdvancedSearch,
-          child: const Text('Search'),
+          child: Text(AppLocalizations.of(context)!.search),
         ),
       ],
     );

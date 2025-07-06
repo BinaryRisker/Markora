@@ -762,6 +762,41 @@
     "description": "预览占位符文本"
   },
 
+  "enterMarkdownContentInLeftEditor": "在左侧编辑器中输入 Markdown 内容",
+  "@enterMarkdownContentInLeftEditor": {
+    "description": "预览空状态消息"
+  },
+
+  "previewWillBeDisplayedHere": "预览将在此处显示",
+  "@previewWillBeDisplayedHere": {
+    "description": "预览空状态描述"
+  },
+
+  "exportAsPdf": "导出为 PDF",
+  "@exportAsPdf": {
+    "description": "导出为 PDF 提示"
+  },
+
+  "exportAsHtml": "导出为 HTML",
+  "@exportAsHtml": {
+    "description": "导出为 HTML 提示"
+  },
+
+  "refreshPreview": "刷新预览",
+  "@refreshPreview": {
+    "description": "刷新预览提示"
+  },
+
+  "noOpenDocuments": "没有打开的文档",
+  "@noOpenDocuments": {
+    "description": "没有打开文档的消息"
+  },
+
+  "clickPlusButtonToCreate": "点击上方的 + 按钮创建新文档，或从文件菜单打开现有文档",
+  "@clickPlusButtonToCreate": {
+    "description": "创建新文档的说明"
+  },
+
   "seconds": "秒",
   "@seconds": {
     "description": "秒单位"
@@ -775,5 +810,260 @@
   "editorTheme": "编辑器主题",
   "@editorTheme": {
     "description": "编辑器主题设置"
+  },
+
+  "heading": "标题",
+  "@heading": {
+    "description": "标题工具栏按钮提示"
+  },
+
+  "link": "链接",
+  "@link": {
+    "description": "链接工具栏按钮提示"
+  },
+
+  "image": "图片",
+  "@image": {
+    "description": "图片工具栏按钮提示"
+  },
+
+  "codeBlock": "代码块",
+  "@codeBlock": {
+    "description": "代码块工具栏按钮提示"
+  },
+
+  "mathFormula": "数学公式",
+  "@mathFormula": {
+    "description": "数学公式工具栏按钮提示"
+  },
+
+  "quote": "引用",
+  "@quote": {
+    "description": "引用工具栏按钮提示"
+  },
+
+  "unorderedList": "无序列表",
+  "@unorderedList": {
+    "description": "无序列表工具栏按钮提示"
+  },
+
+  "orderedList": "有序列表",
+  "@orderedList": {
+    "description": "有序列表工具栏按钮提示"
+  },
+
+  "pluginStatistics": "插件统计",
+  "@pluginStatistics": {
+    "description": "插件统计卡片标题"
+  },
+
+  "totalPlugins": "插件总数",
+  "@totalPlugins": {
+    "description": "插件总数标签"
+  },
+
+  "distributionByType": "类型分布",
+  "@distributionByType": {
+    "description": "插件类型分布区域标题"
+  },
+
+  "errors": "错误",
+  "@errors": {
+    "description": "错误数量标签"
+  },
+
+  "syntaxPlugin": "语法插件",
+  "@syntaxPlugin": {
+    "description": "语法插件类型"
+  },
+
+  "rendererPlugin": "渲染插件",
+  "@rendererPlugin": {
+    "description": "渲染插件类型"
+  },
+
+  "themePlugin": "主题插件",
+  "@themePlugin": {
+    "description": "主题插件类型"
+  },
+
+  "exportPlugin": "导出插件",
+  "@exportPlugin": {
+    "description": "导出插件类型"
+  },
+
+  "exporterPlugin": "导出器插件",
+  "@exporterPlugin": {
+    "description": "导出器插件类型"
+  },
+
+  "importPlugin": "导入插件",
+  "@importPlugin": {
+    "description": "导入插件类型"
+  },
+
+  "toolPlugin": "工具插件",
+  "@toolPlugin": {
+    "description": "工具插件类型"
+  },
+
+  "widgetPlugin": "组件插件",
+  "@widgetPlugin": {
+    "description": "组件插件类型"
+  },
+
+  "componentPlugin": "部件插件",
+  "@componentPlugin": {
+    "description": "部件插件类型"
+  },
+
+  "integrationPlugin": "集成插件",
+  "@integrationPlugin": {
+    "description": "集成插件类型"
+  },
+
+  "otherPlugin": "其他插件",
+  "@otherPlugin": {
+    "description": "其他插件类型"
+  },
+
+  "enabledStatus": "已启用",
+  "@enabledStatus": {
+    "description": "已启用插件状态"
+  },
+
+  "disabledStatus": "已禁用",
+  "@disabledStatus": {
+    "description": "已禁用插件状态"
+  },
+
+  "installedStatus": "已安装",
+  "@installedStatus": {
+    "description": "已安装插件状态"
+  },
+
+  "errorStatus": "错误",
+  "@errorStatus": {
+    "description": "错误插件状态"
+  },
+
+  "loadingStatus": "加载中",
+  "@loadingStatus": {
+    "description": "加载中插件状态"
+  },
+
+  "allStatus": "全部状态",
+  "@allStatus": {
+    "description": "全部状态筛选选项"
+  },
+
+  "filterAndSort": "筛选和排序",
+  "@filterAndSort": {
+    "description": "筛选和排序部分标题"
+  },
+
+  "pluginType": "插件类型",
+  "@pluginType": {
+    "description": "插件类型筛选标签"
+  },
+
+  "allTypes": "全部类型",
+  "@allTypes": {
+    "description": "全部类型筛选选项"
+  },
+
+  "all": "全部",
+  "@all": {
+    "description": "全部筛选选项"
+  },
+
+  "ascending": "升序",
+  "@ascending": {
+    "description": "升序排序"
+  },
+
+  "descending": "降序",
+  "@descending": {
+    "description": "降序排序"
+  },
+
+  "searchPluginHint": "搜索插件名称、描述或标签...",
+  "@searchPluginHint": {
+    "description": "插件搜索输入提示文本"
+  },
+
+  "clearSearch": "清除搜索",
+  "@clearSearch": {
+    "description": "清除搜索按钮提示"
+  },
+
+  "advancedSearch": "高级搜索",
+  "@advancedSearch": {
+    "description": "高级搜索按钮提示和对话框标题"
+  },
+
+  "pluginName": "插件名称",
+  "@pluginName": {
+    "description": "插件名称字段标签"
+  },
+
+  "descriptionKeywords": "描述关键词",
+  "@descriptionKeywords": {
+    "description": "描述关键词字段标签"
+  },
+
+  "tags": "标签",
+  "@tags": {
+    "description": "标签字段标签"
+  },
+
+  "tagsHint": "例如：markdown, editor, syntax",
+  "@tagsHint": {
+    "description": "标签字段提示文本"
+  },
+
+  "tagsCommaSeparated": "标签（逗号分隔）",
+  "@tagsCommaSeparated": {
+    "description": "标签字段标签（带逗号分隔说明）"
+  },
+
+  "advancedSearchTip": "提示：高级搜索功能即将推出，目前仅支持基础搜索",
+  "@advancedSearchTip": {
+    "description": "高级搜索提示信息"
+  },
+
+  "cancel": "取消",
+  "@cancel": {
+    "description": "取消按钮文本"
+  },
+
+  "clear": "清除",
+  "@clear": {
+    "description": "清除按钮文本"
+  },
+
+  "search": "搜索",
+  "@search": {
+    "description": "搜索按钮文本"
+  },
+
+  "author": "作者",
+  "@author": {
+    "description": "作者字段标签"
+  },
+
+  "sortBy": "排序方式",
+  "@sortBy": {
+    "description": "排序方式标签"
+  },
+
+  "lastUpdated": "最后更新",
+  "@lastUpdated": {
+    "description": "最后更新标签"
+  },
+
+  "name": "名称",
+  "@name": {
+    "description": "名称标签"
   }
 }

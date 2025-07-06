@@ -417,6 +417,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get previewWillBeShownHere => 'Preview will be shown here';
 
   @override
+  String get enterMarkdownContentInLeftEditor =>
+      'Enter Markdown content in the left editor';
+
+  @override
+  String get previewWillBeDisplayedHere => 'Preview will be displayed here';
+
+  @override
+  String get exportAsPdf => 'Export as PDF';
+
+  @override
+  String get exportAsHtml => 'Export as HTML';
+
+  @override
+  String get refreshPreview => 'Refresh Preview';
+
+  @override
+  String get noOpenDocuments => 'No open documents';
+
+  @override
+  String get clickPlusButtonToCreate =>
+      'Click the + button above to create a new document, or open an existing document from the file menu';
+
+  @override
   String get selectLanguage => 'Select Language';
 
   @override
@@ -446,4 +469,149 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcomeDocument => 'Welcome Document';
+
+  @override
+  String get heading => 'Heading';
+
+  @override
+  String get link => 'Link';
+
+  @override
+  String get image => 'Image';
+
+  @override
+  String get codeBlock => 'Code block';
+
+  @override
+  String get mathFormula => 'Math formula';
+
+  @override
+  String get quote => 'Quote';
+
+  @override
+  String get unorderedList => 'Unordered list';
+
+  @override
+  String get orderedList => 'Ordered list';
+
+  @override
+  String get pluginStatistics => 'Plugin Statistics';
+
+  @override
+  String get totalPlugins => 'Total Plugins';
+
+  @override
+  String get distributionByType => 'Distribution by Type';
+
+  @override
+  String get errors => 'Errors';
+
+  @override
+  String get syntaxPlugin => 'Syntax Plugin';
+
+  @override
+  String get rendererPlugin => 'Renderer Plugin';
+
+  @override
+  String get themePlugin => 'Theme Plugin';
+
+  @override
+  String get exportPlugin => 'Export Plugin';
+
+  @override
+  String get exporterPlugin => 'Exporter Plugin';
+
+  @override
+  String get importPlugin => 'Import Plugin';
+
+  @override
+  String get toolPlugin => 'Tool Plugin';
+
+  @override
+  String get widgetPlugin => 'Widget Plugin';
+
+  @override
+  String get componentPlugin => 'Component Plugin';
+
+  @override
+  String get integrationPlugin => 'Integration Plugin';
+
+  @override
+  String get otherPlugin => 'Other Plugin';
+
+  @override
+  String get enabledStatus => 'Enabled';
+
+  @override
+  String get disabledStatus => 'Disabled';
+
+  @override
+  String get installedStatus => 'Installed';
+
+  @override
+  String get errorStatus => 'Error';
+
+  @override
+  String get loadingStatus => 'Loading';
+
+  @override
+  String get allStatus => 'All Status';
+
+  @override
+  String get filterAndSort => 'Filter and Sort';
+
+  @override
+  String get pluginType => 'Plugin Type';
+
+  @override
+  String get allTypes => 'All Types';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get ascending => 'Ascending';
+
+  @override
+  String get descending => 'Descending';
+
+  @override
+  String get searchPluginHint => 'Search plugin name, description or tags...';
+
+  @override
+  String get clearSearch => 'Clear search';
+
+  @override
+  String get advancedSearch => 'Advanced search';
+
+  @override
+  String get pluginName => 'Plugin Name';
+
+  @override
+  String get descriptionKeywords => 'Description Keywords';
+
+  @override
+  String get tagsHint => 'e.g: markdown, editor, syntax';
+
+  @override
+  String get tagsCommaSeparated => 'Tags (comma separated)';
+
+  @override
+  String get advancedSearchTip =>
+      'Tip: Advanced search feature coming soon, currently only basic search is supported';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get sortBy => 'Sort By';
+
+  @override
+  String get lastUpdated => 'Last Updated';
+
+  @override
+  String get name => 'Name';
 }

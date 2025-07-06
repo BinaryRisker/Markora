@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../providers/plugin_providers.dart';
 import '../widgets/plugin_card.dart';
 import '../widgets/plugin_stats_card.dart';
@@ -21,12 +21,30 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isInitialized = false;
+  String? _currentLanguage;
   
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _initializePluginManager();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Check if language has changed
+    final newLanguage = Localizations.localeOf(context).languageCode;
+    if (_currentLanguage != null && _currentLanguage != newLanguage) {
+      // Language changed, force rebuild by calling setState
+      if (mounted) {
+        setState(() {
+          // This will trigger a rebuild of the widget tree
+        });
+      }
+    }
+    _currentLanguage = newLanguage;
   }
   
   /// Initialize plugin manager
@@ -537,8 +555,8 @@ class _PluginDetailsDialog extends ConsumerWidget {
           children: [
             _buildInfoRow(AppLocalizations.of(context)!.version, plugin.metadata.version),
             _buildInfoRow(AppLocalizations.of(context)!.author, plugin.metadata.author),
-            _buildInfoRow(AppLocalizations.of(context)!.type, plugin.metadata.type.displayName),
-            _buildInfoRow('Status', plugin.status.displayName),
+            _buildInfoRow(AppLocalizations.of(context)!.type, plugin.metadata.type.getLocalizedDisplayName(context)),
+        _buildInfoRow(AppLocalizations.of(context)!.status, plugin.status.getLocalizedDisplayName(context)),
             if (plugin.metadata.homepage != null)
               _buildInfoRow(AppLocalizations.of(context)!.homepage, plugin.metadata.homepage!),
             const SizedBox(height: 16),

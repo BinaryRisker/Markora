@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../types/plugin.dart';
 import '../providers/plugin_providers.dart';
 
@@ -21,7 +22,7 @@ class PluginFilters extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Filter and Sort',
+              AppLocalizations.of(context)!.filterAndSort,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 12),
@@ -75,7 +76,9 @@ class PluginFilters extends ConsumerWidget {
                   icon: Icon(
                     sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
                   ),
-                  tooltip: sortAscending ? 'Ascending' : 'Descending',
+                  tooltip: sortAscending 
+                    ? AppLocalizations.of(context)!.ascending 
+                    : AppLocalizations.of(context)!.descending,
                 ),
               ],
             ),
@@ -87,7 +90,7 @@ class PluginFilters extends ConsumerWidget {
               spacing: 8,
               children: [
                 _QuickFilterChip(
-                  label: 'All',
+                  label: AppLocalizations.of(context)!.all,
                   isSelected: typeFilter == null && statusFilter == null,
                   onTap: () {
                     ref.read(pluginTypeFilterProvider.notifier).state = null;
@@ -95,28 +98,28 @@ class PluginFilters extends ConsumerWidget {
                   },
                 ),
                 _QuickFilterChip(
-                  label: 'Enabled',
+                  label: AppLocalizations.of(context)!.enabled,
                   isSelected: statusFilter == PluginStatus.enabled,
                   onTap: () {
                     ref.read(pluginStatusFilterProvider.notifier).state = PluginStatus.enabled;
                   },
                 ),
                 _QuickFilterChip(
-                  label: 'Syntax',
+                  label: AppLocalizations.of(context)!.syntaxPlugin,
                   isSelected: typeFilter == PluginType.syntax,
                   onTap: () {
                     ref.read(pluginTypeFilterProvider.notifier).state = PluginType.syntax;
                   },
                 ),
                 _QuickFilterChip(
-                  label: 'Theme',
+                  label: AppLocalizations.of(context)!.themePlugin,
                   isSelected: typeFilter == PluginType.theme,
                   onTap: () {
                     ref.read(pluginTypeFilterProvider.notifier).state = PluginType.theme;
                   },
                 ),
                 _QuickFilterChip(
-                  label: 'Tool',
+                  label: AppLocalizations.of(context)!.toolPlugin,
                   isSelected: typeFilter == PluginType.tool,
                   onTap: () {
                     ref.read(pluginTypeFilterProvider.notifier).state = PluginType.tool;
@@ -145,26 +148,30 @@ class _TypeFilterDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<PluginType?>(
       value: value,
-      decoration: const InputDecoration(
-        labelText: 'Plugin Type',
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: InputDecoration(
+        labelText: AppLocalizations.of(context)!.pluginType,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       items: [
-        const DropdownMenuItem<PluginType?>(
+        DropdownMenuItem<PluginType?>(
           value: null,
-          child: Text('All Types'),
+          child: Text(AppLocalizations.of(context)!.allTypes),
         ),
-        ...PluginType.values.map((type) => DropdownMenuItem(
-          value: type,
-          child: Row(
-            children: [
-              Icon(_getTypeIcon(type), size: 16),
-              const SizedBox(width: 8),
-              Text(type.displayName),
-            ],
-          ),
-        )),
+        ...PluginType.values.map((type) {
+          return DropdownMenuItem(
+            value: type,
+            child: Builder(
+              builder: (context) => Row(
+                children: [
+                  Icon(_getTypeIcon(type), size: 16),
+                  const SizedBox(width: 8),
+                  Text(type.getLocalizedDisplayName(context)),
+                ],
+              ),
+            ),
+          );
+        }),
       ],
       onChanged: (value) => onChanged(value!),
     );
@@ -212,26 +219,30 @@ class _StatusFilterDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<PluginStatus?>(
       value: value,
-      decoration: const InputDecoration(
-        labelText: 'Plugin Status',
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: InputDecoration(
+        labelText: AppLocalizations.of(context)!.status,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       items: [
-        const DropdownMenuItem<PluginStatus?>(
+        DropdownMenuItem<PluginStatus?>(
           value: null,
-          child: Text('All Status'),
+          child: Text(AppLocalizations.of(context)!.allStatus),
         ),
-        ...PluginStatus.values.map((status) => DropdownMenuItem(
-          value: status,
-          child: Row(
-            children: [
-              Icon(_getStatusIcon(status), size: 16),
-              const SizedBox(width: 8),
-              Text(status.displayName),
-            ],
-          ),
-        )),
+        ...PluginStatus.values.map((status) {
+          return DropdownMenuItem(
+            value: status,
+            child: Builder(
+              builder: (context) => Row(
+                children: [
+                  Icon(_getStatusIcon(status), size: 16),
+                  const SizedBox(width: 8),
+                  Text(status.getLocalizedDisplayName(context)),
+                ],
+              ),
+            ),
+          );
+        }),
       ],
       onChanged: onChanged,
     );
@@ -267,19 +278,19 @@ class _SortDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<PluginSortBy>(
       value: value,
-      decoration: const InputDecoration(
-        labelText: 'Sort By',
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: InputDecoration(
+        labelText: AppLocalizations.of(context)!.sortBy,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
-      items: const [
+      items: [
         DropdownMenuItem(
           value: PluginSortBy.name,
           child: Row(
             children: [
-              Icon(Icons.sort_by_alpha, size: 16),
-              SizedBox(width: 8),
-              Text('Name'),
+              const Icon(Icons.sort_by_alpha, size: 16),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.name),
             ],
           ),
         ),
@@ -287,9 +298,9 @@ class _SortDropdown extends StatelessWidget {
           value: PluginSortBy.type,
           child: Row(
             children: [
-              Icon(Icons.category, size: 16),
-              SizedBox(width: 8),
-              Text('Type'),
+              const Icon(Icons.category, size: 16),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.type),
             ],
           ),
         ),
@@ -297,9 +308,9 @@ class _SortDropdown extends StatelessWidget {
           value: PluginSortBy.status,
           child: Row(
             children: [
-              Icon(Icons.info, size: 16),
-              SizedBox(width: 8),
-              Text('Status'),
+              const Icon(Icons.info, size: 16),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.status),
             ],
           ),
         ),
@@ -307,9 +318,9 @@ class _SortDropdown extends StatelessWidget {
           value: PluginSortBy.lastUpdated,
           child: Row(
             children: [
-              Icon(Icons.update, size: 16),
-              SizedBox(width: 8),
-              Text('Last Updated'),
+              const Icon(Icons.update, size: 16),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.lastUpdated),
             ],
           ),
         ),
@@ -317,9 +328,9 @@ class _SortDropdown extends StatelessWidget {
           value: PluginSortBy.author,
           child: Row(
             children: [
-              Icon(Icons.person, size: 16),
-              SizedBox(width: 8),
-              Text('Author'),
+              const Icon(Icons.person, size: 16),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.author),
             ],
           ),
         ),

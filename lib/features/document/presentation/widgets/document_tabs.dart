@@ -2,14 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../providers/document_providers.dart';
 
 /// 文档Tab栏组件
-class DocumentTabs extends ConsumerWidget {
+class DocumentTabs extends ConsumerStatefulWidget {
   const DocumentTabs({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DocumentTabs> createState() => _DocumentTabsState();
+}
+
+class _DocumentTabsState extends ConsumerState<DocumentTabs> {
+  String? _currentLanguage;
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Check if language has changed
+    final newLanguage = Localizations.localeOf(context).languageCode;
+    if (_currentLanguage != null && _currentLanguage != newLanguage) {
+      // Language changed, force rebuild by calling setState
+      if (mounted) {
+        setState(() {
+          // This will trigger a rebuild of the widget tree
+        });
+      }
+    }
+    _currentLanguage = newLanguage;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final tabs = ref.watch(documentTabsProvider);
     final tabsNotifier = ref.read(documentTabsProvider.notifier);
     
@@ -27,7 +52,7 @@ class DocumentTabs extends ConsumerWidget {
         ),
         child: Center(
           child: Text(
-            'No open documents',
+            AppLocalizations.of(context)!.noOpenDocuments,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),

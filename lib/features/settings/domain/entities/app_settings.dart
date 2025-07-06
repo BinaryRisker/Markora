@@ -91,19 +91,9 @@ class AppSettings {
 
   /// Default settings
   factory AppSettings.defaultSettings() {
-    // Detect system language, default to Chinese if system is Chinese, otherwise English
-    String defaultLanguage = 'zh'; // Default to Chinese
-    try {
-      final systemLocale = WidgetsBinding.instance.platformDispatcher.locale;
-      if (systemLocale.languageCode == 'zh') {
-        defaultLanguage = 'zh';
-      } else {
-        defaultLanguage = 'en';
-      }
-    } catch (e) {
-      // If detection fails, use Chinese as default
-      defaultLanguage = 'zh';
-    }
+    // Default to English
+    String defaultLanguage = 'en';
+    // Note: Removed system language detection to ensure English as default
     
     return AppSettings(
       themeMode: ThemeMode.system,

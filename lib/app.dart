@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'l10n/generated/app_localizations.dart';
+import 'l10n/app_localizations.dart';
 
 import 'core/constants/app_constants.dart';
 import 'types/editor.dart';
@@ -439,11 +439,10 @@ ${l10n.blockFormula}：
                   ),
                 ),
               ],
-            ] else ...[
-              const Text(
-                'No open documents',
-                style: TextStyle(fontSize: 12),
-              ),
+            ] else ...[                Text(
+                AppLocalizations.of(context)!.noOpenDocuments,
+                  style: const TextStyle(fontSize: 12),
+                ),
             ],
             const Spacer(),
             if (activeDocument != null) ...[

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../types/plugin.dart';
 import '../providers/plugin_providers.dart';
 
@@ -75,7 +75,7 @@ class PluginCard extends ConsumerWidget {
                   ),
                   
                   // Status indicator
-                  _buildStatusChip(plugin.status, theme),
+                  _buildStatusChip(plugin.status, theme, context),
                 ],
               ),
               
@@ -159,7 +159,7 @@ class PluginCard extends ConsumerWidget {
   }
   
   /// Build status chip
-  Widget _buildStatusChip(PluginStatus status, ThemeData theme) {
+  Widget _buildStatusChip(PluginStatus status, ThemeData theme, BuildContext context) {
     Color backgroundColor;
     Color textColor;
     IconData icon;
@@ -204,7 +204,7 @@ class PluginCard extends ConsumerWidget {
           Icon(icon, size: 12, color: textColor),
           const SizedBox(width: 4),
           Text(
-            status.displayName,
+            status.getLocalizedDisplayName(context),
             style: TextStyle(
               color: textColor,
               fontSize: 12,
