@@ -1032,11 +1032,6 @@
     "description": "高级搜索提示信息"
   },
 
-  "cancel": "取消",
-  "@cancel": {
-    "description": "取消按钮文本"
-  },
-
   "clear": "清除",
   "@clear": {
     "description": "清除按钮文本"
@@ -1045,11 +1040,6 @@
   "search": "搜索",
   "@search": {
     "description": "搜索按钮文本"
-  },
-
-  "author": "作者",
-  "@author": {
-    "description": "作者字段标签"
   },
 
   "sortBy": "排序方式",

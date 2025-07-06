@@ -680,7 +680,7 @@ abstract class AppLocalizations {
   /// **'Browse plugin store'**
   String get browsePluginStore;
 
-  /// Cancel button text
+  /// Cancel button
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
@@ -740,7 +740,7 @@ abstract class AppLocalizations {
   /// **'Refresh failed'**
   String get refreshFailed;
 
-  /// Author field label
+  /// Author label
   ///
   /// In en, this message translates to:
   /// **'Author'**
