@@ -11,6 +11,7 @@ import 'features/document/infrastructure/repositories/hive_document_repository.d
 import 'features/document/presentation/providers/document_providers.dart';
 import 'features/plugins/domain/plugin_manager.dart';
 import 'features/plugins/domain/plugin_interface.dart';
+import 'features/plugins/domain/plugin_implementations.dart';
 import 'types/document.dart';
 import 'types/plugin.dart';
 
@@ -68,17 +69,26 @@ Future<void> _cleanupHiveData() async {
   }
 }
 
+// 全局插件系统实例
+late SyntaxRegistryImpl globalSyntaxRegistry;
+late ToolbarRegistryImpl globalToolbarRegistry;
+late MenuRegistryImpl globalMenuRegistry;
+
 /// 初始化插件管理器
 Future<void> _initializePluginManager() async {
   try {
     final pluginManager = PluginManager.instance;
     
-    // 创建简单的插件上下文
+    // 创建真正的插件系统实例
+    globalSyntaxRegistry = SyntaxRegistryImpl();
+    globalToolbarRegistry = ToolbarRegistryImpl();
+    globalMenuRegistry = MenuRegistryImpl();
+    
     final context = PluginContext(
       editorController: _SimpleEditorController(),
-      syntaxRegistry: _SimpleSyntaxRegistry(),
-      toolbarRegistry: _SimpleToolbarRegistry(),
-      menuRegistry: _SimpleMenuRegistry(),
+      syntaxRegistry: globalSyntaxRegistry,
+      toolbarRegistry: globalToolbarRegistry,
+      menuRegistry: globalMenuRegistry,
     );
     
     // 初始化插件管理器
@@ -114,41 +124,7 @@ class _SimpleEditorController implements EditorController {
   void setCursorPosition(int position) {}
 }
 
-/// 简单的语法注册表实现
-class _SimpleSyntaxRegistry implements SyntaxRegistry {
-  @override
-  void registerSyntax(String name, RegExp pattern, String replacement) {}
-  
-  @override
-  void registerBlockSyntax(String name, RegExp pattern, Widget Function(String content) builder) {}
-  
-  @override
-  void registerInlineSyntax(String name, RegExp pattern, Widget Function(String content) builder) {}
-}
 
-/// 简单的工具栏注册表实现
-class _SimpleToolbarRegistry implements ToolbarRegistry {
-  @override
-  void registerAction(PluginAction action, VoidCallback callback) {}
-  
-  @override
-  void registerGroup(String groupId, String title, List<PluginAction> actions) {}
-  
-  @override
-  void unregisterAction(String actionId) {}
-}
-
-/// 简单的菜单注册表实现
-class _SimpleMenuRegistry implements MenuRegistry {
-  @override
-  void registerMenuItem(String menuId, String title, VoidCallback callback, {String? icon, String? shortcut}) {}
-  
-  @override
-  void registerSubMenu(String parentId, String menuId, String title, List<String> items) {}
-  
-  @override
-  void unregisterMenuItem(String menuId) {}
-}
 
 /// 创建示例文档
 Future<void> _createSampleDocuments(HiveDocumentRepository repo) async {

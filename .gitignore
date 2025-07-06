@@ -7,6 +7,7 @@
 .buildlog/
 .history
 .cursor/
+.trae/
 
 
 # Flutter repo-specific

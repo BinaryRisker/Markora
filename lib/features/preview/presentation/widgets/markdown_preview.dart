@@ -10,6 +10,8 @@ import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../syntax_highlighting/presentation/widgets/code_block_widget.dart';
 import '../../../../types/syntax_highlighting.dart';
+import '../../../../main.dart';
+import '../../../plugins/domain/plugin_implementations.dart';
 
 
 /// 渲染缓存项
@@ -309,15 +311,18 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// 构建包含数学公式的内容
+  /// 构建包含数学公式和插件内容的内容
   Widget _buildContentWithMath() {
-    // 解析数学公式
-    final mathFormulas = MathParser.parseFormulas(widget.content);
+    // 首先处理插件注册的块级语法
+    final processedContent = _processPluginSyntax(widget.content);
     
-    if (mathFormulas.isEmpty) {
+    // 解析数学公式
+    final mathFormulas = MathParser.parseFormulas(processedContent.content);
+    
+    if (mathFormulas.isEmpty && processedContent.pluginWidgets.isEmpty) {
       // 没有特殊内容，直接使用普通Markdown渲染
       return MarkdownBody(
-        data: widget.content,
+        data: processedContent.content,
         selectable: widget.selectable,
         styleSheet: _buildMarkdownStyleSheet(),
         extensionSet: md.ExtensionSet.gitHubFlavored,
@@ -334,11 +339,11 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     }
 
     // 有特殊内容，需要特殊处理
-    return _buildMixedContent(mathFormulas);
+    return _buildMixedContent(mathFormulas, processedContent.pluginWidgets);
   }
 
-  /// 构建混合内容（文本+数学公式）
-  Widget _buildMixedContent(List<MathFormula> mathFormulas) {
+  /// 构建混合内容（文本+数学公式+插件组件）
+  Widget _buildMixedContent(List<MathFormula> mathFormulas, List<_PluginElement> pluginElements) {
     final widgets = <Widget>[];
     
     // 合并所有特殊元素并按位置排序
@@ -351,6 +356,16 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
         startIndex: formula.startIndex,
         endIndex: formula.endIndex,
         data: formula,
+      ));
+    }
+    
+    // 添加插件组件
+    for (final pluginElement in pluginElements) {
+      allElements.add(_SpecialElement(
+        type: _SpecialElementType.plugin,
+        startIndex: pluginElement.start,
+        endIndex: pluginElement.end,
+        data: pluginElement.widget,
       ));
     }
     
@@ -399,6 +414,9 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
             }
           },
         ));
+      } else if (element.type == _SpecialElementType.plugin) {
+        final widget = element.data as Widget;
+        widgets.add(widget);
       }
 
       currentIndex = element.endIndex;
@@ -643,6 +661,7 @@ class CodeElementBuilder extends MarkdownElementBuilder {
 /// 特殊元素类型
 enum _SpecialElementType {
   math,   // 数学公式
+  plugin, // 插件组件
 }
 
 /// 特殊元素
@@ -658,4 +677,75 @@ class _SpecialElement {
   final int startIndex;
   final int endIndex;
   final dynamic data;
+}
+
+/// 插件元素
+class _PluginElement {
+  const _PluginElement({
+    required this.start,
+    required this.end,
+    required this.content,
+    required this.widget,
+  });
+
+  final int start;
+  final int end;
+  final String content;
+  final Widget widget;
+}
+
+/// 处理后的内容
+class _ProcessedContent {
+  const _ProcessedContent({
+    required this.content,
+    required this.pluginWidgets,
+  });
+
+  final String content;
+  final List<_PluginElement> pluginWidgets;
+}
+
+/// 处理插件语法
+_ProcessedContent _processPluginSyntax(String content) {
+  final pluginWidgets = <_PluginElement>[];
+  String processedContent = content;
+  int offset = 0;
+
+  try {
+    // 获取全局语法注册器
+     final syntaxRegistry = globalSyntaxRegistry;
+     final blockRules = syntaxRegistry.blockSyntaxRules;
+
+    for (final rule in blockRules.values) {
+      final matches = rule.pattern.allMatches(content);
+      
+      for (final match in matches) {
+        try {
+          final widget = rule.builder(match.group(0)!);
+          pluginWidgets.add(_PluginElement(
+            start: match.start - offset,
+            end: match.end - offset,
+            content: match.group(0)!,
+            widget: widget,
+          ));
+          
+          // 从内容中移除匹配的文本
+           final before = processedContent.substring(0, match.start - offset);
+           final after = processedContent.substring(match.end - offset);
+           processedContent = before + after;
+           offset += (match.end - match.start);
+        } catch (e) {
+          // 插件渲染错误，跳过
+          print('Plugin syntax error: $e');
+        }
+      }
+    }
+  } catch (e) {
+    print('Error processing plugin syntax: $e');
+  }
+
+  return _ProcessedContent(
+    content: processedContent,
+    pluginWidgets: pluginWidgets,
+  );
 }
