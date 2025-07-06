@@ -9,6 +9,8 @@ import 'features/editor/presentation/widgets/markdown_editor.dart';
 import 'features/preview/presentation/widgets/markdown_preview.dart';
 import 'features/document/presentation/providers/document_providers.dart';
 import 'features/document/presentation/widgets/file_dialog.dart';
+import 'features/document/presentation/widgets/document_tabs.dart';
+import 'features/document/presentation/widgets/save_as_dialog.dart';
 import 'features/settings/presentation/widgets/settings_page.dart';
 import 'features/export/presentation/widgets/export_dialog.dart';
 
@@ -81,6 +83,9 @@ void main() {
         children: [
           // 工具栏
           _buildToolbar(),
+          
+          // 文档Tab栏
+          const DocumentTabs(),
           
           // 主要内容区域
           Expanded(
@@ -264,12 +269,14 @@ void main() {
 
   /// 构建编辑器
   Widget _buildEditor() {
+    final activeDocument = ref.watch(activeDocumentProvider);
+    final content = activeDocument?.content ?? '';
+    
     return MarkdownEditor(
-      initialContent: _currentContent,
+      initialContent: content,
       onChanged: (content) {
-        setState(() {
-          _currentContent = content;
-        });
+        // 移除setState调用，因为内容已经通过Tab系统管理
+        // Tab系统会自动处理内容同步
       },
       onCursorPositionChanged: (position) {
         setState(() {
@@ -281,8 +288,11 @@ void main() {
 
   /// 构建预览器
   Widget _buildPreview() {
+    final activeDocument = ref.watch(activeDocumentProvider);
+    final content = activeDocument?.content ?? '';
+    
     return MarkdownPreview(
-      content: _currentContent,
+      content: content,
     );
   }
 
@@ -343,6 +353,10 @@ void main() {
 
   /// 构建状态栏
   Widget _buildStatusBar() {
+    final activeDocument = ref.watch(activeDocumentProvider);
+    final tabs = ref.watch(documentTabsProvider);
+    final tabsNotifier = ref.read(documentTabsProvider.notifier);
+    
     return Container(
       height: AppConstants.statusBarHeight,
       decoration: BoxDecoration(
@@ -358,15 +372,42 @@ void main() {
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Row(
           children: [
-            Text(
-              '准备就绪 | ${_currentContent.length} 字符',
-              style: const TextStyle(fontSize: 12),
-            ),
+            if (activeDocument != null) ...[
+              Text(
+                '${activeDocument.title} | ${activeDocument.content.length} 字符',
+                style: const TextStyle(fontSize: 12),
+              ),
+              const SizedBox(width: 8),
+              if (tabsNotifier.activeTabIndex >= 0 && 
+                  tabsNotifier.activeTabIndex < tabs.length &&
+                  tabs[tabsNotifier.activeTabIndex].isModified) ...[
+                Icon(
+                  Icons.circle,
+                  size: 8,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '已修改',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ] else ...[
+              const Text(
+                '没有打开的文档',
+                style: TextStyle(fontSize: 12),
+              ),
+            ],
             const Spacer(),
-            Text(
-              'Ln ${_cursorPosition.line + 1}, Col ${_cursorPosition.column + 1}',
-              style: const TextStyle(fontSize: 12),
-            ),
+            if (activeDocument != null) ...[
+              Text(
+                'Ln ${_cursorPosition.line + 1}, Col ${_cursorPosition.column + 1}',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
           ],
         ),
       ),
@@ -376,18 +417,11 @@ void main() {
   // 事件处理方法
   void _handleNewDocument() async {
     try {
-      await ref.read(currentDocumentProvider.notifier).createNewDocument(
+      final tabsNotifier = ref.read(documentTabsProvider.notifier);
+      await tabsNotifier.createNewDocumentTab(
         title: '新文档',
         content: '# 新文档\n\n开始你的创作...',
       );
-      
-      // 更新当前内容
-      final currentDoc = ref.read(currentDocumentProvider);
-      if (currentDoc != null) {
-        setState(() {
-          _currentContent = currentDoc.content;
-        });
-      }
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -407,14 +441,7 @@ void main() {
     try {
       final selectedDocument = await showOpenFileDialog(context);
       if (selectedDocument != null) {
-        // 切换到选中的文档
-        ref.read(currentDocumentProvider.notifier).setCurrentDocument(selectedDocument);
-        
-        // 更新当前内容
-        setState(() {
-          _currentContent = selectedDocument.content;
-        });
-        
+        // 文档已经在file_dialog中被添加到Tab了，这里只需要显示消息
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('已打开文档: ${selectedDocument.title}')),
@@ -432,15 +459,12 @@ void main() {
 
   void _handleSaveDocument() async {
     try {
-      final currentDoc = ref.read(currentDocumentProvider);
+      final tabsNotifier = ref.read(documentTabsProvider.notifier);
+      final activeDocument = ref.read(activeDocumentProvider);
       
-      // 如果有当前文档，直接保存
-      if (currentDoc != null) {
-        // 更新当前文档内容
-        ref.read(currentDocumentProvider.notifier).updateContent(_currentContent);
-        
-        // 保存文档
-        await ref.read(currentDocumentProvider.notifier).saveDocument();
+      // 如果有激活文档，直接保存
+      if (activeDocument != null) {
+        await tabsNotifier.saveActiveTab();
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -448,7 +472,7 @@ void main() {
           );
         }
       } else {
-        // 如果没有当前文档，显示另存为对话框
+        // 如果没有激活文档，显示另存为对话框
         _handleSaveAsDocument();
       }
     } catch (e) {
@@ -463,17 +487,31 @@ void main() {
   /// 处理另存为
   void _handleSaveAsDocument() async {
     try {
-      final fileName = await showSaveFileDialog(context, initialFileName: '新文档');
-      if (fileName != null && fileName.isNotEmpty) {
-        // 创建新文档
-        await ref.read(currentDocumentProvider.notifier).createNewDocument(
-          title: fileName,
-          content: _currentContent,
-        );
+      final activeDocument = ref.read(activeDocumentProvider);
+      final documentToSave = activeDocument ?? Document(
+        id: 'temp_save',
+        title: '新文档',
+        content: _currentContent,
+        type: DocumentType.markdown,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final result = await showDialog<SaveResult>(
+        context: context,
+        builder: (context) => SaveAsDialog(
+          document: documentToSave,
+          initialFormat: SaveFormat.markdown,
+        ),
+      );
+
+      if (result != null) {
+        // 根据选择的格式保存文件
+        await _saveFileWithFormat(documentToSave, result);
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('文档已保存为: $fileName')),
+            SnackBar(content: Text('文档已保存为: ${result.fileName}')),
           );
         }
       }
@@ -482,6 +520,33 @@ void main() {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('保存失败: $e')),
         );
+      }
+    }
+  }
+
+  /// 根据格式保存文件
+  Future<void> _saveFileWithFormat(Document document, SaveResult result) async {
+    // 文件已经在SaveAsDialog中保存到磁盘了
+    // 这里只需要更新Tab中的文档信息
+    final tabsNotifier = ref.read(documentTabsProvider.notifier);
+    
+    // 更新文档标题为文件名（不包含扩展名）
+    final fileNameWithoutExt = result.fileName.replaceAll(RegExp(r'\.[^.]*$'), '');
+    final updatedDocument = document.copyWith(
+      title: fileNameWithoutExt,
+      updatedAt: DateTime.now(),
+    );
+    
+    // 保存到Hive数据库
+    await ref.read(documentServiceProvider).saveDocument(updatedDocument);
+    
+    // 如果文档在Tab中，更新Tab
+    final activeIndex = tabsNotifier.activeTabIndex;
+    if (activeIndex >= 0) {
+      final tabs = ref.read(documentTabsProvider);
+      if (activeIndex < tabs.length && tabs[activeIndex].document.id == document.id) {
+        // 更新当前Tab的文档信息
+        tabsNotifier.updateTabContent(activeIndex, updatedDocument.content);
       }
     }
   }

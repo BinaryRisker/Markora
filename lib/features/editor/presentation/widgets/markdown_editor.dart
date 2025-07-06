@@ -10,6 +10,7 @@ import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../charts/domain/services/mermaid_parser.dart';
 import '../../../charts/presentation/widgets/mermaid_chart_widget.dart';
 import '../../../../types/charts.dart';
+import '../../../document/presentation/providers/document_providers.dart';
 
 /// Markdown编辑器组件
 class MarkdownEditor extends ConsumerStatefulWidget {
@@ -40,6 +41,7 @@ class MarkdownEditor extends ConsumerStatefulWidget {
 class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
   late TextEditingController _controller;
   late FocusNode _focusNode;
+  String _lastSyncedContent = '';
   
   @override
   void initState() {
@@ -49,6 +51,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     
     // 初始化文本编辑器控制器
     _controller = TextEditingController(text: widget.initialContent);
+    _lastSyncedContent = widget.initialContent;
     
     // 监听文本变化
     _controller.addListener(_onTextChanged);
@@ -65,7 +68,18 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
   /// 文本变化处理
   void _onTextChanged() {
     final text = _controller.text;
+    
+    // 通知外部回调
     widget.onChanged?.call(text);
+    
+    // 更新当前激活的Tab内容
+    final tabsNotifier = ref.read(documentTabsProvider.notifier);
+    final activeIndex = tabsNotifier.activeTabIndex;
+    
+    if (activeIndex >= 0 && text != _lastSyncedContent) {
+      tabsNotifier.updateTabContent(activeIndex, text);
+      _lastSyncedContent = text;
+    }
     
     // 计算光标位置
     final selection = _controller.selection;
@@ -84,10 +98,46 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
   }
 
+  /// 同步Tab内容到编辑器
+  void _syncTabContent() {
+    final activeDocument = ref.watch(activeDocumentProvider);
+    
+    if (activeDocument != null) {
+      final content = activeDocument.content;
+      if (content != _controller.text) {
+        // 使用addPostFrameCallback避免在build期间调用setState
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _lastSyncedContent = content;
+            _controller.text = content;
+            // 保持光标位置在末尾
+            _controller.selection = TextSelection.collapsed(
+              offset: content.length,
+            );
+          }
+        });
+      }
+    } else {
+      // 没有激活文档时清空编辑器
+      if (_controller.text.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _lastSyncedContent = '';
+            _controller.text = '';
+          }
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 监听激活文档变化并同步内容
+    _syncTabContent();
+    
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final editorTheme = isDark ? EditorTheme.dark : EditorTheme.light;
+    final activeDocument = ref.watch(activeDocumentProvider);
     
     return Container(
       decoration: BoxDecoration(
@@ -104,7 +154,40 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           
           // 代码编辑器
           Expanded(
-            child: _buildCodeEditor(isDark, editorTheme),
+            child: activeDocument != null 
+                ? _buildCodeEditor(isDark, editorTheme)
+                : _buildEmptyState(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建空状态
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.description_outlined,
+            size: 64,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '没有打开的文档',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '点击上方的 + 按钮创建新文档，或从文件菜单打开现有文档',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -113,6 +196,9 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
 
   /// 构建编辑器工具栏
   Widget _buildEditorToolbar() {
+    final activeDocument = ref.watch(activeDocumentProvider);
+    final isEnabled = activeDocument != null;
+    
     return Container(
       height: 32,
       decoration: BoxDecoration(
@@ -130,71 +216,73 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           _buildToolbarButton(
             icon: Icons.format_bold,
             tooltip: '粗体 (Ctrl+B)',
-            onPressed: () => _insertMarkdown('**', '**'),
+            onPressed: isEnabled ? () => _insertMarkdown('**', '**') : null,
           ),
           _buildToolbarButton(
             icon: Icons.format_italic,
             tooltip: '斜体 (Ctrl+I)',
-            onPressed: () => _insertMarkdown('*', '*'),
+            onPressed: isEnabled ? () => _insertMarkdown('*', '*') : null,
           ),
           _buildToolbarButton(
             icon: Icons.format_strikethrough,
             tooltip: '删除线',
-            onPressed: () => _insertMarkdown('~~', '~~'),
+            onPressed: isEnabled ? () => _insertMarkdown('~~', '~~') : null,
           ),
           const VerticalDivider(width: 1),
           _buildToolbarButton(
             icon: Icons.title,
             tooltip: '标题',
-            onPressed: () => _insertHeading(),
+            onPressed: isEnabled ? () => _insertHeading() : null,
           ),
           _buildToolbarButton(
             icon: Icons.link,
             tooltip: '链接',
-            onPressed: () => _insertLink(),
+            onPressed: isEnabled ? () => _insertLink() : null,
           ),
           _buildToolbarButton(
             icon: Icons.image,
             tooltip: '图片',
-            onPressed: () => _insertImage(),
+            onPressed: isEnabled ? () => _insertImage() : null,
           ),
           const VerticalDivider(width: 1),
           _buildToolbarButton(
             icon: Icons.code,
             tooltip: '代码块',
-            onPressed: () => _insertCodeBlock(),
+            onPressed: isEnabled ? () => _insertCodeBlock() : null,
           ),
           _buildToolbarButton(
             icon: Icons.functions,
             tooltip: '数学公式',
-            onPressed: () => _insertMathFormula(),
+            onPressed: isEnabled ? () => _insertMathFormula() : null,
           ),
           _buildToolbarButton(
             icon: Icons.account_tree,
             tooltip: 'Mermaid图表',
-            onPressed: () => _insertMermaidChart(),
+            onPressed: isEnabled ? () => _insertMermaidChart() : null,
           ),
           _buildToolbarButton(
             icon: Icons.format_quote,
             tooltip: '引用',
-            onPressed: () => _insertQuote(),
+            onPressed: isEnabled ? () => _insertQuote() : null,
           ),
           _buildToolbarButton(
             icon: Icons.format_list_bulleted,
             tooltip: '无序列表',
-            onPressed: () => _insertList(false),
+            onPressed: isEnabled ? () => _insertList(false) : null,
           ),
           _buildToolbarButton(
             icon: Icons.format_list_numbered,
             tooltip: '有序列表',
-            onPressed: () => _insertList(true),
+            onPressed: isEnabled ? () => _insertList(true) : null,
           ),
           const Spacer(),
-          Text(
-            '行 ${_getCurrentLine()} 列 ${_getCurrentColumn()}',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(width: 8),
+          if (isEnabled) ...[
+            Text(
+              '行 ${_getCurrentLine()} 列 ${_getCurrentColumn()}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(width: 8),
+          ],
         ],
       ),
     );
@@ -204,7 +292,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
   Widget _buildToolbarButton({
     required IconData icon,
     required String tooltip,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) {
     return Tooltip(
       message: tooltip,
