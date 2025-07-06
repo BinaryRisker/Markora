@@ -120,7 +120,7 @@ class _DocumentTabItem extends StatelessWidget {
               children: [
                 // 文档图标
                 PhosphorIcon(
-                  PhosphorIcons.fileText(),
+                  PhosphorIconsRegular.fileText,
                   size: 16,
                   color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
@@ -162,7 +162,7 @@ class _DocumentTabItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: PhosphorIcon(
-                      PhosphorIcons.x(),
+                      PhosphorIconsRegular.x,
                       size: 12,
                       color: theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
@@ -217,7 +217,7 @@ class _NewTabButton extends ConsumerWidget {
           },
           child: Center(
             child: PhosphorIcon(
-              PhosphorIcons.plus(),
+              PhosphorIconsRegular.plus,
               size: 16,
               color: theme.colorScheme.onSurface.withOpacity(0.7),
             ),
@@ -226,4 +226,4 @@ class _NewTabButton extends ConsumerWidget {
       ),
     );
   }
-} 
+}

@@ -75,7 +75,7 @@ class SettingsPage extends ConsumerWidget {
       children: [
         _buildSettingCard(
           context,
-          leading: Icon(PhosphorIcons.palette()),
+          leading: Icon(PhosphorIconsRegular.palette),
           title: '主题模式',
           subtitle: _getThemeModeLabel(settings.themeMode),
           trailing: DropdownButton<ThemeMode>(
@@ -87,7 +87,7 @@ class SettingsPage extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(PhosphorIcons.deviceMobile(), size: 16),
+                    Icon(PhosphorIconsRegular.deviceMobile, size: 16),
                     const SizedBox(width: 8),
                     const Text('跟随系统'),
                   ],
@@ -98,7 +98,7 @@ class SettingsPage extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(PhosphorIcons.sun(), size: 16),
+                    Icon(PhosphorIconsRegular.sun, size: 16),
                     const SizedBox(width: 8),
                     const Text('浅色'),
                   ],
@@ -109,7 +109,7 @@ class SettingsPage extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(PhosphorIcons.moon(), size: 16),
+                    Icon(PhosphorIconsRegular.moon, size: 16),
                     const SizedBox(width: 8),
                     const Text('深色'),
                   ],
@@ -126,7 +126,7 @@ class SettingsPage extends ConsumerWidget {
         
         _buildSettingCard(
           context,
-          leading: Icon(PhosphorIcons.paintBrush()),
+          leading: Icon(PhosphorIconsRegular.paintBrush),
           title: '编辑器主题',
           subtitle: settings.editorTheme,
           trailing: DropdownButton<String>(
@@ -158,7 +158,7 @@ class SettingsPage extends ConsumerWidget {
       children: [
         _buildSettingCard(
           context,
-          leading: Icon(PhosphorIcons.textAa()),
+          leading: Icon(PhosphorIconsRegular.textAa),
           title: '字体大小',
           subtitle: '${settings.fontSize.toInt()}px',
           trailing: SizedBox(
@@ -178,7 +178,7 @@ class SettingsPage extends ConsumerWidget {
         
         _buildSettingCard(
           context,
-          leading: Icon(PhosphorIcons.listNumbers()),
+          leading: Icon(PhosphorIconsRegular.listNumbers),
           title: '显示行号',
           subtitle: settings.showLineNumbers ? '已启用' : '已禁用',
           trailing: Switch(
@@ -191,7 +191,7 @@ class SettingsPage extends ConsumerWidget {
         
         _buildSettingCard(
           context,
-          leading: Icon(PhosphorIcons.textIndent()),
+          leading: Icon(PhosphorIconsRegular.textIndent),
           title: '自动换行',
           subtitle: settings.wordWrap ? '已启用' : '已禁用',
           trailing: Switch(
@@ -204,7 +204,7 @@ class SettingsPage extends ConsumerWidget {
         
         _buildSettingCard(
           context,
-          leading: Icon(PhosphorIcons.columns()),
+          leading: Icon(PhosphorIconsRegular.columns),
           title: '默认视图模式',
           subtitle: _getViewModeLabel(settings.defaultViewMode),
           trailing: DropdownButton<String>(
@@ -232,7 +232,7 @@ class SettingsPage extends ConsumerWidget {
       children: [
         _buildSettingCard(
           context,
-          leading: Icon(PhosphorIcons.floppyDisk()),
+          leading: Icon(PhosphorIconsRegular.floppyDisk),
           title: '自动保存',
           subtitle: settings.autoSave ? '已启用' : '已禁用',
           trailing: Switch(
@@ -245,7 +245,7 @@ class SettingsPage extends ConsumerWidget {
         
         _buildSettingCard(
           context,
-          leading: Icon(PhosphorIcons.clock()),
+          leading: Icon(PhosphorIconsRegular.clock),
           title: '自动保存间隔',
           subtitle: '${settings.autoSaveInterval}秒',
           trailing: SizedBox(
@@ -265,7 +265,7 @@ class SettingsPage extends ConsumerWidget {
         
         _buildSettingCard(
           context,
-          leading: Icon(PhosphorIcons.eye()),
+          leading: Icon(PhosphorIconsRegular.eye),
           title: '实时预览',
           subtitle: settings.livePreview ? '已启用' : '已禁用',
           trailing: Switch(
@@ -283,10 +283,10 @@ class SettingsPage extends ConsumerWidget {
   Widget _buildAboutSection(BuildContext context) {
     return _buildSettingCard(
       context,
-      leading: Icon(PhosphorIcons.info()),
+      leading: Icon(PhosphorIconsRegular.info),
       title: 'Markora',
       subtitle: '版本 ${AppConstants.version}',
-      trailing: Icon(PhosphorIcons.caretRight()),
+      trailing: Icon(PhosphorIconsRegular.caretRight),
       onTap: () => _showAboutDialog(context),
     );
   }
@@ -345,7 +345,7 @@ class SettingsPage extends ConsumerWidget {
       applicationName: 'Markora',
       applicationVersion: AppConstants.version,
       applicationIcon: Icon(
-        PhosphorIcons.notePencil(),
+        PhosphorIconsRegular.notePencil,
         size: 48,
         color: Theme.of(context).colorScheme.primary,
       ),
@@ -361,4 +361,4 @@ class SettingsPage extends ConsumerWidget {
       ],
     );
   }
-} 
+}

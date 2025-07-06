@@ -84,7 +84,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
     return Row(
       children: [
         Icon(
-          PhosphorIcons.export(),
+          PhosphorIconsRegular.export,
           color: theme.colorScheme.primary,
           size: 28,
         ),
@@ -108,7 +108,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
         ),
         const Spacer(),
         IconButton(
-          icon: Icon(PhosphorIcons.x()),
+          icon: Icon(PhosphorIconsRegular.x),
           onPressed: () => Navigator.of(context).pop(),
           tooltip: '关闭',
         ),
@@ -175,7 +175,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                   if (!isSupported) ...[
                     const SizedBox(width: 4),
                     Icon(
-                      PhosphorIcons.warning(),
+                      PhosphorIconsRegular.warning,
                       size: 12,
                       color: theme.colorScheme.error,
                     ),
@@ -454,7 +454,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 ),
                 const SizedBox(height: 8),
                 Icon(
-                  PhosphorIcons.hammer(),
+                  PhosphorIconsRegular.hammer,
                   size: 48,
                   color: theme.colorScheme.outline,
                 ),
@@ -492,7 +492,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 ),
                 const SizedBox(height: 8),
                 Icon(
-                  PhosphorIcons.hammer(),
+                  PhosphorIconsRegular.hammer,
                   size: 48,
                   color: theme.colorScheme.outline,
                 ),
@@ -552,7 +552,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
           if (_currentProgress?.hasError == true) ...[
             const SizedBox(height: 16),
             Icon(
-              PhosphorIcons.warning(),
+              PhosphorIconsRegular.warning,
               size: 48,
               color: theme.colorScheme.error,
             ),
@@ -599,7 +599,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
       children: [
         // 导出预览
         TextButton.icon(
-          icon: Icon(PhosphorIcons.eye()),
+          icon: Icon(PhosphorIconsRegular.eye),
           label: const Text('预览'),
           onPressed: () => _showPreview(),
         ),
@@ -616,7 +616,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
         
         // 导出按钮
         FilledButton.icon(
-          icon: Icon(PhosphorIcons.export()),
+          icon: Icon(PhosphorIconsRegular.export),
           label: const Text('开始导出'),
           onPressed: _canExport() ? _startExport : null,
         ),
@@ -641,14 +641,14 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
   IconData _getFormatIcon(ExportFormat format) {
     switch (format) {
       case ExportFormat.html:
-        return PhosphorIcons.globe();
+        return PhosphorIconsRegular.globe;
       case ExportFormat.pdf:
-        return PhosphorIcons.filePdf();
+        return PhosphorIconsRegular.filePdf;
       case ExportFormat.png:
       case ExportFormat.jpeg:
-        return PhosphorIcons.image();
+        return PhosphorIconsRegular.image;
       case ExportFormat.docx:
-        return PhosphorIcons.fileDoc();
+        return PhosphorIconsRegular.fileDoc;
     }
   }
 
@@ -757,4 +757,4 @@ Future<void> showExportDialog(BuildContext context, Document document) {
     context: context,
     builder: (context) => ExportDialog(document: document),
   );
-} 
+}
