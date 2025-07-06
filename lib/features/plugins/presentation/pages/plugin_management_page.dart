@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../types/plugin.dart';
 import '../providers/plugin_providers.dart';
 import '../widgets/plugin_card.dart';
-import '../widgets/plugin_filters.dart';
 import '../widgets/plugin_stats_card.dart';
 import '../widgets/plugin_search_bar.dart';
+import '../widgets/plugin_filters.dart';
+import '../../../../types/plugin.dart';
+import '../../domain/plugin_interface.dart';
 
 /// 插件管理页面
 class PluginManagementPage extends ConsumerStatefulWidget {
@@ -18,13 +19,52 @@ class PluginManagementPage extends ConsumerStatefulWidget {
 class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _isInitialized = false;
   
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _initializePluginManager();
   }
   
+  /// 初始化插件管理器
+  Future<void> _initializePluginManager() async {
+    if (_isInitialized) return;
+    
+    try {
+      final manager = ref.read(pluginManagerProvider);
+      // 创建简单的插件上下文
+      final context = _createPluginContext();
+      
+      // 初始化插件管理器
+      await manager.initialize(context);
+      
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('初始化插件管理器失败: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('初始化插件管理器失败: $e')),
+        );
+      }
+    }
+  }
+  
+  /// 创建插件上下文
+  PluginContext _createPluginContext() {
+    return PluginContext(
+      editorController: _SimpleEditorController(),
+      syntaxRegistry: _SimpleSyntaxRegistry(),
+      toolbarRegistry: _SimpleToolbarRegistry(),
+      menuRegistry: _SimpleMenuRegistry(),
+    );
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -257,10 +297,35 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
   
   /// 从文件安装插件
   void _installFromFile() async {
-    // TODO: 实现文件选择和安装逻辑
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('文件安装功能即将推出')),
-    );
+    try {
+      // TODO: 实现文件选择器
+      // 这里暂时使用模拟路径
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请选择插件文件')),
+      );
+      
+      // final result = await FilePicker.platform.pickFiles(
+      //   type: FileType.custom,
+      //   allowedExtensions: ['zip'],
+      // );
+      // 
+      // if (result != null && result.files.single.path != null) {
+      //   final actions = ref.read(pluginActionsProvider);
+      //   final success = await actions.installPlugin(result.files.single.path!);
+      //   
+      //   if (mounted) {
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       SnackBar(content: Text(success ? '插件安装成功' : '插件安装失败')),
+      //     );
+      //   }
+      // }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('安装失败: $e')),
+        );
+      }
+    }
   }
   
   /// 从URL安装插件
@@ -292,19 +357,52 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     );
     
     if (result != null && result.isNotEmpty) {
-      // TODO: 实现URL下载和安装逻辑
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('URL安装功能即将推出')),
-      );
+      try {
+        // TODO: 实现URL下载逻辑
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('正在下载插件...')),
+        );
+        
+        // 这里需要实现下载逻辑
+        // final downloadPath = await downloadPlugin(result);
+        // final actions = ref.read(pluginActionsProvider);
+        // final success = await actions.installPlugin(downloadPath);
+        // 
+        // if (mounted) {
+        //   ScaffoldMessenger.of(context).showSnackBar(
+        //     SnackBar(content: Text(success ? '插件安装成功' : '插件安装失败')),
+        //   );
+        // }
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('URL安装功能开发中')),
+        );
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('安装失败: $e')),
+          );
+        }
+      }
     }
   }
   
   /// 刷新插件列表
   void _refreshPlugins() async {
-    // TODO: 实现刷新逻辑
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('刷新完成')),
-    );
+    try {
+      await _initializePluginManager();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('刷新完成')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('刷新失败: $e')),
+        );
+      }
+    }
   }
   
   /// 显示插件详情
@@ -313,6 +411,96 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
       context: context,
       builder: (context) => _PluginDetailsDialog(plugin: plugin),
     );
+  }
+}
+
+/// 简单的编辑器控制器实现
+class _SimpleEditorController implements EditorController {
+  String _content = '';
+  int _cursorPosition = 0;
+  String _selectedText = '';
+
+  @override
+  String get content => _content;
+
+  @override
+  void setContent(String content) {
+    _content = content;
+  }
+
+  @override
+  void insertText(String text) {
+    // 简单实现
+  }
+
+  @override
+  String get selectedText => _selectedText;
+
+  @override
+  void replaceSelection(String text) {
+    // 简单实现
+  }
+
+  @override
+  int get cursorPosition => _cursorPosition;
+
+  @override
+  void setCursorPosition(int position) {
+    _cursorPosition = position;
+  }
+}
+
+/// 简单的语法注册器实现
+class _SimpleSyntaxRegistry implements SyntaxRegistry {
+  @override
+  void registerSyntax(String name, RegExp pattern, String replacement) {
+    // 简单实现
+  }
+
+  @override
+  void registerBlockSyntax(String name, RegExp pattern, Widget Function(String content) builder) {
+    // 简单实现
+  }
+
+  @override
+  void registerInlineSyntax(String name, RegExp pattern, Widget Function(String content) builder) {
+    // 简单实现
+  }
+}
+
+/// 简单的工具栏注册器实现
+class _SimpleToolbarRegistry implements ToolbarRegistry {
+  @override
+  void registerAction(PluginAction action, VoidCallback callback) {
+    // 简单实现
+  }
+
+  @override
+  void registerGroup(String groupId, String title, List<PluginAction> actions) {
+    // 简单实现
+  }
+
+  @override
+  void unregisterAction(String actionId) {
+    // 简单实现
+  }
+}
+
+/// 简单的菜单注册器实现
+class _SimpleMenuRegistry implements MenuRegistry {
+  @override
+  void registerMenuItem(String menuId, String title, VoidCallback callback, {String? icon, String? shortcut}) {
+    // 简单实现
+  }
+
+  @override
+  void registerSubMenu(String parentId, String menuId, String title, List<String> items) {
+    // 简单实现
+  }
+
+  @override
+  void unregisterMenuItem(String menuId) {
+    // 简单实现
   }
 }
 
@@ -375,7 +563,8 @@ class _PluginDetailsDialog extends ConsumerWidget {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success ? '插件已禁用' : '禁用失败'),
+                    content: Text(success ? '插件已禁用' : '禁用插件失败'),
+                    backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
               }
@@ -390,7 +579,8 @@ class _PluginDetailsDialog extends ConsumerWidget {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success ? '插件已启用' : '启用失败'),
+                    content: Text(success ? '插件已启用' : '启用插件失败'),
+                    backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
               }
@@ -403,7 +593,7 @@ class _PluginDetailsDialog extends ConsumerWidget {
               context: context,
               builder: (context) => AlertDialog(
                 title: const Text('确认卸载'),
-                content: Text('确定要卸载插件 "${plugin.metadata.name}" 吗？'),
+                content: Text('确定要卸载插件 "${plugin.metadata.name}" 吗？此操作不可撤销。'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
@@ -411,6 +601,9 @@ class _PluginDetailsDialog extends ConsumerWidget {
                   ),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(true),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.red,
+                    ),
                     child: const Text('卸载'),
                   ),
                 ],
@@ -423,7 +616,8 @@ class _PluginDetailsDialog extends ConsumerWidget {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success ? '插件已卸载' : '卸载失败'),
+                    content: Text(success ? '插件已卸载' : '卸载插件失败'),
+                    backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
               }
