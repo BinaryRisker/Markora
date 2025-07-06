@@ -1049,11 +1049,6 @@
     "description": "Advanced search tip message"
   },
 
-  "cancel": "Cancel",
-  "@cancel": {
-    "description": "Cancel button text"
-  },
-
   "clear": "Clear",
   "@clear": {
     "description": "Clear button text"
@@ -1062,11 +1057,6 @@
   "search": "Search",
   "@search": {
     "description": "Search button text"
-  },
-
-  "author": "Author",
-  "@author": {
-    "description": "Author field label"
   },
 
   "sortBy": "Sort By",
