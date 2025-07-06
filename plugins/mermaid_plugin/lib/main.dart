@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import '../../../lib/features/plugins/domain/plugin_interface.dart';
-import '../../../lib/types/plugin.dart';
+import 'package:markora/features/plugins/domain/plugin_interface.dart';
+import 'package:markora/types/plugin.dart';
 
 /// Mermaid图表插件
 class MermaidPlugin extends MarkoraPlugin {
@@ -21,7 +21,7 @@ class MermaidPlugin extends MarkoraPlugin {
     license: 'MIT',
     type: PluginType.syntax,
     tags: ['图表', 'mermaid', '可视化', '流程图'],
-    minAppVersion: '1.0.0',
+    minVersion: '1.0.0',
   );
 
   @override
@@ -85,10 +85,10 @@ class MermaidPlugin extends MarkoraPlugin {
 /// Mermaid图表渲染组件
 class MermaidWidget extends StatefulWidget {
   const MermaidWidget({
-    Key? key,
+    super.key,
     required this.code,
     required this.config,
-  }) : super(key: key);
+  });
 
   final String code;
   final Map<String, dynamic> config;
@@ -131,8 +131,6 @@ class _MermaidWidgetState extends State<MermaidWidget> {
 
   String _generateHtml() {
     final theme = widget.config['theme'] ?? 'default';
-    final width = widget.config['defaultWidth'] ?? 800;
-    final height = widget.config['defaultHeight'] ?? 600;
     
     return '''
 <!DOCTYPE html>
@@ -254,10 +252,10 @@ ${widget.code}
 /// Mermaid插件配置组件
 class MermaidConfigWidget extends StatefulWidget {
   const MermaidConfigWidget({
-    Key? key,
+    super.key,
     required this.config,
     required this.onConfigChanged,
-  }) : super(key: key);
+  });
 
   final Map<String, dynamic> config;
   final Function(Map<String, dynamic>) onConfigChanged;

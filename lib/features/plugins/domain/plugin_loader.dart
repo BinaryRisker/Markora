@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../../types/plugin.dart';
 import 'plugin_interface.dart';
 
@@ -21,8 +22,8 @@ class PluginLoader {
         description: json['description'] as String,
         author: json['author'] as String,
         type: _parsePluginType(json['type'] as String),
-        minVersion: json['minMarkoraVersion'] as String? ?? '1.0.0',
-        maxVersion: json['maxMarkoraVersion'] as String?,
+        minVersion: json['minVersion'] as String? ?? '1.0.0',
+        maxVersion: json['maxVersion'] as String?,
         homepage: json['homepage'] as String?,
         repository: json['repository'] as String?,
         license: json['license'] as String? ?? 'MIT',
@@ -101,7 +102,15 @@ class PluginLoader {
   
   /// 创建Mermaid插件实例
   MarkoraPlugin _createMermaidPlugin(PluginMetadata metadata) {
-    return _MermaidPluginProxy(metadata);
+    // 导入真正的MermaidPlugin
+    try {
+      // 这里应该动态导入真正的MermaidPlugin
+      // 由于Dart的限制，我们先用一个改进的代理实现
+      return _ImprovedMermaidPluginProxy(metadata);
+    } catch (e) {
+      debugPrint('创建MermaidPlugin失败: $e');
+      return _MermaidPluginProxy(metadata);
+    }
   }
   
   /// 加载主题插件
@@ -294,6 +303,80 @@ class IntegrationPluginImpl extends BasePlugin {
   }
 }
 
+/// 改进的Mermaid插件代理实现
+class _ImprovedMermaidPluginProxy extends BasePlugin {
+  _ImprovedMermaidPluginProxy(super.metadata);
+  
+  Map<String, dynamic> _config = {
+    'theme': 'default',
+    'enableInteraction': true,
+    'defaultWidth': 800.0,
+    'defaultHeight': 600.0,
+  };
+  
+  @override
+  Future<void> onLoad(PluginContext context) async {
+    await super.onLoad(context);
+    
+    // 注册Mermaid块级语法
+    context.syntaxRegistry.registerBlockSyntax(
+      'mermaid',
+      RegExp(r'^```mermaid\s*\n([\s\S]*?)\n```', multiLine: true),
+      (content) {
+        final syntax = ImprovedMermaidBlockSyntax(_config);
+        return syntax.parseBlock(content);
+      },
+    );
+    
+    // 注册工具栏按钮
+    context.toolbarRegistry.registerAction(
+      PluginAction(
+        id: 'mermaid',
+        title: 'Mermaid图表',
+        description: '插入Mermaid图表代码块',
+        icon: 'account_tree',
+      ),
+      () {
+        // 插入Mermaid代码块模板
+        final template = '''```mermaid
+graph TD
+    A[开始] --> B{判断条件}
+    B -->|是| C[执行操作]
+    B -->|否| D[结束]
+    C --> D
+```''';
+        context.editorController.insertText(template);
+      },
+    );
+    
+    debugPrint('改进的Mermaid插件已加载');
+  }
+  
+  @override
+  Future<void> onUnload() async {
+    await super.onUnload();
+    debugPrint('改进的Mermaid插件已卸载');
+  }
+  
+  @override
+  void onConfigChanged(Map<String, dynamic> config) {
+    _config = {..._config, ...config};
+  }
+  
+  @override
+  Widget? getConfigWidget() {
+    return MermaidConfigWidget();
+  }
+  
+  @override
+  Map<String, dynamic> getStatus() {
+    return {
+      ...super.getStatus(),
+      'config': _config,
+    };
+  }
+}
+
 /// Mermaid插件代理实现
 class _MermaidPluginProxy extends BasePlugin {
   _MermaidPluginProxy(super.metadata);
@@ -312,6 +395,27 @@ class _MermaidPluginProxy extends BasePlugin {
       },
     );
     
+    // 注册工具栏按钮
+    context.toolbarRegistry.registerAction(
+      PluginAction(
+        id: 'mermaid',
+        title: 'Mermaid图表',
+        description: '插入Mermaid图表代码块',
+        icon: 'account_tree',
+      ),
+      () {
+        // 插入Mermaid代码块模板
+        final template = '''```mermaid
+graph TD
+    A[开始] --> B{判断条件}
+    B -->|是| C[执行操作]
+    B -->|否| D[结束]
+    C --> D
+```''';
+        context.editorController.insertText(template);
+      },
+    );
+    
     debugPrint('Mermaid插件已加载');
   }
   
@@ -324,6 +428,42 @@ class _MermaidPluginProxy extends BasePlugin {
   @override
   Widget? getConfigWidget() {
     return MermaidConfigWidget();
+  }
+}
+
+/// 改进的Mermaid块级语法实现
+class ImprovedMermaidBlockSyntax {
+  final Map<String, dynamic> config;
+  
+  ImprovedMermaidBlockSyntax(this.config);
+  
+  /// 检查是否匹配Mermaid语法
+  bool canParse(String line) {
+    return line.trim().startsWith('```mermaid');
+  }
+  
+  /// 解析Mermaid代码块
+  Widget parseBlock(String content) {
+    // 提取mermaid代码
+    final lines = content.split('\n');
+    final codeLines = <String>[];
+    bool inMermaidBlock = false;
+    
+    for (final line in lines) {
+      if (line.trim().startsWith('```mermaid')) {
+        inMermaidBlock = true;
+        continue;
+      }
+      if (line.trim() == '```' && inMermaidBlock) {
+        break;
+      }
+      if (inMermaidBlock) {
+        codeLines.add(line);
+      }
+    }
+    
+    final mermaidCode = codeLines.join('\n');
+    return ImprovedMermaidWidget(code: mermaidCode, config: config);
   }
 }
 
@@ -356,6 +496,179 @@ class MermaidBlockSyntax {
     
     final mermaidCode = codeLines.join('\n');
     return MermaidWidget(code: mermaidCode);
+  }
+}
+
+/// 改进的Mermaid渲染组件
+class ImprovedMermaidWidget extends StatefulWidget {
+  const ImprovedMermaidWidget({
+    super.key,
+    required this.code,
+    required this.config,
+  });
+  
+  final String code;
+  final Map<String, dynamic> config;
+  
+  @override
+  State<ImprovedMermaidWidget> createState() => _ImprovedMermaidWidgetState();
+}
+
+class _ImprovedMermaidWidgetState extends State<ImprovedMermaidWidget> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeWebView();
+  }
+
+  void _initializeWebView() {
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (String url) {
+            setState(() {
+              _isLoading = false;
+            });
+          },
+          onWebResourceError: (WebResourceError error) {
+            setState(() {
+              _error = error.description;
+              _isLoading = false;
+            });
+          },
+        ),
+      )
+      ..loadHtmlString(_generateHtml());
+  }
+
+  String _generateHtml() {
+    final theme = widget.config['theme'] ?? 'default';
+    
+    return '''
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mermaid Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: transparent;
+        }
+        .mermaid {
+            text-align: center;
+            max-width: 100%;
+            overflow: auto;
+        }
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 16px;
+            border-radius: 4px;
+            border-left: 4px solid #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div id="mermaid-container">
+        <div class="mermaid">
+${widget.code}
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({
+            theme: '$theme',
+            startOnLoad: true,
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+        
+        // 错误处理
+        window.addEventListener('error', function(e) {
+            document.getElementById('mermaid-container').innerHTML = 
+                '<div class="error">图表渲染失败: ' + e.message + '</div>';
+        });
+    </script>
+</body>
+</html>
+    ''';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_error != null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.red.shade300),
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.red.shade50,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Colors.red.shade600,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Mermaid渲染错误',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.red.shade800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _error!,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.red.shade600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      height: (widget.config['defaultHeight'] ?? 400).toDouble(),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Stack(
+          children: [
+            WebViewWidget(controller: _controller),
+            if (_isLoading)
+              Container(
+                color: Colors.white.withOpacity(0.8),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
