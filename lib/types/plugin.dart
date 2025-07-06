@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 /// Plugin type enumeration
 enum PluginType {
@@ -41,6 +43,34 @@ extension PluginTypeExtension on PluginType {
         return 'Other Plugin';
     }
   }
+  
+  String getLocalizedDisplayName(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    switch (this) {
+      case PluginType.syntax:
+        return localizations.syntaxPlugin;
+      case PluginType.renderer:
+        return localizations.rendererPlugin;
+      case PluginType.theme:
+        return localizations.themePlugin;
+      case PluginType.export:
+        return localizations.exportPlugin;
+      case PluginType.exporter:
+        return localizations.exporterPlugin;
+      case PluginType.import:
+        return localizations.importPlugin;
+      case PluginType.tool:
+        return localizations.toolPlugin;
+      case PluginType.widget:
+        return localizations.widgetPlugin;
+      case PluginType.component:
+        return localizations.componentPlugin;
+      case PluginType.integration:
+        return localizations.integrationPlugin;
+      default:
+        return localizations.otherPlugin;
+    }
+  }
 }
 
 /// Plugin status enumeration
@@ -66,6 +96,22 @@ extension PluginStatusExtension on PluginStatus {
         return 'Error';
       case PluginStatus.loading:
         return 'Loading';
+    }
+  }
+  
+  String getLocalizedDisplayName(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    switch (this) {
+      case PluginStatus.enabled:
+        return localizations.enabledStatus;
+      case PluginStatus.disabled:
+        return localizations.disabledStatus;
+      case PluginStatus.installed:
+        return localizations.installedStatus;
+      case PluginStatus.error:
+        return localizations.errorStatus;
+      case PluginStatus.loading:
+        return localizations.loadingStatus;
     }
   }
 }

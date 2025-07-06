@@ -5,6 +5,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../l10n/app_localizations.dart';
 
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
@@ -60,11 +61,29 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   static const int _maxCacheSize = 10;
   static const Duration _debounceDelay = Duration(milliseconds: 300);
   static const Duration _cacheExpiry = Duration(minutes: 5);
+  
+  // Track current language to detect changes
+  String? _currentLanguage;
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Check if language has changed
+    final newLanguage = Localizations.localeOf(context).languageCode;
+    if (_currentLanguage != null && _currentLanguage != newLanguage) {
+      // Language changed, clear cache and force rebuild
+      _renderCache.clear();
+      _cachedWidget = null;
+      _lastRenderedContent = '';
+    }
+    _currentLanguage = newLanguage;
   }
 
   @override
@@ -100,13 +119,16 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
   /// Build optimized Markdown content (with cache and debounce)
   Widget _buildOptimizedMarkdownContent() {
-    // If content hasn't changed, return cached widget
+    // Get current language for cache key
+    final currentLanguage = Localizations.localeOf(context).languageCode;
+    
+    // If content hasn't changed and language hasn't changed, return cached widget
     if (widget.content == _lastRenderedContent && _cachedWidget != null) {
       return _cachedWidget!;
     }
 
-    // Check cache
-    final cacheKey = widget.content.hashCode.toString();
+    // Check cache (include language in cache key)
+    final cacheKey = '${widget.content.hashCode}_$currentLanguage';
     final cachedItem = _renderCache[cacheKey];
     
     if (cachedItem != null) {
@@ -146,7 +168,8 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   /// Render and cache content
   Widget _renderAndCache() {
     final widget = _buildMarkdownContent();
-    final cacheKey = this.widget.content.hashCode.toString();
+    final currentLanguage = Localizations.localeOf(context).languageCode;
+    final cacheKey = '${this.widget.content.hashCode}_$currentLanguage';
     
     // Clean expired cache
     _cleanExpiredCache();
@@ -219,7 +242,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
           ),
           const SizedBox(width: 8),
           Text(
-            'Preview',
+            AppLocalizations.of(context)!.preview,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -228,17 +251,17 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
           // Export buttons
           _buildToolbarButton(
             icon: Icons.picture_as_pdf,
-            tooltip: 'Export as PDF',
+            tooltip: AppLocalizations.of(context)!.exportAsPdf,
             onPressed: () => _exportToPdf(),
           ),
           _buildToolbarButton(
             icon: Icons.html,
-            tooltip: 'Export as HTML',
+            tooltip: AppLocalizations.of(context)!.exportAsHtml,
             onPressed: () => _exportToHtml(),
           ),
           _buildToolbarButton(
             icon: Icons.refresh,
-            tooltip: 'Refresh Preview',
+            tooltip: AppLocalizations.of(context)!.refreshPreview,
             onPressed: () => _refreshPreview(),
           ),
           const SizedBox(width: 8),
@@ -284,14 +307,14 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Enter Markdown content in the left editor',
+              AppLocalizations.of(context)!.enterMarkdownContentInLeftEditor,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Preview will be displayed here',
+              AppLocalizations.of(context)!.previewWillBeDisplayedHere,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
               ),

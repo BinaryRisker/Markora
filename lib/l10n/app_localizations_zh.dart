@@ -413,6 +413,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get previewWillBeShownHere => '预览将在此处显示';
 
   @override
+  String get enterMarkdownContentInLeftEditor => '在左侧编辑器中输入 Markdown 内容';
+
+  @override
+  String get previewWillBeDisplayedHere => '预览将在此处显示';
+
+  @override
+  String get exportAsPdf => '导出为 PDF';
+
+  @override
+  String get exportAsHtml => '导出为 HTML';
+
+  @override
+  String get refreshPreview => '刷新预览';
+
+  @override
+  String get noOpenDocuments => '没有打开的文档';
+
+  @override
+  String get clickPlusButtonToCreate => '点击上方的 + 按钮创建新文档，或从文件菜单打开现有文档';
+
+  @override
   String get selectLanguage => '选择语言';
 
   @override
@@ -441,4 +462,148 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get welcomeDocument => '欢迎文档';
+
+  @override
+  String get heading => '标题';
+
+  @override
+  String get link => '链接';
+
+  @override
+  String get image => '图片';
+
+  @override
+  String get codeBlock => '代码块';
+
+  @override
+  String get mathFormula => '数学公式';
+
+  @override
+  String get quote => '引用';
+
+  @override
+  String get unorderedList => '无序列表';
+
+  @override
+  String get orderedList => '有序列表';
+
+  @override
+  String get pluginStatistics => '插件统计';
+
+  @override
+  String get totalPlugins => '插件总数';
+
+  @override
+  String get distributionByType => '类型分布';
+
+  @override
+  String get errors => '错误';
+
+  @override
+  String get syntaxPlugin => '语法插件';
+
+  @override
+  String get rendererPlugin => '渲染插件';
+
+  @override
+  String get themePlugin => '主题插件';
+
+  @override
+  String get exportPlugin => '导出插件';
+
+  @override
+  String get exporterPlugin => '导出器插件';
+
+  @override
+  String get importPlugin => '导入插件';
+
+  @override
+  String get toolPlugin => '工具插件';
+
+  @override
+  String get widgetPlugin => '组件插件';
+
+  @override
+  String get componentPlugin => '部件插件';
+
+  @override
+  String get integrationPlugin => '集成插件';
+
+  @override
+  String get otherPlugin => '其他插件';
+
+  @override
+  String get enabledStatus => '已启用';
+
+  @override
+  String get disabledStatus => '已禁用';
+
+  @override
+  String get installedStatus => '已安装';
+
+  @override
+  String get errorStatus => '错误';
+
+  @override
+  String get loadingStatus => '加载中';
+
+  @override
+  String get allStatus => '全部状态';
+
+  @override
+  String get filterAndSort => '筛选和排序';
+
+  @override
+  String get pluginType => '插件类型';
+
+  @override
+  String get allTypes => '全部类型';
+
+  @override
+  String get all => '全部';
+
+  @override
+  String get ascending => '升序';
+
+  @override
+  String get descending => '降序';
+
+  @override
+  String get searchPluginHint => '搜索插件名称、描述或标签...';
+
+  @override
+  String get clearSearch => '清除搜索';
+
+  @override
+  String get advancedSearch => '高级搜索';
+
+  @override
+  String get pluginName => '插件名称';
+
+  @override
+  String get descriptionKeywords => '描述关键词';
+
+  @override
+  String get tagsHint => '例如：markdown, editor, syntax';
+
+  @override
+  String get tagsCommaSeparated => '标签（逗号分隔）';
+
+  @override
+  String get advancedSearchTip => '提示：高级搜索功能即将推出，目前仅支持基础搜索';
+
+  @override
+  String get clear => '清除';
+
+  @override
+  String get search => '搜索';
+
+  @override
+  String get sortBy => '排序方式';
+
+  @override
+  String get lastUpdated => '最后更新';
+
+  @override
+  String get name => '名称';
 }

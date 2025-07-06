@@ -725,6 +725,41 @@
     "description": "Preview placeholder text"
   },
 
+  "enterMarkdownContentInLeftEditor": "Enter Markdown content in the left editor",
+  "@enterMarkdownContentInLeftEditor": {
+    "description": "Preview empty state message"
+  },
+
+  "previewWillBeDisplayedHere": "Preview will be displayed here",
+  "@previewWillBeDisplayedHere": {
+    "description": "Preview empty state description"
+  },
+
+  "exportAsPdf": "Export as PDF",
+  "@exportAsPdf": {
+    "description": "Export as PDF tooltip"
+  },
+
+  "exportAsHtml": "Export as HTML",
+  "@exportAsHtml": {
+    "description": "Export as HTML tooltip"
+  },
+
+  "refreshPreview": "Refresh Preview",
+  "@refreshPreview": {
+    "description": "Refresh preview tooltip"
+  },
+
+  "noOpenDocuments": "No open documents",
+  "@noOpenDocuments": {
+    "description": "No open documents message"
+  },
+
+  "clickPlusButtonToCreate": "Click the + button above to create a new document, or open an existing document from the file menu",
+  "@clickPlusButtonToCreate": {
+    "description": "Instructions for creating new document"
+  },
+
   "selectLanguage": "Select Language",
   "@selectLanguage": {
     "description": "Select language option"
@@ -792,5 +827,260 @@
   "welcomeDocument": "Welcome Document",
   "@welcomeDocument": {
     "description": "Welcome document title"
+  },
+
+  "heading": "Heading",
+  "@heading": {
+    "description": "Heading toolbar button tooltip"
+  },
+
+  "link": "Link",
+  "@link": {
+    "description": "Link toolbar button tooltip"
+  },
+
+  "image": "Image",
+  "@image": {
+    "description": "Image toolbar button tooltip"
+  },
+
+  "codeBlock": "Code block",
+  "@codeBlock": {
+    "description": "Code block toolbar button tooltip"
+  },
+
+  "mathFormula": "Math formula",
+  "@mathFormula": {
+    "description": "Math formula toolbar button tooltip"
+  },
+
+  "quote": "Quote",
+  "@quote": {
+    "description": "Quote toolbar button tooltip"
+  },
+
+  "unorderedList": "Unordered list",
+  "@unorderedList": {
+    "description": "Unordered list toolbar button tooltip"
+  },
+
+  "orderedList": "Ordered list",
+  "@orderedList": {
+    "description": "Ordered list toolbar button tooltip"
+  },
+
+  "pluginStatistics": "Plugin Statistics",
+  "@pluginStatistics": {
+    "description": "Plugin statistics card title"
+  },
+
+  "totalPlugins": "Total Plugins",
+  "@totalPlugins": {
+    "description": "Total plugins count label"
+  },
+
+  "distributionByType": "Distribution by Type",
+  "@distributionByType": {
+    "description": "Plugin distribution by type section title"
+  },
+
+  "errors": "Errors",
+  "@errors": {
+    "description": "Error count label"
+  },
+
+  "syntaxPlugin": "Syntax Plugin",
+  "@syntaxPlugin": {
+    "description": "Syntax plugin type"
+  },
+
+  "rendererPlugin": "Renderer Plugin",
+  "@rendererPlugin": {
+    "description": "Renderer plugin type"
+  },
+
+  "themePlugin": "Theme Plugin",
+  "@themePlugin": {
+    "description": "Theme plugin type"
+  },
+
+  "exportPlugin": "Export Plugin",
+  "@exportPlugin": {
+    "description": "Export plugin type"
+  },
+
+  "exporterPlugin": "Exporter Plugin",
+  "@exporterPlugin": {
+    "description": "Exporter plugin type"
+  },
+
+  "importPlugin": "Import Plugin",
+  "@importPlugin": {
+    "description": "Import plugin type"
+  },
+
+  "toolPlugin": "Tool Plugin",
+  "@toolPlugin": {
+    "description": "Tool plugin type"
+  },
+
+  "widgetPlugin": "Widget Plugin",
+  "@widgetPlugin": {
+    "description": "Widget plugin type"
+  },
+
+  "componentPlugin": "Component Plugin",
+  "@componentPlugin": {
+    "description": "Component plugin type"
+  },
+
+  "integrationPlugin": "Integration Plugin",
+  "@integrationPlugin": {
+    "description": "Integration plugin type"
+  },
+
+  "otherPlugin": "Other Plugin",
+  "@otherPlugin": {
+    "description": "Other plugin type"
+  },
+
+  "enabledStatus": "Enabled",
+  "@enabledStatus": {
+    "description": "Enabled plugin status"
+  },
+
+  "disabledStatus": "Disabled",
+  "@disabledStatus": {
+    "description": "Disabled plugin status"
+  },
+
+  "installedStatus": "Installed",
+  "@installedStatus": {
+    "description": "Installed plugin status"
+  },
+
+  "errorStatus": "Error",
+  "@errorStatus": {
+    "description": "Error plugin status"
+  },
+
+  "loadingStatus": "Loading",
+  "@loadingStatus": {
+    "description": "Loading plugin status"
+  },
+
+  "allStatus": "All Status",
+  "@allStatus": {
+    "description": "All status filter option"
+  },
+
+  "filterAndSort": "Filter and Sort",
+  "@filterAndSort": {
+    "description": "Filter and sort section title"
+  },
+
+  "pluginType": "Plugin Type",
+  "@pluginType": {
+    "description": "Plugin type filter label"
+  },
+
+  "allTypes": "All Types",
+  "@allTypes": {
+    "description": "All types filter option"
+  },
+
+  "all": "All",
+  "@all": {
+    "description": "All filter option"
+  },
+
+  "ascending": "Ascending",
+  "@ascending": {
+    "description": "Ascending sort order"
+  },
+
+  "descending": "Descending",
+  "@descending": {
+    "description": "Descending sort order"
+  },
+
+  "searchPluginHint": "Search plugin name, description or tags...",
+  "@searchPluginHint": {
+    "description": "Plugin search input hint text"
+  },
+
+  "clearSearch": "Clear search",
+  "@clearSearch": {
+    "description": "Clear search button tooltip"
+  },
+
+  "advancedSearch": "Advanced search",
+  "@advancedSearch": {
+    "description": "Advanced search button tooltip and dialog title"
+  },
+
+  "pluginName": "Plugin Name",
+  "@pluginName": {
+    "description": "Plugin name field label"
+  },
+
+  "descriptionKeywords": "Description Keywords",
+  "@descriptionKeywords": {
+    "description": "Description keywords field label"
+  },
+
+  "tags": "Tags",
+  "@tags": {
+    "description": "Tags field label"
+  },
+
+  "tagsHint": "e.g: markdown, editor, syntax",
+  "@tagsHint": {
+    "description": "Tags field hint text"
+  },
+
+  "tagsCommaSeparated": "Tags (comma separated)",
+  "@tagsCommaSeparated": {
+    "description": "Tags field label with comma separated note"
+  },
+
+  "advancedSearchTip": "Tip: Advanced search feature coming soon, currently only basic search is supported",
+  "@advancedSearchTip": {
+    "description": "Advanced search tip message"
+  },
+
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+
+  "clear": "Clear",
+  "@clear": {
+    "description": "Clear button text"
+  },
+
+  "search": "Search",
+  "@search": {
+    "description": "Search button text"
+  },
+
+  "author": "Author",
+  "@author": {
+    "description": "Author field label"
+  },
+
+  "sortBy": "Sort By",
+  "@sortBy": {
+    "description": "Sort by label"
+  },
+
+  "lastUpdated": "Last Updated",
+  "@lastUpdated": {
+    "description": "Last updated label"
+  },
+
+  "name": "Name",
+  "@name": {
+    "description": "Name label"
   }
 }

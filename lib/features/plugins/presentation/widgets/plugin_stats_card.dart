@@ -1,14 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../../types/plugin.dart';
 import '../providers/plugin_providers.dart';
 
 /// Plugin statistics card component
-class PluginStatsCard extends ConsumerWidget {
+class PluginStatsCard extends ConsumerStatefulWidget {
   const PluginStatsCard({super.key});
   
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PluginStatsCard> createState() => _PluginStatsCardState();
+}
+
+class _PluginStatsCardState extends ConsumerState<PluginStatsCard> {
+  String? _currentLanguage;
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Check if language has changed
+    final newLanguage = Localizations.localeOf(context).languageCode;
+    if (_currentLanguage != null && _currentLanguage != newLanguage) {
+      // Language changed, force rebuild by calling setState
+      if (mounted) {
+        setState(() {
+          // This will trigger a rebuild of the widget tree
+        });
+      }
+    }
+    _currentLanguage = newLanguage;
+  }
+  
+  @override
+  Widget build(BuildContext context) {
     final stats = ref.watch(pluginStatsProvider);
     final theme = Theme.of(context);
     
@@ -20,7 +45,7 @@ class PluginStatsCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Plugin Statistics',
+              AppLocalizations.of(context)!.pluginStatistics,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -33,7 +58,7 @@ class PluginStatsCard extends ConsumerWidget {
                 Expanded(
                   child: _StatItem(
                     icon: Icons.extension,
-                    label: 'Total Plugins',
+                    label: AppLocalizations.of(context)!.totalPlugins,
                     value: stats.total.toString(),
                     color: theme.colorScheme.primary,
                   ),
@@ -41,7 +66,7 @@ class PluginStatsCard extends ConsumerWidget {
                 Expanded(
                   child: _StatItem(
                     icon: Icons.check_circle,
-                    label: 'Enabled',
+                    label: AppLocalizations.of(context)!.enabled,
                     value: stats.enabled.toString(),
                     color: Colors.green,
                   ),
@@ -49,7 +74,7 @@ class PluginStatsCard extends ConsumerWidget {
                 Expanded(
                   child: _StatItem(
                     icon: Icons.download_done,
-                    label: 'Installed',
+                    label: AppLocalizations.of(context)!.installedStatus,
                     value: stats.installed.toString(),
                     color: theme.colorScheme.secondary,
                   ),
@@ -57,7 +82,7 @@ class PluginStatsCard extends ConsumerWidget {
                 Expanded(
                   child: _StatItem(
                     icon: Icons.error,
-                    label: 'Errors',
+                    label: AppLocalizations.of(context)!.errors,
                     value: stats.error.toString(),
                     color: theme.colorScheme.error,
                   ),
@@ -69,7 +94,7 @@ class PluginStatsCard extends ConsumerWidget {
             
             // Statistics by type
             Text(
-              'Distribution by Type',
+              AppLocalizations.of(context)!.distributionByType,
               style: theme.textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -184,7 +209,7 @@ class _TypeChip extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            type.displayName,
+            type.getLocalizedDisplayName(context),
             style: theme.textTheme.bodySmall?.copyWith(
               color: color,
               fontWeight: FontWeight.w500,

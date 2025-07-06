@@ -7,7 +7,7 @@ import '../../../../core/themes/app_theme.dart';
 import '../../../../types/editor.dart';
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
-import '../../../../l10n/generated/app_localizations.dart';
+import '../../../../l10n/app_localizations.dart';
 
 import '../../../document/presentation/providers/document_providers.dart';
 import '../../domain/services/undo_redo_manager.dart';
@@ -48,6 +48,9 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
   bool _isApplyingUndoRedo = false;
   String? _tabId;
   
+  // Track current language to detect changes
+  String? _currentLanguage;
+  
   @override
   void initState() {
     super.initState();
@@ -84,6 +87,23 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateActiveTab();
     });
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Check if language has changed
+    final newLanguage = Localizations.localeOf(context).languageCode;
+    if (_currentLanguage != null && _currentLanguage != newLanguage) {
+      // Language changed, force rebuild by calling setState
+      if (mounted) {
+        setState(() {
+          // This will trigger a rebuild of the widget tree
+        });
+      }
+    }
+    _currentLanguage = newLanguage;
   }
 
   @override
@@ -264,14 +284,14 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No open documents',
+            AppLocalizations.of(context)!.noOpenDocuments,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Click the + button above to create a new document, or open an existing document from the file menu',
+            AppLocalizations.of(context)!.clickPlusButtonToCreate,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
             ),
@@ -304,56 +324,56 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           // Undo/Redo buttons
           _buildToolbarButton(
             icon: Icons.undo,
-            tooltip: 'Undo (Ctrl+Z)',
+            tooltip: '${AppLocalizations.of(context)!.undo} (Ctrl+Z)',
             onPressed: isEnabled && _undoRedoManager.canUndo ? _undo : null,
           ),
           _buildToolbarButton(
             icon: Icons.redo,
-            tooltip: 'Redo (Ctrl+Y)',
+            tooltip: '${AppLocalizations.of(context)!.redo} (Ctrl+Y)',
             onPressed: isEnabled && _undoRedoManager.canRedo ? _redo : null,
           ),
           const VerticalDivider(width: 1),
           _buildToolbarButton(
             icon: Icons.title,
-            tooltip: 'Heading',
+            tooltip: AppLocalizations.of(context)!.heading,
             onPressed: isEnabled ? () => _insertHeading() : null,
           ),
           _buildToolbarButton(
             icon: Icons.link,
-            tooltip: 'Link',
+            tooltip: AppLocalizations.of(context)!.link,
             onPressed: isEnabled ? () => _insertLink() : null,
           ),
           _buildToolbarButton(
             icon: Icons.image,
-            tooltip: 'Image',
+            tooltip: AppLocalizations.of(context)!.image,
             onPressed: isEnabled ? () => _insertImage() : null,
           ),
           const VerticalDivider(width: 1),
           _buildToolbarButton(
             icon: Icons.code,
-            tooltip: 'Code block',
+            tooltip: AppLocalizations.of(context)!.codeBlock,
             onPressed: isEnabled ? () => _insertCodeBlock() : null,
           ),
           _buildToolbarButton(
             icon: Icons.functions,
-            tooltip: 'Math formula',
+            tooltip: AppLocalizations.of(context)!.mathFormula,
             onPressed: isEnabled ? () => _insertMathFormula() : null,
           ),
           // Plugin toolbar buttons
           ..._buildPluginToolbarButtons(isEnabled),
           _buildToolbarButton(
             icon: Icons.format_quote,
-            tooltip: 'Quote',
+            tooltip: AppLocalizations.of(context)!.quote,
             onPressed: isEnabled ? () => _insertQuote() : null,
           ),
           _buildToolbarButton(
             icon: Icons.format_list_bulleted,
-            tooltip: 'Unordered list',
+            tooltip: AppLocalizations.of(context)!.unorderedList,
             onPressed: isEnabled ? () => _insertList(false) : null,
           ),
           _buildToolbarButton(
             icon: Icons.format_list_numbered,
-            tooltip: 'Ordered list',
+            tooltip: AppLocalizations.of(context)!.orderedList,
             onPressed: isEnabled ? () => _insertList(true) : null,
           ),
           const Spacer(),
