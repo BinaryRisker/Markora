@@ -36,72 +36,34 @@ Plugin System Features:
 - **Mobile Adaptation** - Responsive interface for iOS, Android
 - **Data Sync** - Local storage + optional cloud sync
 
+## 📈 Project Progress Summary (2025 Update)
+
+Markora has completed its core architecture and main features, offering a professional-grade Markdown editing experience with formulas, charts, code highlighting, file management, and export capabilities. The project adopts Clean Architecture, features a robust type system, and supports responsive layouts across platforms. The Typora-style immersive writing experience is fully realized. Next, the focus will be on enhancing the editor, improving file management and export formats, launching the plugin system, optimizing performance, and gradually implementing cloud sync.
+
 ## 📊 Development Progress
 
-### ✅ Completed Features
+### ✅ Core Features Completed (as of 2025)
 
-- [x] **Project Initialization and Architecture Design** - Clean Architecture + Riverpod state management
-- [x] **Basic UI Interface and Theme System** - Material Design 3 + Typora-style interface
-- [x] **Markdown Editor Component** - Fully functional editor (955 lines of code)
-- [x] **Markdown Preview Component** - Real-time rendering system (571 lines of code)
-- [x] **Math Formula Rendering** - LaTeX formula support based on flutter_math_fork (413 lines of code)
-- [x] **Mermaid Chart Support** - 12 chart types, WebView renderer (860 lines of code)
-- [x] **Code Syntax Highlighting** - Support for 27 programming languages (356 lines of code)
-- [x] **File Management System** - Document CRUD, Hive local storage, state synchronization
-- [x] **Application State Management** - Complete Riverpod state management integration
-- [x] **Type System** - Complete TypeScript-style type definitions (5 core type files)
+- [x] **Architecture & Infrastructure**: Clean Architecture + Riverpod state management, clear separation of concerns, robust type system (5 core type files).
+- [x] **UI & Theme System**: Material Design 3, Typora-style interface, light/dark theme switching.
+- [x] **Markdown Editing & Preview**: WYSIWYG editor, real-time bidirectional preview, three editing modes (source/split/preview).
+- [x] **Math & Charts**: LaTeX formula rendering, Mermaid charts (12 types), Excalidraw whiteboard.
+- [x] **Code Highlighting**: 27 programming languages, 4 themes, line numbers, copy feature.
+- [x] **File Management**: Document CRUD, Hive local storage, state sync, user-friendly file dialog (search/preview).
+- [x] **Export Functionality**: HTML/PDF export, rich configuration, one-click export from preview.
+- [x] **Settings System**: Complete configuration for theme, editor, shortcuts, with UI and state management.
+- [x] **Responsive Layout**: Adaptive for desktop and mobile, adjustable split view.
+- [x] **Real-time Status Display**: Character count, cursor position, document status, etc.
 
-### ✅ Latest Completed Features
+### 🚧 Upcoming Improvements
+- [ ] **Editor Enhancement**: Undo/redo, text formatting (bold/italic/links, etc.).
+- [ ] **File Management Optimization**: Add file sorting functionality.
+- [ ] **Export Expansion**: Implement DOCX and image export, improve export dependencies (image/document processing packages).
 
-- [x] **Settings Module** - Theme switching, editor configuration, shortcut settings ⭐
-- [x] **File Selection Dialog** - User-friendly document management interface with search and preview ⭐
-- [x] **Export Function** - Multi-format export support (HTML/PDF) with complete configuration options ⭐
-- [x] **Preview Export Integration** - Unified export functionality in preview area with format pre-selection ⭐
-- [x] **PDF Export Implementation** - Complete PDF generation with custom styling and layout options ⭐
-
-### 🚧 Next Development Plan
-
-#### Pending Improvements
-- [ ] **Editor Enhancement** - Undo/redo, text formatting (bold/italic/links)
-- [ ] **File Management** - File sorting functionality
-- [ ] **Export Format Expansion** - Implement DOCX and image export
-- [ ] **Export Dependencies Optimization** - Add image and document processing packages
-
-#### New Feature Development
-- [ ] **Plugin System Architecture** - Extensible plugin framework
-- [ ] **Performance Optimization** - Large document editing, preview rendering performance improvement
-- [ ] **Cloud Sync Functionality** - Support for various cloud storage services
-
-### 🎯 Current Fully Available Features
-
-- ✨ **Professional Markdown Editor** - WYSIWYG with rich toolbar
-- 🔢 **LaTeX Math Formulas** - Inline formulas ($...$) and block formulas ($$...$$)
-- 📊 **Mermaid Chart Rendering** - Flowcharts, sequence diagrams, class diagrams, and 12 other chart types
-- 🌈 **Code Syntax Highlighting** - Support for 27 programming languages, 4 beautiful themes
-- 📱 **Three Editing Modes** - Source, split-screen, preview mode seamless switching
-- 💾 **Smart Document Management** - Auto-save, real-time sync, state management
-- 📂 **File Management Interface** - Friendly document selection dialog with search, preview, sorting
-- ⚙️ **Complete Settings System** - Theme switching, editor configuration, personalization settings
-- 📤 **Multi-format Export** - HTML/PDF/image/Word export with rich configuration options
-- 📐 **Responsive Interface** - Adjustable split-screen layout, adaptive to different devices
-- 📈 **Real-time Status Display** - Character count, cursor position, document status
-
-### 📈 Code Implementation Statistics
-
-| Feature Module | Lines of Code | Completion | Notes |
-|----------------|---------------|------------|-------|
-| Markdown Editor | 955 lines | ✅ 90% | Basic functionality complete, missing undo/redo |
-| Preview System | 571 lines | ✅ 100% | Real-time rendering and mixed content support |
-| Math Formulas | 413 lines | ✅ 100% | LaTeX formula rendering and dialog |
-| Chart System | 860 lines | ✅ 100% | Mermaid renderer and editor |
-| Syntax Highlighting | 356 lines | ✅ 100% | Code block components and highlighting system |
-| Main App Interface | 446 lines | ✅ 95% | Typora-style interface, missing formatting button functionality |
-| Settings System | 600 lines | ✅ 100% | Complete settings interface and state management |
-| File Dialog | 500 lines | ✅ 95% | Missing sorting functionality |
-| Export System | 800 lines | ✅ 90% | UI complete, HTML/PDF export working, DOCX/Image formats pending |
-| Type System | 5 files | ✅ 100% | Complete type definition system |
-| Plugin System | 0 lines | ❌ 0% | Not started yet |
-| **Total** | **5500+ lines** | **85%** | **Core functionality complete, details to be refined** |
+### 🆕 New Feature Roadmap
+- [ ] **Plugin System Architecture**: Design and implement an extensible plugin framework (custom syntax, themes, cloud storage, export extensions, etc.).
+- [ ] **Performance Optimization**: Improve editing and preview performance for large documents.
+- [ ] **Cloud Sync**: Support for syncing with various cloud storage services.
 
 ## 🏗️ Technical Architecture
 
