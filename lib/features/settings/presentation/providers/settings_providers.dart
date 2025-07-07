@@ -106,6 +106,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     await _saveSettings();
   }
 
+  /// Update font family
+  Future<void> updateFontFamily(String fontFamily) async {
+    state = state.copyWith(fontFamily: fontFamily);
+    await _saveSettings();
+  }
+
   /// Reset to default settings
   Future<void> resetToDefaults() async {
     state = AppSettings.defaultSettings();

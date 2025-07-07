@@ -33,13 +33,14 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       enableAutoComplete: fields[13] as bool,
       tabSize: fields[14] as int,
       useSpacesForTab: fields[15] as bool,
+      fontFamily: fields[16] as String? ?? 'monospace',
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(17)
       ..writeByte(0)
       ..write(obj.themeMode)
       ..writeByte(1)
@@ -71,7 +72,9 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(14)
       ..write(obj.tabSize)
       ..writeByte(15)
-      ..write(obj.useSpacesForTab);
+      ..write(obj.useSpacesForTab)
+      ..writeByte(16)
+      ..write(obj.fontFamily);
   }
 
   @override

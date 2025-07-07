@@ -8,6 +8,7 @@ import '../../../../types/editor.dart';
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../settings/presentation/providers/settings_providers.dart';
 
 import '../../../document/presentation/providers/document_providers.dart';
 import '../../domain/services/undo_redo_manager.dart';
@@ -469,41 +470,88 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     );
   }
 
+  /// Build line numbers
+  Widget _buildLineNumbers() {
+    final lines = _controller.text.split('\n');
+    final lineCount = lines.length;
+    final settings = ref.watch(settingsProvider);
+    final theme = Theme.of(context);
+    
+    return Container(
+      width: 40,
+      padding: const EdgeInsets.only(right: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: List.generate(lineCount, (index) {
+          return Container(
+            height: settings.fontSize * 1.5,
+            alignment: Alignment.centerRight,
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                fontFamily: settings.fontFamily,
+                fontSize: settings.fontSize * 0.9,
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                height: 1.5,
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
   /// Build code editor
   Widget _buildCodeEditor(bool isDark, EditorTheme editorTheme) {
+    final settings = ref.watch(settingsProvider);
+    
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: editorTheme.backgroundColor,
       ),
-      child: RawKeyboardListener(
-        focusNode: FocusNode(),
-        onKey: _handleKeyEvent,
-        child: TextField(
-          controller: _controller,
-          focusNode: _focusNode,
-          readOnly: widget.readOnly,
-          style: TextStyle(
-            fontFamily: 'monospace',
-            fontSize: 14,
-            color: editorTheme.textColor,
-            height: 1.5,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Line numbers (if enabled)
+          if (settings.showLineNumbers) ...[
+            _buildLineNumbers(),
+            const SizedBox(width: 8),
+          ],
+          // Editor content
+          Expanded(
+            child: RawKeyboardListener(
+              focusNode: FocusNode(),
+              onKey: _handleKeyEvent,
+              child: TextField(
+                controller: _controller,
+                focusNode: _focusNode,
+                readOnly: widget.readOnly,
+                style: TextStyle(
+                  fontFamily: settings.fontFamily,
+                  fontSize: settings.fontSize,
+                  color: editorTheme.textColor,
+                  height: 1.5,
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: AppLocalizations.of(context)!.enterMarkdownContent,
+                  contentPadding: EdgeInsets.zero,
+                ),
+                cursorColor: editorTheme.cursorColor,
+                enabled: !widget.readOnly,
+                expands: true,
+                maxLines: settings.wordWrap ? null : null,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                scrollPhysics: settings.wordWrap ? null : const AlwaysScrollableScrollPhysics(),
+                onChanged: (value) {
+                  // Handled by _onTextChanged
+                },
+              ),
+            ),
           ),
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: AppLocalizations.of(context)!.enterMarkdownContent,
-            contentPadding: EdgeInsets.zero,
-          ),
-          cursorColor: editorTheme.cursorColor,
-          enabled: !widget.readOnly,
-          expands: true,
-          maxLines: null,
-          keyboardType: TextInputType.multiline,
-          textInputAction: TextInputAction.newline,
-          onChanged: (value) {
-            // Handled by _onTextChanged
-          },
-        ),
+        ],
       ),
     );
   }
