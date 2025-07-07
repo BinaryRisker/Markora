@@ -223,6 +223,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fontSize => 'Font Size';
 
   @override
+  String get fontFamily => 'Font Family';
+
+  @override
   String get showLineNumbers => 'Show Line Numbers';
 
   @override

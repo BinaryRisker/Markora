@@ -406,6 +406,11 @@
   "@fontSize": {
     "description": "字体大小设置标签"
   },
+  
+  "fontFamily": "字体族",
+  "@fontFamily": {
+    "description": "字体族设置标签"
+  },
 
   "showLineNumbers": "显示行号",
   "@showLineNumbers": {
