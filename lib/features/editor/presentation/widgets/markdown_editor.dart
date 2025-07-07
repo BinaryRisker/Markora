@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -477,26 +478,36 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     final settings = ref.watch(settingsProvider);
     final theme = Theme.of(context);
     
+    // Calculate dynamic width based on line count
+    final maxLineNumber = lineCount;
+    final digitCount = maxLineNumber.toString().length;
+    final dynamicWidth = (digitCount * settings.fontSize * 0.6) + 16;
+    final minWidth = 40.0;
+    final maxWidth = math.max(80.0, dynamicWidth + 10); // Ensure maxWidth is always larger than calculated width
+    final lineNumberWidth = math.max(minWidth, math.min(dynamicWidth, maxWidth));
+    
     return Container(
-      width: 40,
+      width: lineNumberWidth,
       padding: const EdgeInsets.only(right: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: List.generate(lineCount, (index) {
-          return Container(
-            height: settings.fontSize * 1.5,
-            alignment: Alignment.centerRight,
-            child: Text(
-              '${index + 1}',
-              style: TextStyle(
-                fontFamily: settings.fontFamily,
-                fontSize: settings.fontSize * 0.9,
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
-                height: 1.5,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: List.generate(lineCount, (index) {
+            return Container(
+              height: settings.fontSize * 1.5,
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${index + 1}',
+                style: TextStyle(
+                  fontFamily: settings.fontFamily,
+                  fontSize: settings.fontSize * 0.9,
+                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  height: 1.5,
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -816,7 +827,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
 }
 
 /// Math formula input dialog
-class _MathFormulaDialog extends StatefulWidget {
+class _MathFormulaDialog extends ConsumerStatefulWidget {
   const _MathFormulaDialog({
     required this.onInsert,
   });
@@ -824,10 +835,10 @@ class _MathFormulaDialog extends StatefulWidget {
   final Function(String latex, bool isInline) onInsert;
 
   @override
-  State<_MathFormulaDialog> createState() => _MathFormulaDialogState();
+  ConsumerState<_MathFormulaDialog> createState() => _MathFormulaDialogState();
 }
 
-class _MathFormulaDialogState extends State<_MathFormulaDialog> {
+class _MathFormulaDialogState extends ConsumerState<_MathFormulaDialog> {
   late TextEditingController _controller;
   bool _isInline = true;
   String _selectedExample = '';
@@ -959,6 +970,7 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
 
   Widget _buildExamplesList() {
     final examples = MathParser.getMathExamples();
+    final settings = ref.watch(settingsProvider);
     
     return Container(
       decoration: BoxDecoration(
@@ -973,7 +985,7 @@ class _MathFormulaDialogState extends State<_MathFormulaDialog> {
             dense: true,
             title: Text(
               example,
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+              style: TextStyle(fontFamily: settings.fontFamily, fontSize: 12),
             ),
             selected: _selectedExample == example,
             onTap: () {

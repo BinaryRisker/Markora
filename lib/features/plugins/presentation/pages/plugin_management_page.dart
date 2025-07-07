@@ -121,42 +121,41 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
           tabs: _buildTabs(context),
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Statistics card
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: PluginStatsCard(),
+      body: Column(
+        children: [
+          // Statistics card
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+            child: PluginStatsCard(),
+          ),
+          
+          // Search and filter
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const PluginSearchBar(),
+                const SizedBox(height: 8),
+                const PluginFilters(),
+              ],
             ),
-            
-            // Search and filter
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                children: [
-                  const PluginSearchBar(),
-                  const SizedBox(height: 8),
-                  const PluginFilters(),
-                ],
-              ),
+          ),
+          
+          const SizedBox(height: 8),
+          
+          // Plugin list
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildAllPluginsTab(),
+                _buildEnabledPluginsTab(),
+                _buildPluginStoreTab(),
+              ],
             ),
-            
-            const SizedBox(height: 16),
-            
-            // Plugin list
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildAllPluginsTab(),
-                  _buildEnabledPluginsTab(),
-                  _buildPluginStoreTab(),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
