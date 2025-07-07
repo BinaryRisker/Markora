@@ -70,6 +70,10 @@ class AppSettings {
   @HiveField(15)
   final bool useSpacesForTab;
 
+  /// Font family
+  @HiveField(16)
+  final String fontFamily;
+
   const AppSettings({
     required this.themeMode,
     required this.editorTheme,
@@ -87,6 +91,7 @@ class AppSettings {
     required this.enableAutoComplete,
     required this.tabSize,
     required this.useSpacesForTab,
+    required this.fontFamily,
   });
 
   /// Default settings
@@ -112,6 +117,7 @@ class AppSettings {
       enableAutoComplete: true,
       tabSize: 2,
       useSpacesForTab: true,
+      fontFamily: 'monospace',
     );
   }
 
@@ -133,6 +139,7 @@ class AppSettings {
     bool? enableAutoComplete,
     int? tabSize,
     bool? useSpacesForTab,
+    String? fontFamily,
   }) {
     return AppSettings(
       themeMode: themeMode ?? this.themeMode,
@@ -151,6 +158,7 @@ class AppSettings {
       enableAutoComplete: enableAutoComplete ?? this.enableAutoComplete,
       tabSize: tabSize ?? this.tabSize,
       useSpacesForTab: useSpacesForTab ?? this.useSpacesForTab,
+      fontFamily: fontFamily ?? this.fontFamily,
     );
   }
 
@@ -173,6 +181,7 @@ class AppSettings {
       'enableAutoComplete': enableAutoComplete,
       'tabSize': tabSize,
       'useSpacesForTab': useSpacesForTab,
+      'fontFamily': fontFamily,
     };
   }
 
@@ -198,6 +207,7 @@ class AppSettings {
       enableAutoComplete: json['enableAutoComplete'] ?? true,
       tabSize: json['tabSize'] ?? 2,
       useSpacesForTab: json['useSpacesForTab'] ?? true,
+      fontFamily: json['fontFamily'] ?? 'monospace',
     );
   }
 
@@ -220,7 +230,8 @@ class AppSettings {
         other.enableLinting == enableLinting &&
         other.enableAutoComplete == enableAutoComplete &&
         other.tabSize == tabSize &&
-        other.useSpacesForTab == useSpacesForTab;
+        other.useSpacesForTab == useSpacesForTab &&
+        other.fontFamily == fontFamily;
   }
 
   @override
@@ -242,6 +253,7 @@ class AppSettings {
       enableAutoComplete,
       tabSize,
       useSpacesForTab,
+      fontFamily,
     );
   }
 
@@ -263,7 +275,8 @@ class AppSettings {
         'enableLinting: $enableLinting, '
         'enableAutoComplete: $enableAutoComplete, '
         'tabSize: $tabSize, '
-        'useSpacesForTab: $useSpacesForTab'
+        'useSpacesForTab: $useSpacesForTab, '
+        'fontFamily: $fontFamily'
         ')';
   }
 }

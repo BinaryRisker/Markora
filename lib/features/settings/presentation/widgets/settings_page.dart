@@ -223,6 +223,35 @@ class SettingsPage extends ConsumerWidget {
         
         _buildSettingCard(
           context,
+          leading: Icon(PhosphorIconsRegular.textT),
+          title: 'Font Family',
+          subtitle: settings.fontFamily,
+          trailing: DropdownButton<String>(
+            value: settings.fontFamily,
+            underline: const SizedBox(),
+            items: [
+              'monospace',
+              'Consolas',
+              'Courier New',
+              'Monaco',
+              'Menlo',
+              'Source Code Pro',
+              'Fira Code',
+              'JetBrains Mono',
+            ].map((font) => DropdownMenuItem(
+              value: font,
+              child: Text(font, style: TextStyle(fontFamily: font)),
+            )).toList(),
+            onChanged: (String? font) {
+              if (font != null) {
+                ref.read(settingsProvider.notifier).updateFontFamily(font);
+              }
+            },
+          ),
+        ),
+        
+        _buildSettingCard(
+          context,
           leading: Icon(PhosphorIconsRegular.listNumbers),
           title: AppLocalizations.of(context)!.showLineNumbers,
           subtitle: settings.showLineNumbers ? AppLocalizations.of(context)!.enabled : AppLocalizations.of(context)!.disabled,
