@@ -423,50 +423,32 @@ class SettingsPage extends ConsumerWidget {
     }
   }
 
+  /// Font name mapping: English names to Chinese names
+  static const Map<String, String> _fontNameMap = {
+    'Microsoft YaHei': '微软雅黑',
+    'SimHei': '黑体',
+    'SimSun': '宋体',
+    'KaiTi': '楷体',
+    'FangSong': '仿宋',
+    'Microsoft JhengHei': '微软正黑体',
+    'PingFang SC': '苹方',
+    'Hiragino Sans GB': '冬青黑体简体中文',
+    'STHeiti': '华文黑体',
+    'STSong': '华文宋体',
+    'STKaiti': '华文楷体',
+    'STFangsong': '华文仿宋',
+    'Noto Sans CJK SC': '思源黑体',
+    'Source Han Sans CN': '思源黑体 CN',
+  };
+
   /// Get font display name (handle legacy English names)
   String _getFontDisplayName(String fontFamily) {
-    // Map legacy English font names to Chinese names
-    const fontNameMap = {
-      'Microsoft YaHei': '微软雅黑',
-      'SimHei': '黑体',
-      'SimSun': '宋体',
-      'KaiTi': '楷体',
-      'FangSong': '仿宋',
-      'Microsoft JhengHei': '微软正黑体',
-      'PingFang SC': '苹方',
-      'Hiragino Sans GB': '冬青黑体简体中文',
-      'STHeiti': '华文黑体',
-      'STSong': '华文宋体',
-      'STKaiti': '华文楷体',
-      'STFangsong': '华文仿宋',
-      'Noto Sans CJK SC': '思源黑体',
-      'Source Han Sans CN': '思源黑体 CN',
-    };
-    
-    return fontNameMap[fontFamily] ?? fontFamily;
+    return _fontNameMap[fontFamily] ?? fontFamily;
   }
   
   /// Get valid font value for dropdown (ensure it exists in available fonts)
   String _getValidFontValue(String fontFamily) {
-    // Map legacy English font names to Chinese names
-    const fontNameMap = {
-      'Microsoft YaHei': '微软雅黑',
-      'SimHei': '黑体',
-      'SimSun': '宋体',
-      'KaiTi': '楷体',
-      'FangSong': '仿宋',
-      'Microsoft JhengHei': '微软正黑体',
-      'PingFang SC': '苹方',
-      'Hiragino Sans GB': '冬青黑体简体中文',
-      'STHeiti': '华文黑体',
-      'STSong': '华文宋体',
-      'STKaiti': '华文楷体',
-      'STFangsong': '华文仿宋',
-      'Noto Sans CJK SC': '思源黑体',
-      'Source Han Sans CN': '思源黑体 CN',
-    };
-    
-    final mappedName = fontNameMap[fontFamily] ?? fontFamily;
+    final mappedName = _fontNameMap[fontFamily] ?? fontFamily;
     
     // Check if the mapped name exists in available fonts
     if (AppConstants.availableFonts.contains(mappedName)) {
