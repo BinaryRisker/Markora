@@ -1,91 +1,123 @@
-/// Markora应用常量定义
+/// Markora application constants definition
 class AppConstants {
-  // 阻止实例化
+  // Prevent instantiation
   AppConstants._();
 
-  /// 应用信息
+  /// Application information
   static const String appName = 'Markora';
   static const String version = '1.0.0';
   static const String appVersion = '1.0.0';
-  static const String appDescription = '下一代跨平台 Markdown 编辑器';
+  static const String appDescription = 'Next-Generation Cross-Platform Markdown Editor';
   
-  /// 支持的文件扩展名
+  /// Supported file extensions
   static const List<String> supportedExtensions = [
     'md',
     'markdown',
     'txt',
-    'mdnb', // Markora笔记本格式
+    'mdnb', // Markora notebook format
   ];
   
-  /// 默认文件名
-  static const String defaultFileName = '未命名文档';
+  /// Default file name
+  static const String defaultFileName = 'Untitled Document';
   static const String defaultFileExtension = 'md';
   
-  /// 存储键名
+  /// Storage key names
   static const String keyEditorConfig = 'editor_config';
   static const String keyAppSettings = 'app_settings';
   static const String keyRecentFiles = 'recent_files';
   static const String keyPluginConfigs = 'plugin_configs';
   static const String keyThemeSettings = 'theme_settings';
   
-  /// 限制值
+  /// Limit values
   static const int maxRecentFiles = 10;
   static const int maxDocumentSize = 100 * 1024 * 1024; // 100MB
-  static const int autoSaveIntervalMin = 10; // 秒
-  static const int autoSaveIntervalMax = 300; // 秒
+  static const int autoSaveIntervalMin = 10; // seconds
+  static const int autoSaveIntervalMax = 300; // seconds
   
-  /// UI常量
+  /// UI constants
   static const double minWindowWidth = 800.0;
   static const double minWindowHeight = 600.0;
   static const double defaultSplitRatio = 0.5;
   static const double toolbarHeight = 48.0;
   static const double statusBarHeight = 24.0;
   
-  /// 字体设置
+  /// Font settings
   static const List<String> availableFonts = [
+    // Monospace fonts (for programming)
     'monospace',
     'Consolas',
     'Courier New',
     'Monaco',
     'Menlo',
+    'Source Code Pro',
+    'Fira Code',
+    'JetBrains Mono',
+    
+    // Chinese fonts
+    '微软雅黑',
+    '黑体',
+    '宋体',
+    '楷体',
+    '仿宋',
+    '微软正黑体',
+    '苹方',
+    '冬青黑体简体中文',
+    '华文黑体',
+    '华文宋体',
+    '华文楷体',
+    '华文仿宋',
+    '思源黑体',
+    '思源黑体 CN',
+    
+    // Western fonts
+    'Times New Roman',
+    'Arial',
+    'Helvetica',
+    'Georgia',
+    'Verdana',
+    'Calibri',
+    'Cambria',
+    'Comic Sans MS',
+    'Impact',
+    'Trebuchet MS',
   ];
   
-  /// 主题设置
+  /// Theme settings
   static const List<String> availableThemes = [
     'light',
     'dark',
     'auto',
   ];
   
-  /// 编辑器配置默认值
+  /// Editor configuration default values
   static const double defaultFontSize = 14.0;
   static const String defaultFontFamily = 'monospace';
   static const double defaultLineHeight = 1.5;
   static const int defaultTabSize = 2;
   
-  /// 插件相关
+  /// Plugin related
   static const String pluginDirectory = 'plugins';
   static const String themeDirectory = 'themes';
   static const String templatesDirectory = 'templates';
   
-  /// 网络配置
+  /// Network configuration
   static const int networkTimeoutSeconds = 30;
   static const String pluginRegistryUrl = 'https://plugins.markora.com';
   
-  /// 正则表达式
+  /// Regular expressions
   static const String markdownHeadingPattern = r'^#{1,6}\s+(.+)$';
   static const String markdownLinkPattern = r'\[([^\]]+)\]\(([^)]+)\)';
   static const String markdownImagePattern = r'!\[([^\]]*)\]\(([^)]+)\)';
   static const String markdownCodeBlockPattern = r'```(\w+)?\n([\s\S]+?)\n```';
   
-  /// 数学公式
+  /// Math formulas
   static const String mathInlinePattern = r'\$([^$]+)\$';
   static const String mathBlockPattern = r'\$\$\n([\s\S]+?)\n\$\$';
   
-  /// Mermaid图表
+  /// Mermaid charts
   static const String mermaidBlockPattern = r'```mermaid\n([\s\S]+?)\n```';
   
-  /// 导出格式
+  /// Export formats
   static const List<String> exportFormats = [
     'pdf',
     'html',
@@ -93,4 +125,4 @@ class AppConstants {
     'png',
     'jpeg',
   ];
-} 
+}

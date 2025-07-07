@@ -222,6 +222,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fontSize => '字体大小';
 
   @override
+  String get fontFamily => '字体族';
+
+  @override
   String get showLineNumbers => '显示行号';
 
   @override

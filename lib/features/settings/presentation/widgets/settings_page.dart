@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -87,7 +88,13 @@ class SettingsPage extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('🇺🇸'),
+                Text('🇺🇸', 
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: Platform.isWindows ? 'Segoe UI Emoji' : null,
+                    fontFamilyFallback: const ['Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji'],
+                  ),
+                ),
                 const SizedBox(width: 8),
                 Text(AppLocalizations.of(context)!.english),
               ],
@@ -98,7 +105,13 @@ class SettingsPage extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('🇨🇳'),
+                Text('🇨🇳', 
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontFamily: Platform.isWindows ? 'Segoe UI Emoji' : null,
+                    fontFamilyFallback: const ['Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji'],
+                  ),
+                ),
                 const SizedBox(width: 8),
                 Text(AppLocalizations.of(context)!.chinese),
               ],
@@ -224,28 +237,21 @@ class SettingsPage extends ConsumerWidget {
         _buildSettingCard(
           context,
           leading: Icon(PhosphorIconsRegular.textT),
-          title: 'Font Family',
-          subtitle: settings.fontFamily,
+          title: AppLocalizations.of(context)!.fontFamily,
+          subtitle: _getFontDisplayName(settings.fontFamily),
           trailing: DropdownButton<String>(
-            value: settings.fontFamily,
+            value: _getValidFontValue(settings.fontFamily),
             underline: const SizedBox(),
-            items: [
-              'monospace',
-              'Consolas',
-              'Courier New',
-              'Monaco',
-              'Menlo',
-              'Source Code Pro',
-              'Fira Code',
-              'JetBrains Mono',
-              'Times New Roman', 
-              'Arial',   
-              'Comic Sans MS',  
-              'Impact',    
-              'Trebuchet MS',  
-            ].map((font) => DropdownMenuItem(
+            items: AppConstants.availableFonts.map((font) => DropdownMenuItem(
               value: font,
-              child: Text(font, style: TextStyle(fontFamily: font, fontSize: 14)),
+              child: Text(
+                font, 
+                style: TextStyle(
+                  fontFamily: font, 
+                  fontSize: 14,
+                  fontFamilyFallback: ['Microsoft YaHei', 'Arial'],
+                ),
+              ),
             )).toList(),
             onChanged: (String? font) {
               if (font != null) {
@@ -415,6 +421,60 @@ class SettingsPage extends ConsumerWidget {
       default:
         return AppLocalizations.of(context)!.split;
     }
+  }
+
+  /// Get font display name (handle legacy English names)
+  String _getFontDisplayName(String fontFamily) {
+    // Map legacy English font names to Chinese names
+    const fontNameMap = {
+      'Microsoft YaHei': '微软雅黑',
+      'SimHei': '黑体',
+      'SimSun': '宋体',
+      'KaiTi': '楷体',
+      'FangSong': '仿宋',
+      'Microsoft JhengHei': '微软正黑体',
+      'PingFang SC': '苹方',
+      'Hiragino Sans GB': '冬青黑体简体中文',
+      'STHeiti': '华文黑体',
+      'STSong': '华文宋体',
+      'STKaiti': '华文楷体',
+      'STFangsong': '华文仿宋',
+      'Noto Sans CJK SC': '思源黑体',
+      'Source Han Sans CN': '思源黑体 CN',
+    };
+    
+    return fontNameMap[fontFamily] ?? fontFamily;
+  }
+  
+  /// Get valid font value for dropdown (ensure it exists in available fonts)
+  String _getValidFontValue(String fontFamily) {
+    // Map legacy English font names to Chinese names
+    const fontNameMap = {
+      'Microsoft YaHei': '微软雅黑',
+      'SimHei': '黑体',
+      'SimSun': '宋体',
+      'KaiTi': '楷体',
+      'FangSong': '仿宋',
+      'Microsoft JhengHei': '微软正黑体',
+      'PingFang SC': '苹方',
+      'Hiragino Sans GB': '冬青黑体简体中文',
+      'STHeiti': '华文黑体',
+      'STSong': '华文宋体',
+      'STKaiti': '华文楷体',
+      'STFangsong': '华文仿宋',
+      'Noto Sans CJK SC': '思源黑体',
+      'Source Han Sans CN': '思源黑体 CN',
+    };
+    
+    final mappedName = fontNameMap[fontFamily] ?? fontFamily;
+    
+    // Check if the mapped name exists in available fonts
+    if (AppConstants.availableFonts.contains(mappedName)) {
+      return mappedName;
+    }
+    
+    // Fallback to default font if not found
+    return AppConstants.defaultFontFamily;
   }
 
   /// Get language label

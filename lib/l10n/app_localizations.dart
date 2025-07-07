@@ -524,6 +524,12 @@ abstract class AppLocalizations {
   /// **'Font Size'**
   String get fontSize;
 
+  /// Font family setting label
+  ///
+  /// In en, this message translates to:
+  /// **'Font Family'**
+  String get fontFamily;
+
   /// Show line numbers setting label
   ///
   /// In en, this message translates to:

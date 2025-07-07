@@ -354,6 +354,11 @@
   "@fontSize": {
     "description": "Font size setting label"
   },
+  
+  "fontFamily": "Font Family",
+  "@fontFamily": {
+    "description": "Font family setting label"
+  },
 
   "showLineNumbers": "Show Line Numbers",
   "@showLineNumbers": {
