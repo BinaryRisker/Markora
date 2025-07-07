@@ -19,6 +19,7 @@ import '../../../plugins/domain/plugin_implementations.dart';
 import '../../../export/presentation/widgets/export_dialog.dart';
 import '../../../export/domain/entities/export_settings.dart';
 import '../../../document/presentation/providers/document_providers.dart';
+import '../../../settings/presentation/providers/settings_providers.dart';
 
 
 
@@ -69,8 +70,10 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   static const Duration _debounceDelay = Duration(milliseconds: 300);
   static const Duration _cacheExpiry = Duration(minutes: 5);
   
-  // Track current language to detect changes
+  // Track current language and font settings to detect changes
   String? _currentLanguage;
+  String? _currentFontFamily;
+  double? _currentFontSize;
 
   @override
   void initState() {
@@ -84,13 +87,34 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     
     // Check if language has changed
     final newLanguage = Localizations.localeOf(context).languageCode;
+    final settings = ref.watch(settingsProvider);
+    final newFontFamily = settings.fontFamily;
+    final newFontSize = settings.fontSize;
+    
+    bool shouldClearCache = false;
+    
     if (_currentLanguage != null && _currentLanguage != newLanguage) {
-      // Language changed, clear cache and force rebuild
+      shouldClearCache = true;
+    }
+    
+    if (_currentFontFamily != null && _currentFontFamily != newFontFamily) {
+      shouldClearCache = true;
+    }
+    
+    if (_currentFontSize != null && _currentFontSize != newFontSize) {
+      shouldClearCache = true;
+    }
+    
+    if (shouldClearCache) {
+      // Settings changed, clear cache and force rebuild
       _renderCache.clear();
       _cachedWidget = null;
       _lastRenderedContent = '';
     }
+    
     _currentLanguage = newLanguage;
+    _currentFontFamily = newFontFamily;
+    _currentFontSize = newFontSize;
   }
 
   @override
@@ -126,16 +150,12 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
   /// Build optimized Markdown content (with cache and debounce)
   Widget _buildOptimizedMarkdownContent() {
-    // Get current language for cache key
+    // Get current settings for cache key
     final currentLanguage = Localizations.localeOf(context).languageCode;
+    final settings = ref.watch(settingsProvider);
     
-    // If content hasn't changed and language hasn't changed, return cached widget
-    if (widget.content == _lastRenderedContent && _cachedWidget != null) {
-      return _cachedWidget!;
-    }
-
-    // Check cache (include language in cache key)
-    final cacheKey = '${widget.content.hashCode}_$currentLanguage';
+    // Check cache (include language and font settings in cache key)
+    final cacheKey = '${widget.content.hashCode}_${currentLanguage}_${settings.fontFamily}_${settings.fontSize}';
     final cachedItem = _renderCache[cacheKey];
     
     if (cachedItem != null) {
@@ -176,7 +196,8 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   Widget _renderAndCache() {
     final widget = _buildMarkdownContent();
     final currentLanguage = Localizations.localeOf(context).languageCode;
-    final cacheKey = '${this.widget.content.hashCode}_$currentLanguage';
+    final settings = ref.watch(settingsProvider);
+    final cacheKey = '${this.widget.content.hashCode}_${currentLanguage}_${settings.fontFamily}_${settings.fontSize}';
     
     // Clean expired cache
     _cleanExpiredCache();
@@ -351,13 +372,14 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     
     if (mathFormulas.isEmpty && processedContent.pluginWidgets.isEmpty) {
       // No special content, use normal Markdown rendering
+      final settings = ref.watch(settingsProvider);
       return MarkdownBody(
         data: processedContent.content,
         selectable: widget.selectable,
         styleSheet: _buildMarkdownStyleSheet(),
         extensionSet: md.ExtensionSet.gitHubFlavored,
         builders: {
-          'code': CodeElementBuilder(),
+          'code': CodeElementBuilder(fontFamily: settings.fontFamily),
         },
         onTapLink: (text, href, title) {
           if (href != null) {
@@ -409,13 +431,14 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       if (currentIndex < element.startIndex) {
         final textContent = widget.content.substring(currentIndex, element.startIndex);
         if (textContent.trim().isNotEmpty) {
+          final settings = ref.watch(settingsProvider);
           widgets.add(MarkdownBody(
             data: textContent,
             selectable: widget.selectable,
             styleSheet: _buildMarkdownStyleSheet(),
             extensionSet: md.ExtensionSet.gitHubFlavored,
             builders: {
-              'code': CodeElementBuilder(),
+              'code': CodeElementBuilder(fontFamily: settings.fontFamily),
             },
             onTapLink: (text, href, title) {
               if (href != null) {
@@ -456,13 +479,14 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     if (currentIndex < widget.content.length) {
       final remainingContent = widget.content.substring(currentIndex);
       if (remainingContent.trim().isNotEmpty) {
+        final settings = ref.watch(settingsProvider);
         widgets.add(MarkdownBody(
           data: remainingContent,
           selectable: widget.selectable,
           styleSheet: _buildMarkdownStyleSheet(),
           extensionSet: md.ExtensionSet.gitHubFlavored,
           builders: {
-            'code': CodeElementBuilder(),
+            'code': CodeElementBuilder(fontFamily: settings.fontFamily),
           },
           onTapLink: (text, href, title) {
             if (href != null) {
@@ -484,41 +508,50 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   MarkdownStyleSheet _buildMarkdownStyleSheet() {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final settings = ref.watch(settingsProvider);
     
     return MarkdownStyleSheet(
       // Paragraph style
       p: textTheme.bodyLarge?.copyWith(
+        fontFamily: settings.fontFamily,
+        fontSize: settings.fontSize.toDouble(),
         height: 1.6,
         color: theme.colorScheme.onSurface,
       ),
       
       // Heading styles
       h1: textTheme.headlineLarge?.copyWith(
+        fontFamily: settings.fontFamily,
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
         height: 1.3,
       ),
       h2: textTheme.headlineMedium?.copyWith(
+        fontFamily: settings.fontFamily,
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
         height: 1.3,
       ),
       h3: textTheme.headlineSmall?.copyWith(
+        fontFamily: settings.fontFamily,
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
         height: 1.3,
       ),
       h4: textTheme.titleLarge?.copyWith(
+        fontFamily: settings.fontFamily,
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
         height: 1.3,
       ),
       h5: textTheme.titleMedium?.copyWith(
+        fontFamily: settings.fontFamily,
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
         height: 1.3,
       ),
       h6: textTheme.titleSmall?.copyWith(
+        fontFamily: settings.fontFamily,
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
         height: 1.3,
@@ -526,8 +559,8 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       
       // Code style
       code: TextStyle(
-        fontFamily: 'monospace',
-        fontSize: textTheme.bodyMedium?.fontSize,
+        fontFamily: settings.fontFamily,
+        fontSize: settings.fontSize.toDouble(),
         backgroundColor: theme.colorScheme.surfaceVariant,
         color: theme.colorScheme.onSurfaceVariant,
       ),
@@ -543,6 +576,8 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       
       // Quote style
       blockquote: textTheme.bodyLarge?.copyWith(
+        fontFamily: settings.fontFamily,
+        fontSize: settings.fontSize.toDouble(),
         color: theme.colorScheme.onSurfaceVariant,
         fontStyle: FontStyle.italic,
       ),
@@ -558,21 +593,29 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       
       // Link style
       a: TextStyle(
+        fontFamily: settings.fontFamily,
+        fontSize: settings.fontSize.toDouble(),
         color: theme.colorScheme.primary,
         decoration: TextDecoration.underline,
       ),
       
       // List style
       listBullet: textTheme.bodyLarge?.copyWith(
+        fontFamily: settings.fontFamily,
+        fontSize: settings.fontSize.toDouble(),
         color: theme.colorScheme.onSurface,
       ),
       
       // Table style
       tableHead: textTheme.bodyLarge?.copyWith(
+        fontFamily: settings.fontFamily,
+        fontSize: settings.fontSize.toDouble(),
         fontWeight: FontWeight.bold,
         color: theme.colorScheme.onSurface,
       ),
       tableBody: textTheme.bodyLarge?.copyWith(
+        fontFamily: settings.fontFamily,
+        fontSize: settings.fontSize.toDouble(),
         color: theme.colorScheme.onSurface,
       ),
       tableBorder: TableBorder.all(
@@ -682,17 +725,28 @@ class MathElementBuilder extends MarkdownElementBuilder {
 
 /// Code block builder
 class CodeElementBuilder extends MarkdownElementBuilder {
+  CodeElementBuilder({required this.fontFamily});
+  
+  final String fontFamily;
+  
   @override
   Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
     if (element.tag == 'code') {
       final language = element.attributes['class']?.replaceFirst('language-', '') ?? '';
       final code = element.textContent;
       
-      return SimpleCodeBlock(
-        code: code,
-        language: language.isNotEmpty ? language : null,
-        showLineNumbers: true,
-        showCopyButton: true,
+      return CodeBlockWidget(
+        codeBlock: CodeBlock(
+          content: code,
+          language: ProgrammingLanguage.fromIdentifier(language),
+          startLine: 1,
+          endLine: code.split('\n').length,
+          showLineNumbers: true,
+          showCopyButton: true,
+        ),
+        config: SyntaxHighlightConfig(
+          fontFamily: fontFamily,
+        ),
       );
     }
     return null;

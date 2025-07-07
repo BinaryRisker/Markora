@@ -238,9 +238,14 @@ class SettingsPage extends ConsumerWidget {
               'Source Code Pro',
               'Fira Code',
               'JetBrains Mono',
+              'Times New Roman', 
+              'Arial',   
+              'Comic Sans MS',  
+              'Impact',    
+              'Trebuchet MS',  
             ].map((font) => DropdownMenuItem(
               value: font,
-              child: Text(font, style: TextStyle(fontFamily: font)),
+              child: Text(font, style: TextStyle(fontFamily: font, fontSize: 14)),
             )).toList(),
             onChanged: (String? font) {
               if (font != null) {
