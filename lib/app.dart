@@ -108,10 +108,20 @@ ${l10n.blockFormula}：
       // Initialize plugin context service
       final contextService = PluginContextService.instance;
       contextService.initialize();
+      debugPrint('Plugin context service initialized');
       
       // Initialize plugin manager with context
       final pluginManager = PluginManager.instance;
       await pluginManager.initialize(contextService.context);
+      debugPrint('Plugin manager initialized');
+      
+      // Wait a bit for plugins to load
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Check if plugins are loaded
+      final syntaxRegistry = contextService.syntaxRegistry;
+      final blockRules = syntaxRegistry.blockSyntaxRules;
+      debugPrint('Available plugins after initialization: ${blockRules.keys.toList()}');
       
       debugPrint('Plugin system initialized successfully');
     } catch (e) {

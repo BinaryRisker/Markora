@@ -1859,9 +1859,10 @@ class WebMermaidDisplayWidget extends StatelessWidget {
             child: Text(
               code,
               style: const TextStyle(
-                fontFamily: 'Courier New',
+                fontFamily: 'monospace',
                 fontSize: 14,
                 color: Colors.black87,
+                fontFamilyFallback: ['Arial', 'Microsoft YaHei', 'SimSun'],
               ),
             ),
           ),
