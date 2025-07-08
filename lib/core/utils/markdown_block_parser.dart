@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+import 'plugin_block_processor.dart';
 
 /// Markdown block types
 enum MarkdownBlockType {
@@ -147,8 +148,12 @@ class MarkdownBlockParser {
       return _parseHorizontalRule(lines, startLine);
     }
     
-    // Plugin syntax (check common patterns)
-    if (_isPluginSyntax(line)) {
+    // Plugin syntax (check registered patterns)
+    if (PluginBlockProcessor.startsPluginBlock(line)) {
+      final pluginBlock = PluginBlockProcessor.parseMultiLinePlugin(lines, startLine);
+      if (pluginBlock != null) {
+        return pluginBlock;
+      }
       return _parsePluginBlock(lines, startLine);
     }
     
@@ -407,10 +412,7 @@ class MarkdownBlockParser {
 
   /// Check if line contains plugin syntax
   bool _isPluginSyntax(String line) {
-    // Common plugin patterns - can be extended
-    return line.contains('{{') || 
-           line.contains('[[') || 
-           line.startsWith(':::');
+    return PluginBlockProcessor.startsPluginBlock(line);
   }
 
   /// Check if line starts a new block
