@@ -598,10 +598,89 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     }
 
     // Has math formulas, needs special handling
-    return _buildContentWithMath(content);
+    return _buildContentWithMathFormulas(content, mathFormulas);
   }
 
+  /// Build content with math formulas
+  Widget _buildContentWithMathFormulas(String content, List<MathFormula> mathFormulas) {
+    if (mathFormulas.isEmpty) {
+      // Fallback to normal rendering
+      final settings = ref.watch(settingsProvider);
+      return MarkdownBody(
+        data: content,
+        selectable: widget.selectable,
+        styleSheet: _buildMarkdownStyleSheet(),
+        extensionSet: md.ExtensionSet.gitHubFlavored,
+        builders: {
+          'code': CodeElementBuilder(fontFamily: settings.fontFamily),
+        },
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            _handleLinkTap(href);
+          }
+        },
+        onTapText: widget.onTap,
+      );
+    }
 
+    // Build content with math formulas
+    final widgets = <Widget>[];
+    int lastEndIndex = 0;
+
+    for (final formula in mathFormulas) {
+      // Add text before this formula
+      if (formula.startIndex > lastEndIndex) {
+        final textBefore = content.substring(lastEndIndex, formula.startIndex);
+        if (textBefore.trim().isNotEmpty) {
+          widgets.add(_buildMarkdownSegment(textBefore));
+        }
+      }
+
+      // Add math formula widget
+      widgets.add(MathFormulaWidget(
+        formula: formula,
+        textStyle: Theme.of(context).textTheme.bodyLarge,
+        onError: (error) {
+          debugPrint('Math formula error: $error');
+        },
+      ));
+
+      lastEndIndex = formula.endIndex;
+    }
+
+    // Add remaining text
+    if (lastEndIndex < content.length) {
+      final textAfter = content.substring(lastEndIndex);
+      if (textAfter.trim().isNotEmpty) {
+        widgets.add(_buildMarkdownSegment(textAfter));
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widgets,
+    );
+  }
+
+  /// Build markdown segment without math formulas
+  Widget _buildMarkdownSegment(String content) {
+    final settings = ref.watch(settingsProvider);
+    return MarkdownBody(
+      data: content,
+      selectable: widget.selectable,
+      styleSheet: _buildMarkdownStyleSheet(),
+      extensionSet: md.ExtensionSet.gitHubFlavored,
+      builders: {
+        'code': CodeElementBuilder(fontFamily: settings.fontFamily),
+      },
+      onTapLink: (text, href, title) {
+        if (href != null) {
+          _handleLinkTap(href);
+        }
+      },
+      onTapText: widget.onTap,
+    );
+  }
 
   /// Build preview toolbar
   Widget _buildPreviewToolbar() {

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import '../../features/plugins/domain/plugin_implementations.dart';
-import '../../main.dart';
+import '../../features/plugins/domain/plugin_context_service.dart';
 import 'markdown_block_parser.dart';
 
 /// Plugin block processor for handling plugin syntax in markdown blocks
@@ -8,7 +8,8 @@ class PluginBlockProcessor {
   /// Check if content contains plugin syntax
   static bool containsPluginSyntax(String content) {
     try {
-      final syntaxRegistry = globalSyntaxRegistry;
+      final contextService = PluginContextService.instance;
+      final syntaxRegistry = contextService.syntaxRegistry;
       final blockRules = syntaxRegistry.blockSyntaxRules;
       
       for (final rule in blockRules.values) {
@@ -34,7 +35,8 @@ class PluginBlockProcessor {
   /// Check if line starts a plugin block
   static bool startsPluginBlock(String line) {
     try {
-      final syntaxRegistry = globalSyntaxRegistry;
+      final contextService = PluginContextService.instance;
+      final syntaxRegistry = contextService.syntaxRegistry;
       final blockRules = syntaxRegistry.blockSyntaxRules;
       
       for (final rule in blockRules.values) {
@@ -56,7 +58,8 @@ class PluginBlockProcessor {
     final elements = <PluginElement>[];
     
     try {
-      final syntaxRegistry = globalSyntaxRegistry;
+      final contextService = PluginContextService.instance;
+      final syntaxRegistry = contextService.syntaxRegistry;
       final blockRules = syntaxRegistry.blockSyntaxRules;
       
       // Process block syntax rules
@@ -115,7 +118,8 @@ class PluginBlockProcessor {
   /// Parse multi-line plugin block
   static MarkdownBlock? parseMultiLinePlugin(List<String> lines, int startLine) {
     try {
-      final syntaxRegistry = globalSyntaxRegistry;
+      final contextService = PluginContextService.instance;
+      final syntaxRegistry = contextService.syntaxRegistry;
       final blockRules = syntaxRegistry.blockSyntaxRules;
       
       final firstLine = lines[startLine];
@@ -203,7 +207,8 @@ class PluginBlockProcessor {
   /// Get all registered plugin patterns (for debugging)
   static List<String> getRegisteredPatterns() {
     try {
-      final syntaxRegistry = globalSyntaxRegistry;
+      final contextService = PluginContextService.instance;
+      final syntaxRegistry = contextService.syntaxRegistry;
       final patterns = <String>[];
       
       for (final rule in syntaxRegistry.blockSyntaxRules.values) {

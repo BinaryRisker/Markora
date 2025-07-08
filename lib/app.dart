@@ -18,6 +18,7 @@ import 'features/settings/presentation/widgets/settings_page.dart';
 import 'features/export/presentation/widgets/export_dialog.dart';
 import 'features/editor/domain/services/global_editor_manager.dart';
 import 'features/plugins/presentation/pages/plugin_management_page.dart';
+import 'features/plugins/domain/plugin_context_service.dart';
 
 /// Application shell - main interface container
 class AppShell extends ConsumerStatefulWidget {
@@ -33,6 +34,9 @@ class _AppShellState extends ConsumerState<AppShell> {
   
   // Split ratio (editor:preview)
   double _splitRatio = AppConstants.defaultSplitRatio;
+  
+  // Plugin toolbar refresh trigger
+  int _pluginToolbarRefreshKey = 0;
   
   // Current document content
   String get _currentContent {
@@ -90,7 +94,28 @@ ${l10n.blockFormula}：
     // Update sample documents with localized content after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateSampleDocuments();
+      _setupPluginListeners();
     });
+  }
+
+  /// Setup plugin listeners
+  void _setupPluginListeners() {
+    try {
+      final contextService = ref.read(pluginContextServiceProvider);
+      final toolbarRegistry = contextService.toolbarRegistry;
+      
+      toolbarRegistry.addChangeListener(() {
+        if (mounted) {
+          setState(() {
+            _pluginToolbarRefreshKey++;
+          });
+        }
+      });
+      
+      debugPrint('Plugin toolbar listeners setup completed');
+    } catch (e) {
+      debugPrint('Failed to setup plugin listeners: $e');
+    }
   }
 
   /// Update sample documents with localized content
@@ -209,7 +234,8 @@ ${l10n.blockFormula}：
           
           const VerticalDivider(),
           
-
+          // Plugin buttons
+          ..._buildPluginButtons(),
           
           const Spacer(),
           
@@ -250,6 +276,68 @@ ${l10n.blockFormula}：
         iconSize: 20,
       ),
     );
+  }
+
+  /// Build plugin buttons
+  List<Widget> _buildPluginButtons() {
+    try {
+      final contextService = ref.read(pluginContextServiceProvider);
+      final toolbarRegistry = contextService.toolbarRegistry;
+      final actions = toolbarRegistry.actions;
+      
+      if (actions.isEmpty) {
+        return [];
+      }
+      
+      final buttons = <Widget>[];
+      
+      for (final actionItem in actions.values) {
+        final action = actionItem.action;
+        buttons.add(
+          _buildToolbarButton(
+            icon: _getIconFromString(action.icon ?? 'default'),
+            tooltip: action.description,
+            onPressed: () {
+              debugPrint('Execute plugin action: ${action.title}');
+              try {
+                actionItem.callback();
+              } catch (e) {
+                debugPrint('Plugin action failed: $e');
+                                 if (context.mounted) {
+                   ScaffoldMessenger.of(context).showSnackBar(
+                     SnackBar(
+                       content: Text('插件操作失败: $e'),
+                       backgroundColor: Colors.red,
+                     ),
+                   );
+                 }
+              }
+            },
+          ),
+        );
+      }
+      
+      return buttons;
+    } catch (e) {
+      debugPrint('Failed to build plugin buttons: $e');
+      return [];
+    }
+  }
+
+  /// Get icon from string
+  Widget _getIconFromString(String iconName) {
+    switch (iconName) {
+      case 'account_tree':
+        return Icon(PhosphorIconsRegular.tree);
+      case 'code':
+        return Icon(PhosphorIconsRegular.code);
+      case 'insert_chart':
+        return Icon(PhosphorIconsRegular.chartBar);
+      case 'functions':
+        return Icon(PhosphorIconsRegular.function);
+             default:
+         return Icon(PhosphorIconsRegular.plugs);
+    }
   }
 
   /// Build mode toggle
