@@ -14,6 +14,7 @@ import '../../../../main.dart';
 import '../../../../core/utils/markdown_block_parser.dart';
 import '../../../../core/utils/markdown_block_cache.dart';
 import '../../../../core/utils/plugin_block_processor.dart';
+import '../../../../core/utils/performance_monitor.dart';
 
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
@@ -176,8 +177,16 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     }
 
     // Parse markdown into blocks
+    final parseTimer = performanceMonitor.startTimer('markdown_parsing');
     _cachedBlocks = _blockParser.parseBlocks(widget.content);
     _lastRenderedContent = widget.content;
+    parseTimer.stop(
+      type: MetricType.parsing,
+      metadata: {
+        'content_length': widget.content.length,
+        'blocks_count': _cachedBlocks.length,
+      },
+    );
 
     // Clean expired cache
     markdownBlockCache.cleanExpired();
@@ -220,12 +229,28 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
 
     // Check cache first
+    final cacheTimer = performanceMonitor.startTimer('cache_lookup');
     final cachedWidget = markdownBlockCache.get(cacheKey);
     if (cachedWidget != null) {
+      cacheTimer.stop(
+        type: MetricType.caching,
+        metadata: {
+          'cache_hit': true,
+          'block_type': block.type.name,
+        },
+      );
       return cachedWidget;
     }
+    cacheTimer.stop(
+      type: MetricType.caching,
+      metadata: {
+        'cache_hit': false,
+        'block_type': block.type.name,
+      },
+    );
 
     // Build new widget
+    final renderTimer = performanceMonitor.startTimer('block_rendering_${block.type.name}');
     Widget widget;
     switch (block.type) {
       case MarkdownBlockType.empty:
@@ -265,6 +290,15 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
     // Cache the widget
     markdownBlockCache.put(cacheKey, widget);
+    
+    renderTimer.stop(
+      type: MetricType.rendering,
+      metadata: {
+        'block_type': block.type.name,
+        'content_length': block.content.length,
+        'cached': false,
+      },
+    );
 
     return widget;
   }
@@ -564,7 +598,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     }
 
     // Has math formulas, needs special handling
-    return _buildMixedContent(mathFormulas, [], content);
+    return _buildContentWithMath(content);
   }
 
 
@@ -615,12 +649,18 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
             onPressed: () => _refreshPreview(),
           ),
           // Debug: Cache statistics (only in debug mode)
-          if (kDebugMode)
+          if (kDebugMode) ...[
             _buildToolbarButton(
               icon: Icons.analytics_outlined,
               tooltip: 'Cache Statistics',
               onPressed: () => _showCacheStatistics(),
             ),
+            _buildToolbarButton(
+              icon: Icons.speed_outlined,
+              tooltip: 'Performance Report',
+              onPressed: () => _showPerformanceReport(),
+            ),
+          ],
           const SizedBox(width: 8),
         ],
       ),
@@ -652,116 +692,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
 
 
-  /// Build mixed content (text + math formulas + plugin components)
-  Widget _buildMixedContent(List<MathFormula> mathFormulas, List<_PluginElement> pluginElements, [String? content]) {
-    final sourceContent = content ?? widget.content;
-    final widgets = <Widget>[];
-    
-    // Merge all special elements and sort by position
-    final allElements = <_SpecialElement>[];
-    
-    // Add math formulas
-    for (final formula in mathFormulas) {
-      allElements.add(_SpecialElement(
-        type: _SpecialElementType.math,
-        startIndex: formula.startIndex,
-        endIndex: formula.endIndex,
-        data: formula,
-      ));
-    }
-    
-    // Add plugin components
-    for (final pluginElement in pluginElements) {
-      allElements.add(_SpecialElement(
-        type: _SpecialElementType.plugin,
-        startIndex: pluginElement.start,
-        endIndex: pluginElement.end,
-        data: pluginElement.widget,
-      ));
-    }
-    
-    // Sort by position
-    allElements.sort((a, b) => a.startIndex.compareTo(b.startIndex));
-    
-    int currentIndex = 0;
 
-    for (final element in allElements) {
-      // Add normal text before element
-      if (currentIndex < element.startIndex) {
-        final textContent = sourceContent.substring(currentIndex, element.startIndex);
-        if (textContent.trim().isNotEmpty) {
-          final settings = ref.watch(settingsProvider);
-          widgets.add(MarkdownBody(
-            data: textContent,
-            selectable: widget.selectable,
-            styleSheet: _buildMarkdownStyleSheet(),
-            extensionSet: md.ExtensionSet.gitHubFlavored,
-            builders: {
-              'code': CodeElementBuilder(fontFamily: settings.fontFamily),
-            },
-            onTapLink: (text, href, title) {
-              if (href != null) {
-                _handleLinkTap(href);
-              }
-            },
-            onTapText: widget.onTap,
-          ));
-        }
-      }
-
-      // Add special element
-      if (element.type == _SpecialElementType.math) {
-        final formula = element.data as MathFormula;
-        widgets.add(MathFormulaWidget(
-          formula: formula,
-          textStyle: Theme.of(context).textTheme.bodyLarge,
-          onError: (error) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Math formula rendering error: $error'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-        ));
-      } else if (element.type == _SpecialElementType.plugin) {
-        final widget = element.data as Widget;
-        widgets.add(widget);
-      }
-
-      currentIndex = element.endIndex;
-    }
-
-    // Add remaining text at the end
-    if (currentIndex < sourceContent.length) {
-      final remainingContent = sourceContent.substring(currentIndex);
-      if (remainingContent.trim().isNotEmpty) {
-        final settings = ref.watch(settingsProvider);
-        widgets.add(MarkdownBody(
-          data: remainingContent,
-          selectable: widget.selectable,
-          styleSheet: _buildMarkdownStyleSheet(),
-          extensionSet: md.ExtensionSet.gitHubFlavored,
-          builders: {
-            'code': CodeElementBuilder(fontFamily: settings.fontFamily),
-          },
-          onTapLink: (text, href, title) {
-            if (href != null) {
-              _handleLinkTap(href);
-            }
-          },
-          onTapText: widget.onTap,
-        ));
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: widgets,
-    );
-  }
 
   /// Build Markdown style sheet
   MarkdownStyleSheet _buildMarkdownStyleSheet() {
@@ -984,6 +915,46 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
               );
             },
             child: const Text('Clear Cache'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show performance report (debug only)
+  void _showPerformanceReport() {
+    if (!kDebugMode) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Performance Report'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                performanceMonitor.getPerformanceReport(),
+                style: const TextStyle(fontFamily: 'monospace'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              performanceMonitor.clear();
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Performance metrics cleared')),
+              );
+            },
+            child: const Text('Clear Metrics'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
