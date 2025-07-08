@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../providers/plugin_providers.dart';
 import '../widgets/plugin_card.dart';
-import '../widgets/plugin_stats_card.dart';
-import '../widgets/plugin_search_bar.dart';
-import '../widgets/plugin_filters.dart';
+import '../widgets/plugin_compact_header.dart';
 import '../../../../types/plugin.dart';
 import '../../domain/plugin_interface.dart';
 
@@ -123,26 +121,8 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
       ),
       body: Column(
         children: [
-          // Statistics card
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-            child: PluginStatsCard(),
-          ),
-          
-          // Search and filter
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const PluginSearchBar(),
-                const SizedBox(height: 8),
-                const PluginFilters(),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 8),
+          // Compact header with search, filters, and stats
+          const PluginCompactHeader(),
           
           // Plugin list
           Expanded(

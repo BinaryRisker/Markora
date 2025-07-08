@@ -605,6 +605,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sortBy => '排序方式';
 
   @override
+  String get moreFilters => '更多过滤器';
+
+  @override
+  String get advancedFilters => '高级过滤器';
+
+  @override
+  String get allStatuses => '全部状态';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String get installDate => '安装日期';
+
+  @override
   String get lastUpdated => '最后更新';
 
   @override

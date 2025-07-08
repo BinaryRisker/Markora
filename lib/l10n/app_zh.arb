@@ -1051,6 +1051,41 @@
   "@sortBy": {
     "description": "排序方式标签"
   },
+  
+  "moreFilters": "更多过滤器",
+  "@moreFilters": {
+    "description": "更多过滤器按钮提示"
+  },
+  
+  "advancedFilters": "高级过滤器",
+  "@advancedFilters": {
+    "description": "高级过滤器对话框标题"
+  },
+  
+  "allStatuses": "全部状态",
+  "@allStatuses": {
+    "description": "全部状态选项"
+  },
+  
+  "reset": "重置",
+  "@reset": {
+    "description": "重置按钮"
+  },
+  
+  "errors": "错误",
+  "@errors": {
+    "description": "错误状态"
+  },
+  
+  "pluginName": "插件名称",
+  "@pluginName": {
+    "description": "插件名称"
+  },
+  
+  "installDate": "安装日期",
+  "@installDate": {
+    "description": "安装日期"
+  },
 
   "lastUpdated": "最后更新",
   "@lastUpdated": {
