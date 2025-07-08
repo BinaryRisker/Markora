@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -10,12 +11,16 @@ import '../../../../l10n/app_localizations.dart';
 import '../../../../types/document.dart';
 import '../../../../types/syntax_highlighting.dart';
 import '../../../../main.dart';
+import '../../../../core/utils/markdown_block_parser.dart';
+import '../../../../core/utils/markdown_block_cache.dart';
+import '../../../../core/utils/plugin_block_processor.dart';
+import '../../../../core/utils/performance_monitor.dart';
 
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../syntax_highlighting/presentation/widgets/code_block_widget.dart';
 
-import '../../../plugins/domain/plugin_implementations.dart';
+
 import '../../../export/presentation/widgets/export_dialog.dart';
 import '../../../export/domain/entities/export_settings.dart';
 import '../../../document/presentation/providers/document_providers.dart';
@@ -23,18 +28,7 @@ import '../../../settings/presentation/providers/settings_providers.dart';
 
 
 
-/// Render cache item
-class _RenderCacheItem {
-  const _RenderCacheItem({
-    required this.content,
-    required this.widget,
-    required this.timestamp,
-  });
 
-  final String content;
-  final Widget widget;
-  final DateTime timestamp;
-}
 
 /// Markdown preview component
 class MarkdownPreview extends ConsumerStatefulWidget {
@@ -60,15 +54,14 @@ class MarkdownPreview extends ConsumerStatefulWidget {
 
 class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   late ScrollController _scrollController;
+  late MarkdownBlockParser _blockParser;
   
   // Performance optimization related
   Timer? _debounceTimer;
   String _lastRenderedContent = '';
-  Widget? _cachedWidget;
-  final Map<String, _RenderCacheItem> _renderCache = {};
-  static const int _maxCacheSize = 10;
+  List<MarkdownBlock> _cachedBlocks = [];
   static const Duration _debounceDelay = Duration(milliseconds: 300);
-  static const Duration _cacheExpiry = Duration(minutes: 5);
+
   
   // Track current language and font settings to detect changes
   String? _currentLanguage;
@@ -79,6 +72,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    _blockParser = MarkdownBlockParser();
   }
   
   @override
@@ -107,8 +101,8 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     
     if (shouldClearCache) {
       // Settings changed, clear cache and force rebuild
-      _renderCache.clear();
-      _cachedWidget = null;
+      markdownBlockCache.clear();
+      _cachedBlocks.clear();
       _lastRenderedContent = '';
     }
     
@@ -150,102 +144,464 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
   /// Build optimized Markdown content (with cache and debounce)
   Widget _buildOptimizedMarkdownContent() {
-    // Get current settings for cache key
-    final currentLanguage = Localizations.localeOf(context).languageCode;
-    final settings = ref.watch(settingsProvider);
-    
-    // Check cache (include language and font settings in cache key)
-    final cacheKey = '${widget.content.hashCode}_${currentLanguage}_${settings.fontFamily}_${settings.fontSize}';
-    final cachedItem = _renderCache[cacheKey];
-    
-    if (cachedItem != null) {
-      // Check if cache is expired
-      final now = DateTime.now();
-      if (now.difference(cachedItem.timestamp) < _cacheExpiry) {
-        _lastRenderedContent = widget.content;
-        _cachedWidget = cachedItem.widget;
-        return cachedItem.widget;
-      } else {
-        // Cache expired, remove it
-        _renderCache.remove(cacheKey);
-      }
+    // If content hasn't changed, return cached blocks
+    if (_lastRenderedContent == widget.content && _cachedBlocks.isNotEmpty) {
+      return _buildBlockListView();
     }
 
-    // Use debounce mechanism
+    // Use debounce mechanism for content changes
     _debounceTimer?.cancel();
     
     // If first render or content is empty, render immediately
-    if (_cachedWidget == null || widget.content.isEmpty) {
-      return _renderAndCache();
+    if (_cachedBlocks.isEmpty || widget.content.isEmpty) {
+      return _parseAndRenderBlocks();
     }
 
     // For content changes, use debounce
     _debounceTimer = Timer(_debounceDelay, () {
       if (mounted) {
         setState(() {
-          _renderAndCache();
+          _parseAndRenderBlocks();
         });
       }
     });
 
-    // Return current cached widget (display during debounce)
-    return _cachedWidget ?? _buildLoadingWidget();
+    // Return current cached blocks (display during debounce)
+    return _buildBlockListView();
   }
 
-  /// Render and cache content
-  Widget _renderAndCache() {
-    final widget = _buildMarkdownContent();
-    final currentLanguage = Localizations.localeOf(context).languageCode;
-    final settings = ref.watch(settingsProvider);
-    final cacheKey = '${this.widget.content.hashCode}_${currentLanguage}_${settings.fontFamily}_${settings.fontSize}';
-    
-    // Clean expired cache
-    _cleanExpiredCache();
-    
-    // Limit cache size
-    if (_renderCache.length >= _maxCacheSize) {
-      final oldestKey = _renderCache.keys.first;
-      _renderCache.remove(oldestKey);
+  /// Parse content into blocks and render
+  Widget _parseAndRenderBlocks() {
+    if (widget.content.isEmpty) {
+      return _buildEmptyState();
     }
-    
-    // Add to cache
-    _renderCache[cacheKey] = _RenderCacheItem(
-      content: this.widget.content,
-      widget: widget,
-      timestamp: DateTime.now(),
+
+    // Parse markdown into blocks
+    final parseTimer = performanceMonitor.startTimer('markdown_parsing');
+    _cachedBlocks = _blockParser.parseBlocks(widget.content);
+    _lastRenderedContent = widget.content;
+    parseTimer.stop(
+      type: MetricType.parsing,
+      metadata: {
+        'content_length': widget.content.length,
+        'blocks_count': _cachedBlocks.length,
+      },
     );
-    
-    _lastRenderedContent = this.widget.content;
-    _cachedWidget = widget;
-    
-    return widget;
+
+    // Clean expired cache
+    markdownBlockCache.cleanExpired();
+
+    return _buildBlockListView();
   }
 
-  /// Clean expired cache
-  void _cleanExpiredCache() {
-    final now = DateTime.now();
-    final expiredKeys = <String>[];
-    
-    for (final entry in _renderCache.entries) {
-      if (now.difference(entry.value.timestamp) >= _cacheExpiry) {
-        expiredKeys.add(entry.key);
-      }
+  /// Build ListView with blocks
+  Widget _buildBlockListView() {
+    if (_cachedBlocks.isEmpty) {
+      return _buildEmptyState();
     }
-    
-    for (final key in expiredKeys) {
-      _renderCache.remove(key);
-    }
-  }
 
-  /// Build loading widget
-  Widget _buildLoadingWidget() {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: CircularProgressIndicator(),
+    return Scrollbar(
+      controller: _scrollController,
+      child: ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        itemCount: _cachedBlocks.length,
+        itemBuilder: (context, index) {
+          final block = _cachedBlocks[index];
+          return _buildBlockWidget(block);
+        },
       ),
     );
   }
+
+  /// Build widget for a single block
+  Widget _buildBlockWidget(MarkdownBlock block) {
+    final settings = ref.watch(settingsProvider);
+    final currentLanguage = Localizations.localeOf(context).languageCode;
+    
+    // Generate cache key with current settings
+    final cacheKey = CacheKeyGenerator.forBlock(
+      block,
+      fontFamily: settings.fontFamily,
+      fontSize: settings.fontSize.toDouble(),
+      theme: Theme.of(context).brightness.name,
+      language: currentLanguage,
+    );
+
+    // Check cache first
+    final cacheTimer = performanceMonitor.startTimer('cache_lookup');
+    final cachedWidget = markdownBlockCache.get(cacheKey);
+    if (cachedWidget != null) {
+      cacheTimer.stop(
+        type: MetricType.caching,
+        metadata: {
+          'cache_hit': true,
+          'block_type': block.type.name,
+        },
+      );
+      return cachedWidget;
+    }
+    cacheTimer.stop(
+      type: MetricType.caching,
+      metadata: {
+        'cache_hit': false,
+        'block_type': block.type.name,
+      },
+    );
+
+    // Build new widget
+    final renderTimer = performanceMonitor.startTimer('block_rendering_${block.type.name}');
+    Widget widget;
+    switch (block.type) {
+      case MarkdownBlockType.empty:
+        widget = _buildEmptyBlock(block);
+        break;
+      case MarkdownBlockType.heading:
+        widget = _buildHeadingBlock(block);
+        break;
+      case MarkdownBlockType.paragraph:
+        widget = _buildParagraphBlock(block);
+        break;
+      case MarkdownBlockType.codeBlock:
+        widget = _buildCodeBlock(block);
+        break;
+      case MarkdownBlockType.mathBlock:
+        widget = _buildMathBlock(block);
+        break;
+      case MarkdownBlockType.quote:
+        widget = _buildQuoteBlock(block);
+        break;
+      case MarkdownBlockType.list:
+        widget = _buildListBlock(block);
+        break;
+      case MarkdownBlockType.table:
+        widget = _buildTableBlock(block);
+        break;
+      case MarkdownBlockType.horizontalRule:
+        widget = _buildHorizontalRuleBlock(block);
+        break;
+      case MarkdownBlockType.plugin:
+        widget = _buildPluginBlock(block);
+        break;
+      case MarkdownBlockType.mathInline:
+        widget = _buildParagraphBlock(block); // Treat as paragraph for now
+        break;
+    }
+
+    // Cache the widget
+    markdownBlockCache.put(cacheKey, widget);
+    
+    renderTimer.stop(
+      type: MetricType.rendering,
+      metadata: {
+        'block_type': block.type.name,
+        'content_length': block.content.length,
+        'cached': false,
+      },
+    );
+
+    return widget;
+  }
+
+
+
+  /// Build empty state
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.article_outlined,
+            size: 64,
+            color: Theme.of(context).colorScheme.outline,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            AppLocalizations.of(context)!.enterMarkdownContentInLeftEditor,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            AppLocalizations.of(context)!.previewWillBeDisplayedHere,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build empty block (spacing)
+  Widget _buildEmptyBlock(MarkdownBlock block) {
+    return const SizedBox(height: 8);
+  }
+
+  /// Build heading block
+  Widget _buildHeadingBlock(MarkdownBlock block) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MarkdownBody(
+        data: block.content,
+        selectable: widget.selectable,
+        styleSheet: _buildMarkdownStyleSheet(),
+        extensionSet: md.ExtensionSet.gitHubFlavored,
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            _handleLinkTap(href);
+          }
+        },
+        onTapText: widget.onTap,
+      ),
+    );
+  }
+
+  /// Build paragraph block
+  Widget _buildParagraphBlock(MarkdownBlock block) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: _buildContentWithMath(block.content),
+    );
+  }
+
+  /// Build code block
+  Widget _buildCodeBlock(MarkdownBlock block) {
+    final settings = ref.watch(settingsProvider);
+    final lines = block.content.split('\n');
+    
+    // Extract language from first line
+    String language = '';
+    String codeContent = block.content;
+    
+    if (lines.isNotEmpty && lines.first.startsWith('```')) {
+      language = lines.first.substring(3).trim();
+      if (lines.length > 2) {
+        codeContent = lines.sublist(1, lines.length - 1).join('\n');
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: CodeBlockWidget(
+        codeBlock: CodeBlock(
+          content: codeContent,
+          language: ProgrammingLanguage.fromIdentifier(language),
+          startLine: 1,
+          endLine: codeContent.split('\n').length,
+          showLineNumbers: true,
+          showCopyButton: true,
+        ),
+        config: SyntaxHighlightConfig(
+          fontFamily: settings.fontFamily,
+        ),
+      ),
+    );
+  }
+
+  /// Build math block
+  Widget _buildMathBlock(MarkdownBlock block) {
+    final lines = block.content.split('\n');
+    String mathContent = block.content;
+    
+    // Extract math content between $$
+    if (lines.length > 2) {
+      mathContent = lines.sublist(1, lines.length - 1).join('\n');
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MathFormulaWidget(
+        formula: MathFormula(
+          type: MathType.block,
+          content: mathContent,
+          rawContent: block.content,
+          startIndex: 0,
+          endIndex: mathContent.length,
+        ),
+        textStyle: Theme.of(context).textTheme.bodyLarge,
+        onError: (error) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Math formula rendering error: $error'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  /// Build quote block
+  Widget _buildQuoteBlock(MarkdownBlock block) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MarkdownBody(
+        data: block.content,
+        selectable: widget.selectable,
+        styleSheet: _buildMarkdownStyleSheet(),
+        extensionSet: md.ExtensionSet.gitHubFlavored,
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            _handleLinkTap(href);
+          }
+        },
+        onTapText: widget.onTap,
+      ),
+    );
+  }
+
+  /// Build list block
+  Widget _buildListBlock(MarkdownBlock block) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MarkdownBody(
+        data: block.content,
+        selectable: widget.selectable,
+        styleSheet: _buildMarkdownStyleSheet(),
+        extensionSet: md.ExtensionSet.gitHubFlavored,
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            _handleLinkTap(href);
+          }
+        },
+        onTapText: widget.onTap,
+      ),
+    );
+  }
+
+  /// Build table block
+  Widget _buildTableBlock(MarkdownBlock block) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MarkdownBody(
+        data: block.content,
+        selectable: widget.selectable,
+        styleSheet: _buildMarkdownStyleSheet(),
+        extensionSet: md.ExtensionSet.gitHubFlavored,
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            _handleLinkTap(href);
+          }
+        },
+        onTapText: widget.onTap,
+      ),
+    );
+  }
+
+  /// Build horizontal rule block
+  Widget _buildHorizontalRuleBlock(MarkdownBlock block) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: MarkdownBody(
+        data: block.content,
+        selectable: widget.selectable,
+        styleSheet: _buildMarkdownStyleSheet(),
+        extensionSet: md.ExtensionSet.gitHubFlavored,
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            _handleLinkTap(href);
+          }
+        },
+        onTapText: widget.onTap,
+      ),
+    );
+  }
+
+  /// Build plugin block
+  Widget _buildPluginBlock(MarkdownBlock block) {
+    // Process plugin elements
+    final pluginElements = PluginBlockProcessor.processPluginBlock(block);
+    
+    if (pluginElements.isEmpty) {
+      // No plugin elements found, treat as paragraph
+      return _buildParagraphBlock(block);
+    }
+    
+    // If only one plugin element that covers the entire block, return it directly
+    if (pluginElements.length == 1 && 
+        pluginElements.first.startIndex == 0 && 
+        pluginElements.first.endIndex == block.content.length) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: pluginElements.first.widget,
+      );
+    }
+    
+    // Multiple plugin elements or mixed content, build mixed layout
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: _buildMixedPluginContent(block.content, pluginElements),
+    );
+  }
+
+  /// Build mixed content with plugin elements
+  Widget _buildMixedPluginContent(String content, List<PluginElement> pluginElements) {
+    final widgets = <Widget>[];
+    int currentIndex = 0;
+
+    for (final element in pluginElements) {
+      // Add text before plugin element
+      if (currentIndex < element.startIndex) {
+        final textContent = content.substring(currentIndex, element.startIndex);
+        if (textContent.trim().isNotEmpty) {
+          widgets.add(_buildContentWithMath(textContent));
+        }
+      }
+
+      // Add plugin widget
+      widgets.add(element.widget);
+      currentIndex = element.endIndex;
+    }
+
+    // Add remaining text
+    if (currentIndex < content.length) {
+      final remainingContent = content.substring(currentIndex);
+      if (remainingContent.trim().isNotEmpty) {
+        widgets.add(_buildContentWithMath(remainingContent));
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widgets,
+    );
+  }
+
+  /// Build content with math formulas support
+  Widget _buildContentWithMath(String content) {
+    // Parse math formulas
+    final mathFormulas = MathParser.parseFormulas(content);
+    
+    if (mathFormulas.isEmpty) {
+      // No math formulas, use normal Markdown rendering
+      final settings = ref.watch(settingsProvider);
+      return MarkdownBody(
+        data: content,
+        selectable: widget.selectable,
+        styleSheet: _buildMarkdownStyleSheet(),
+        extensionSet: md.ExtensionSet.gitHubFlavored,
+        builders: {
+          'code': CodeElementBuilder(fontFamily: settings.fontFamily),
+        },
+        onTapLink: (text, href, title) {
+          if (href != null) {
+            _handleLinkTap(href);
+          }
+        },
+        onTapText: widget.onTap,
+      );
+    }
+
+    // Has math formulas, needs special handling
+    return _buildContentWithMath(content);
+  }
+
+
 
   /// Build preview toolbar
   Widget _buildPreviewToolbar() {
@@ -292,6 +648,19 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
             tooltip: AppLocalizations.of(context)!.refreshPreview,
             onPressed: () => _refreshPreview(),
           ),
+          // Debug: Cache statistics (only in debug mode)
+          if (kDebugMode) ...[
+            _buildToolbarButton(
+              icon: Icons.analytics_outlined,
+              tooltip: 'Cache Statistics',
+              onPressed: () => _showCacheStatistics(),
+            ),
+            _buildToolbarButton(
+              icon: Icons.speed_outlined,
+              tooltip: 'Performance Report',
+              onPressed: () => _showPerformanceReport(),
+            ),
+          ],
           const SizedBox(width: 8),
         ],
       ),
@@ -321,188 +690,9 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// Build Markdown content
-  Widget _buildMarkdownContent() {
-    if (widget.content.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.article_outlined,
-              size: 64,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context)!.enterMarkdownContentInLeftEditor,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context)!.previewWillBeDisplayedHere,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
 
-    return Scrollbar(
-      controller: _scrollController,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(16),
-        child: _buildContentWithMath(),
-      ),
-    );
-  }
 
-  /// Build content with math formulas and plugin content
-  Widget _buildContentWithMath() {
-    // First process plugin registered block syntax
-    final processedContent = _processPluginSyntax(widget.content);
-    
-    // Parse math formulas
-    final mathFormulas = MathParser.parseFormulas(processedContent.content);
-    
-    if (mathFormulas.isEmpty && processedContent.pluginWidgets.isEmpty) {
-      // No special content, use normal Markdown rendering
-      final settings = ref.watch(settingsProvider);
-      return MarkdownBody(
-        data: processedContent.content,
-        selectable: widget.selectable,
-        styleSheet: _buildMarkdownStyleSheet(),
-        extensionSet: md.ExtensionSet.gitHubFlavored,
-        builders: {
-          'code': CodeElementBuilder(fontFamily: settings.fontFamily),
-        },
-        onTapLink: (text, href, title) {
-          if (href != null) {
-            _handleLinkTap(href);
-          }
-        },
-        onTapText: widget.onTap,
-      );
-    }
 
-    // Has special content, needs special handling
-    return _buildMixedContent(mathFormulas, processedContent.pluginWidgets);
-  }
-
-  /// Build mixed content (text + math formulas + plugin components)
-  Widget _buildMixedContent(List<MathFormula> mathFormulas, List<_PluginElement> pluginElements) {
-    final widgets = <Widget>[];
-    
-    // Merge all special elements and sort by position
-    final allElements = <_SpecialElement>[];
-    
-    // Add math formulas
-    for (final formula in mathFormulas) {
-      allElements.add(_SpecialElement(
-        type: _SpecialElementType.math,
-        startIndex: formula.startIndex,
-        endIndex: formula.endIndex,
-        data: formula,
-      ));
-    }
-    
-    // Add plugin components
-    for (final pluginElement in pluginElements) {
-      allElements.add(_SpecialElement(
-        type: _SpecialElementType.plugin,
-        startIndex: pluginElement.start,
-        endIndex: pluginElement.end,
-        data: pluginElement.widget,
-      ));
-    }
-    
-    // Sort by position
-    allElements.sort((a, b) => a.startIndex.compareTo(b.startIndex));
-    
-    int currentIndex = 0;
-
-    for (final element in allElements) {
-      // Add normal text before element
-      if (currentIndex < element.startIndex) {
-        final textContent = widget.content.substring(currentIndex, element.startIndex);
-        if (textContent.trim().isNotEmpty) {
-          final settings = ref.watch(settingsProvider);
-          widgets.add(MarkdownBody(
-            data: textContent,
-            selectable: widget.selectable,
-            styleSheet: _buildMarkdownStyleSheet(),
-            extensionSet: md.ExtensionSet.gitHubFlavored,
-            builders: {
-              'code': CodeElementBuilder(fontFamily: settings.fontFamily),
-            },
-            onTapLink: (text, href, title) {
-              if (href != null) {
-                _handleLinkTap(href);
-              }
-            },
-            onTapText: widget.onTap,
-          ));
-        }
-      }
-
-      // Add special element
-      if (element.type == _SpecialElementType.math) {
-        final formula = element.data as MathFormula;
-        widgets.add(MathFormulaWidget(
-          formula: formula,
-          textStyle: Theme.of(context).textTheme.bodyLarge,
-          onError: (error) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Math formula rendering error: $error'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
-        ));
-      } else if (element.type == _SpecialElementType.plugin) {
-        final widget = element.data as Widget;
-        widgets.add(widget);
-      }
-
-      currentIndex = element.endIndex;
-    }
-
-    // Add remaining text at the end
-    if (currentIndex < widget.content.length) {
-      final remainingContent = widget.content.substring(currentIndex);
-      if (remainingContent.trim().isNotEmpty) {
-        final settings = ref.watch(settingsProvider);
-        widgets.add(MarkdownBody(
-          data: remainingContent,
-          selectable: widget.selectable,
-          styleSheet: _buildMarkdownStyleSheet(),
-          extensionSet: md.ExtensionSet.gitHubFlavored,
-          builders: {
-            'code': CodeElementBuilder(fontFamily: settings.fontFamily),
-          },
-          onTapLink: (text, href, title) {
-            if (href != null) {
-              _handleLinkTap(href);
-            }
-          },
-          onTapText: widget.onTap,
-        ));
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: widgets,
-    );
-  }
 
   /// Build Markdown style sheet
   MarkdownStyleSheet _buildMarkdownStyleSheet() {
@@ -689,8 +879,90 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   /// Refresh preview
   void _refreshPreview() {
     setState(() {
-      // Force rebuild preview
+      markdownBlockCache.clear();
+      _cachedBlocks.clear();
+      _lastRenderedContent = '';
     });
+  }
+
+  /// Show cache statistics (debug only)
+  void _showCacheStatistics() {
+    if (!kDebugMode) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cache Statistics'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                markdownBlockCache.getEfficiencyReport(),
+                style: const TextStyle(fontFamily: 'monospace'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              markdownBlockCache.clear();
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Cache cleared')),
+              );
+            },
+            child: const Text('Clear Cache'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show performance report (debug only)
+  void _showPerformanceReport() {
+    if (!kDebugMode) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Performance Report'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                performanceMonitor.getPerformanceReport(),
+                style: const TextStyle(fontFamily: 'monospace'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              performanceMonitor.clear();
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Performance metrics cleared')),
+              );
+            },
+            child: const Text('Clear Metrics'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -753,94 +1025,3 @@ class CodeElementBuilder extends MarkdownElementBuilder {
   }
 }
 
-/// Special element type
-enum _SpecialElementType {
-  math,   // Math formula
-  plugin, // Plugin component
-}
-
-/// Special element
-class _SpecialElement {
-  const _SpecialElement({
-    required this.type,
-    required this.startIndex,
-    required this.endIndex,
-    required this.data,
-  });
-
-  final _SpecialElementType type;
-  final int startIndex;
-  final int endIndex;
-  final dynamic data;
-}
-
-/// Plugin element
-class _PluginElement {
-  const _PluginElement({
-    required this.start,
-    required this.end,
-    required this.content,
-    required this.widget,
-  });
-
-  final int start;
-  final int end;
-  final String content;
-  final Widget widget;
-}
-
-/// Processed content
-class _ProcessedContent {
-  const _ProcessedContent({
-    required this.content,
-    required this.pluginWidgets,
-  });
-
-  final String content;
-  final List<_PluginElement> pluginWidgets;
-}
-
-/// Process plugin syntax
-_ProcessedContent _processPluginSyntax(String content) {
-  final pluginWidgets = <_PluginElement>[];
-  String processedContent = content;
-  int offset = 0;
-
-  try {
-    // Get global syntax registry
-     final syntaxRegistry = globalSyntaxRegistry;
-     final blockRules = syntaxRegistry.blockSyntaxRules;
-
-    for (final rule in blockRules.values) {
-      final matches = rule.pattern.allMatches(content);
-      
-      for (final match in matches) {
-        try {
-          final widget = rule.builder(match.group(0)!);
-          pluginWidgets.add(_PluginElement(
-            start: match.start - offset,
-            end: match.end - offset,
-            content: match.group(0)!,
-            widget: widget,
-          ));
-          
-          // Remove matched text from content
-           final before = processedContent.substring(0, match.start - offset);
-           final after = processedContent.substring(match.end - offset);
-           processedContent = before + after;
-           offset += (match.end - match.start);
-        } catch (e) {
-          // Plugin rendering error, skip
-          print('Plugin syntax error: $e');
-        }
-      }
-    }
-  } catch (e) {
-    print('Error processing plugin syntax: $e');
-  }
-
-  return _ProcessedContent(
-    content: processedContent,
-    pluginWidgets: pluginWidgets,
-  );
-}
