@@ -12,8 +12,7 @@ import 'features/settings/presentation/providers/settings_providers.dart';
 import 'features/document/infrastructure/repositories/hive_document_repository.dart';
 import 'features/document/presentation/providers/document_providers.dart';
 import 'features/plugins/domain/plugin_manager.dart';
-import 'features/plugins/domain/plugin_interface.dart';
-import 'features/plugins/domain/plugin_implementations.dart';
+import 'features/plugins/domain/plugin_context_service.dart';
 import 'types/document.dart';
 
 
@@ -71,59 +70,22 @@ Future<void> _cleanupHiveData() async {
   }
 }
 
-// Global plugin system instance
-late SyntaxRegistryImpl globalSyntaxRegistry;
-late ToolbarRegistryImpl globalToolbarRegistry;
-late MenuRegistryImpl globalMenuRegistry;
-
 /// Initialize plugin manager
 Future<void> _initializePluginManager() async {
   try {
     final pluginManager = PluginManager.instance;
+    final contextService = PluginContextService.instance;
     
-    // Create actual plugin system instance
-    globalSyntaxRegistry = SyntaxRegistryImpl();
-    globalToolbarRegistry = ToolbarRegistryImpl();
-    globalMenuRegistry = MenuRegistryImpl();
+    // Initialize plugin context service
+    contextService.initialize();
     
-    final context = PluginContext(
-      editorController: _SimpleEditorController(),
-      syntaxRegistry: globalSyntaxRegistry,
-      toolbarRegistry: globalToolbarRegistry,
-      menuRegistry: globalMenuRegistry,
-    );
-    
-    // Initialize plugin manager
-    await pluginManager.initialize(context);
+    // Initialize plugin manager with real context
+    await pluginManager.initialize(contextService.context);
     
     print('Plugin manager initialized successfully');
   } catch (e) {
     print('Plugin manager initialization failed: $e');
   }
-}
-
-/// Simple editor controller implementation
-class _SimpleEditorController implements EditorController {
-  @override
-  String get content => '';
-  
-  @override
-  void setContent(String content) {}
-  
-  @override
-  void insertText(String text) {}
-  
-  @override
-  String get selectedText => '';
-  
-  @override
-  void replaceSelection(String text) {}
-  
-  @override
-  int get cursorPosition => 0;
-  
-  @override
-  void setCursorPosition(int position) {}
 }
 
 

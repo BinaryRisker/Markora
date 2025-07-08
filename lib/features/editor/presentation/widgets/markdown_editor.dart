@@ -14,6 +14,8 @@ import '../../../settings/presentation/providers/settings_providers.dart';
 import '../../../document/presentation/providers/document_providers.dart';
 import '../../domain/services/undo_redo_manager.dart';
 import '../../domain/services/global_editor_manager.dart';
+import '../../../plugins/domain/plugin_context_service.dart';
+import '../../../plugins/domain/plugin_implementations.dart';
 import '../../../../main.dart';
 
 /// Markdown editor component
@@ -79,6 +81,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     // Delay registration to global editor manager, ensure ref is available
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _registerToGlobalManager();
+      _registerToPluginSystem();
     });
   }
   
@@ -152,10 +155,25 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
         // Tab has changed, re-register
         _unregisterFromGlobalManager();
         _registerToGlobalManager();
+        _registerToPluginSystem();
       } else if (activeDocument != null && _tabId == activeDocument.id) {
         // Ensure current tab is active
         final globalManager = ref.read(globalEditorManagerProvider);
         globalManager.setActiveTab(_tabId!);
+      }
+    }
+  }
+
+  /// Register to plugin system
+  void _registerToPluginSystem() {
+    if (mounted) {
+      try {
+        final contextService = ref.read(pluginContextServiceProvider);
+        final editorController = EditorControllerImpl(_controller);
+        contextService.setEditorController(editorController);
+        debugPrint('Editor registered to plugin system');
+      } catch (e) {
+        debugPrint('Failed to register editor to plugin system: $e');
       }
     }
   }
@@ -393,7 +411,9 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
 
   /// Build plugin toolbar buttons
   List<Widget> _buildPluginToolbarButtons(bool isEnabled) {
-    final actions = globalToolbarRegistry.actions;
+    try {
+      final contextService = ref.read(pluginContextServiceProvider);
+      final actions = contextService.toolbarRegistry.actions;
     final widgets = <Widget>[];
     
     // Debug info
@@ -420,6 +440,10 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     }
     
     return widgets;
+    } catch (e) {
+      debugPrint('Failed to build plugin toolbar buttons: $e');
+      return [];
+    }
   }
   
   /// Convert string to IconData

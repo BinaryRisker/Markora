@@ -6,6 +6,7 @@ import '../widgets/plugin_card.dart';
 import '../widgets/plugin_compact_header.dart';
 import '../../../../types/plugin.dart';
 import '../../domain/plugin_interface.dart';
+import '../../domain/plugin_context_service.dart';
 
 /// Plugin management page
 class PluginManagementPage extends ConsumerStatefulWidget {
@@ -51,11 +52,13 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     
     try {
       final manager = ref.read(pluginManagerProvider);
-      // Create simple plugin context
-      final context = _createPluginContext();
+      final contextService = ref.read(pluginContextServiceProvider);
       
-      // Initialize plugin manager
-      await manager.initialize(context);
+      // Initialize plugin context service
+      contextService.initialize();
+      
+      // Initialize plugin manager with real context
+      await manager.initialize(contextService.context);
       
       if (mounted) {
         setState(() {
@@ -70,16 +73,6 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
         );
       }
     }
-  }
-  
-  /// Create plugin context
-  PluginContext _createPluginContext() {
-    return PluginContext(
-      editorController: _SimpleEditorController(),
-      syntaxRegistry: _SimpleSyntaxRegistry(),
-      toolbarRegistry: _SimpleToolbarRegistry(),
-      menuRegistry: _SimpleMenuRegistry(),
-    );
   }
 
   @override
@@ -396,9 +389,10 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
   void _refreshPlugins() async {
     try {
       final manager = ref.read(pluginManagerProvider);
+      final contextService = ref.read(pluginContextServiceProvider);
       
       // Rescan plugin directory
-      await manager.initialize(manager.context ?? _createPluginContext());
+      await manager.initialize(manager.context ?? contextService.context);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -424,95 +418,7 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
   }
 }
 
-/// Simple editor controller implementation
-class _SimpleEditorController implements EditorController {
-  String _content = '';
-  int _cursorPosition = 0;
-  String _selectedText = '';
-
-  @override
-  String get content => _content;
-
-  @override
-  void setContent(String content) {
-    _content = content;
-  }
-
-  @override
-  void insertText(String text) {
-    // Simple implementation
-  }
-
-  @override
-  String get selectedText => _selectedText;
-
-  @override
-  void replaceSelection(String text) {
-    // Simple implementation
-  }
-
-  @override
-  int get cursorPosition => _cursorPosition;
-
-  @override
-  void setCursorPosition(int position) {
-    _cursorPosition = position;
-  }
-}
-
-/// Simple syntax registry implementation
-class _SimpleSyntaxRegistry implements SyntaxRegistry {
-  @override
-  void registerSyntax(String name, RegExp pattern, String replacement) {
-    // Simple implementation
-  }
-
-  @override
-  void registerBlockSyntax(String name, RegExp pattern, Widget Function(String content) builder) {
-    // Simple implementation
-  }
-
-  @override
-  void registerInlineSyntax(String name, RegExp pattern, Widget Function(String content) builder) {
-    // Simple implementation
-  }
-}
-
-/// Simple toolbar registry implementation
-class _SimpleToolbarRegistry implements ToolbarRegistry {
-  @override
-  void registerAction(PluginAction action, VoidCallback callback) {
-    // Simple implementation
-  }
-
-  @override
-  void registerGroup(String groupId, String title, List<PluginAction> actions) {
-    // Simple implementation
-  }
-
-  @override
-  void unregisterAction(String actionId) {
-    // Simple implementation
-  }
-}
-
-/// Simple menu registry implementation
-class _SimpleMenuRegistry implements MenuRegistry {
-  @override
-  void registerMenuItem(String menuId, String title, VoidCallback callback, {String? icon, String? shortcut}) {
-    // Simple implementation
-  }
-
-  @override
-  void registerSubMenu(String parentId, String menuId, String title, List<String> items) {
-    // Simple implementation
-  }
-
-  @override
-  void unregisterMenuItem(String menuId) {
-    // Simple implementation
-  }
-}
+// Simple implementations removed - using real plugin context service now
 
 /// Plugin details dialog
 class _PluginDetailsDialog extends ConsumerWidget {
