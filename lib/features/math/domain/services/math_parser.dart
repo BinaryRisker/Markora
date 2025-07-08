@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 /// Math formula type
 enum MathType {
@@ -188,10 +189,15 @@ class MathParser {
 
   /// Preprocess LaTeX content
   static String preprocessLatex(String latex) {
-    return latex
-        .replaceAll('\\\\', '\\\\\\\\') // Escape backslashes
+    // Remove any remaining $ symbols that shouldn't be in the content
+    String cleaned = latex
+        .replaceAll(RegExp(r'^\$+'), '') // Remove leading $
+        .replaceAll(RegExp(r'\$+$'), '') // Remove trailing $
         .replaceAll('\n', ' ') // Convert newlines to spaces
         .trim();
+    
+    debugPrint('Preprocessing LaTeX: "$latex" -> "$cleaned"');
+    return cleaned;
   }
 
   /// Get common math formula examples
