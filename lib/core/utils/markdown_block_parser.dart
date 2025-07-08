@@ -120,6 +120,7 @@ class MarkdownBlockParser {
     
     // Math block
     if (line.trim().startsWith(r'$$')) {
+      debugPrint('Found math block starting at line $startLine: ${line.trim()}');
       return _parseMathBlock(lines, startLine);
     }
     

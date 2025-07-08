@@ -384,6 +384,18 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       }
     }
 
+    debugPrint('Building code block with language: $language, content length: ${codeContent.length}');
+
+    // Check if this is a mermaid code block
+    if (language.toLowerCase() == 'mermaid') {
+      debugPrint('Detected mermaid code block, using mermaid renderer');
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: _buildMermaidChart(codeContent),
+      );
+    }
+
+    // Regular code block
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: CodeBlockWidget(
@@ -404,12 +416,27 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
   /// Build math block
   Widget _buildMathBlock(MarkdownBlock block) {
+    debugPrint('Building math block with content: ${block.content}');
+    
     final lines = block.content.split('\n');
     String mathContent = block.content;
     
     // Extract math content between $$
-    if (lines.length > 2) {
-      mathContent = lines.sublist(1, lines.length - 1).join('\n');
+    if (lines.length > 2 && lines.first.trim() == r'$$' && lines.last.trim() == r'$$') {
+      mathContent = lines.sublist(1, lines.length - 1).join('\n').trim();
+      debugPrint('Extracted math content: $mathContent');
+    } else {
+      // Handle inline-style $$content$$
+      mathContent = mathContent.replaceAll(RegExp(r'^\$\$'), '').replaceAll(RegExp(r'\$\$$'), '').trim();
+      debugPrint('Cleaned inline math content: $mathContent');
+    }
+
+    if (mathContent.isEmpty) {
+      debugPrint('Warning: Empty math content detected');
+      return const Padding(
+        padding: EdgeInsets.only(bottom: 8),
+        child: Text('Empty math formula'),
+      );
     }
 
     return Padding(
@@ -424,6 +451,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
         ),
         textStyle: Theme.of(context).textTheme.bodyLarge,
         onError: (error) {
+          debugPrint('Math formula rendering error: $error');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
