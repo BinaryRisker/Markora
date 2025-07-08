@@ -267,6 +267,13 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     final editorTheme = isDark ? EditorTheme.dark : EditorTheme.light;
     final activeDocument = ref.watch(activeDocumentProvider);
     
+    // Ensure plugin system registration when there's an active document
+    if (activeDocument != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _registerToPluginSystem();
+      });
+    }
+    
     return Container(
       decoration: BoxDecoration(
         color: editorTheme.backgroundColor,
@@ -430,6 +437,11 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
         onPressed: isEnabled ? () {
           // Execute plugin action
           debugPrint('Execute plugin action: ${action.title}');
+          
+          // Ensure we have the latest editor controller
+          _registerToPluginSystem();
+          
+          // Execute the callback
           actionItem.callback();
         } : null,
       ));
