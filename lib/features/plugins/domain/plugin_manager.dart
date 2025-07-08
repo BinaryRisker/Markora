@@ -115,6 +115,13 @@ class PluginManager extends ChangeNotifier {
       final mermaidPluginDir = Directory('plugins/mermaid_plugin');
       await _scanPluginDirectory(mermaidPluginDir);
       
+      // Automatically enable mermaid plugin
+      final mermaidPlugin = _plugins['mermaid_plugin'];
+      if (mermaidPlugin != null) {
+        _plugins['mermaid_plugin'] = mermaidPlugin.copyWith(status: PluginStatus.enabled);
+        debugPrint('Mermaid plugin automatically enabled');
+      }
+      
       debugPrint('Web environment plugin scanning completed');
     } catch (e) {
       debugPrint('Web environment plugin scanning failed: $e');
@@ -143,7 +150,8 @@ class PluginManager extends ChangeNotifier {
       debugPrint('Successfully loaded plugin metadata: ${metadata.id} - ${metadata.name}');
       
       final existingPlugin = _plugins[metadata.id];
-      final status = existingPlugin?.status ?? PluginStatus.installed;
+      final status = existingPlugin?.status ?? 
+          (metadata.id == 'mermaid_plugin' ? PluginStatus.enabled : PluginStatus.installed);
       
       final plugin = Plugin(
         metadata: metadata,
@@ -154,7 +162,7 @@ class PluginManager extends ChangeNotifier {
       );
       
       _plugins[metadata.id] = plugin;
-      debugPrint('Plugin added to manager: ${metadata.id}');
+      debugPrint('Plugin added to manager: ${metadata.id} with status: ${status.name}');
     } catch (e) {
       debugPrint('Failed to scan plugin directory ${pluginDir.path}: $e');
     }

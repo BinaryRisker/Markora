@@ -7,7 +7,7 @@
   "homepage": "https://github.com/markora/mermaid-plugin",
   "repository": "https://github.com/markora/mermaid-plugin.git",
   "license": "MIT",
-  "type": "renderer",
+  "type": "syntax",
   "category": "visualization",
   "tags": ["图表", "mermaid", "可视化", "流程图"],
   "minVersion": "1.0.0",
