@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -25,7 +26,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Hive local storage
-  await Hive.initFlutter();
+  if (kIsWeb) {
+    // For web, just initialize Hive without path
+    Hive.init('hive_db');
+  } else {
+    // For mobile/desktop, use Flutter-specific initialization
+    await Hive.initFlutter();
+  }
   
   // Clean up possible conflicting data
   await _cleanupHiveData();
