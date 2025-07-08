@@ -19,7 +19,7 @@ import 'features/export/presentation/widgets/export_dialog.dart';
 import 'features/editor/domain/services/global_editor_manager.dart';
 import 'features/plugins/presentation/pages/plugin_management_page.dart';
 import 'features/plugins/domain/plugin_context_service.dart';
-import 'features/plugins/domain/plugin_loader.dart';
+import 'features/plugins/domain/plugin_manager.dart';
 
 /// Application shell - main interface container
 class AppShell extends ConsumerStatefulWidget {
@@ -109,9 +109,9 @@ ${l10n.blockFormula}：
       final contextService = PluginContextService.instance;
       contextService.initialize();
       
-      // Load plugins
-      final pluginLoader = PluginLoader();
-      await pluginLoader.loadPlugins();
+      // Initialize plugin manager with context
+      final pluginManager = PluginManager.instance;
+      await pluginManager.initialize(contextService.context);
       
       debugPrint('Plugin system initialized successfully');
     } catch (e) {
