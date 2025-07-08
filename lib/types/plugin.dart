@@ -324,3 +324,58 @@ class PluginAction extends Equatable {
         category,
       ];
 }
+
+/// Plugin sort method
+enum PluginSortBy {
+  name,
+  author,
+  type,
+  status,
+  installDate,
+  lastUpdated,
+}
+
+/// Plugin sort method extension
+extension PluginSortByExtension on PluginSortBy {
+  String getLocalizedDisplayName(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    switch (this) {
+      case PluginSortBy.name:
+        return localizations.pluginName;
+      case PluginSortBy.author:
+        return localizations.author;
+      case PluginSortBy.type:
+        return localizations.pluginType;
+      case PluginSortBy.status:
+        return localizations.status;
+      case PluginSortBy.installDate:
+        return localizations.installDate;
+      case PluginSortBy.lastUpdated:
+        return localizations.lastUpdated;
+    }
+  }
+}
+
+/// Plugin statistics (alias for PluginStats)
+typedef PluginStatistics = PluginStats;
+
+/// Plugin statistics class
+class PluginStats {
+  const PluginStats({
+    required this.total,
+    required this.enabled,
+    required this.disabled,
+    required this.installed,
+    required this.error,
+    required this.pluginsByType,
+  });
+  
+  final int total;
+  final int enabled;
+  final int disabled;
+  final int installed;
+  final int error;
+  final Map<PluginType, int> pluginsByType;
+  
+  int get inactive => disabled + installed;
+}

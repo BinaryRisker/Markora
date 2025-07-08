@@ -198,36 +198,7 @@ class PluginActions {
   }
 }
 
-/// Plugin statistics
-class PluginStats {
-  const PluginStats({
-    required this.total,
-    required this.enabled,
-    required this.disabled,
-    required this.installed,
-    required this.error,
-    required this.pluginsByType,
-  });
-  
-  final int total;
-  final int enabled;
-  final int disabled;
-  final int installed;
-  final int error;
-  final Map<PluginType, int> pluginsByType;
-  
-  int get inactive => disabled + installed;
-}
 
-/// Plugin sort method
-enum PluginSortBy {
-  name,
-  author,
-  type,
-  status,
-  installDate,
-  lastUpdated,
-}
 
 /// Plugin sort Provider
 final pluginSortProvider = StateProvider<PluginSortBy>((ref) => PluginSortBy.name);

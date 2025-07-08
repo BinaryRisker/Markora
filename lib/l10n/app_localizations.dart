@@ -1076,7 +1076,7 @@ abstract class AppLocalizations {
   /// **'Distribution by Type'**
   String get distributionByType;
 
-  /// Error count label
+  /// Error status
   ///
   /// In en, this message translates to:
   /// **'Errors'**
@@ -1238,7 +1238,7 @@ abstract class AppLocalizations {
   /// **'Advanced search'**
   String get advancedSearch;
 
-  /// Plugin name field label
+  /// Plugin name
   ///
   /// In en, this message translates to:
   /// **'Plugin Name'**
@@ -1285,6 +1285,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sort By'**
   String get sortBy;
+
+  /// More filters button tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'More Filters'**
+  String get moreFilters;
+
+  /// Advanced filters dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced Filters'**
+  String get advancedFilters;
+
+  /// All statuses option
+  ///
+  /// In en, this message translates to:
+  /// **'All Statuses'**
+  String get allStatuses;
+
+  /// Reset button
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// Install date
+  ///
+  /// In en, this message translates to:
+  /// **'Install Date'**
+  String get installDate;
 
   /// Last updated label
   ///

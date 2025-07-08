@@ -613,6 +613,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sortBy => 'Sort By';
 
   @override
+  String get moreFilters => 'More Filters';
+
+  @override
+  String get advancedFilters => 'Advanced Filters';
+
+  @override
+  String get allStatuses => 'All Statuses';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get installDate => 'Install Date';
+
+  @override
   String get lastUpdated => 'Last Updated';
 
   @override
