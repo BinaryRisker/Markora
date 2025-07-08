@@ -8,6 +8,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../../../types/plugin.dart';
 import 'plugin_interface.dart';
 import 'plugin_implementations.dart';
+import 'plugin_context_service.dart';
 
 /// Plugin loader
 class PluginLoader {
@@ -944,7 +945,11 @@ graph TD
     B -->|否| D[结束]
     C --> D
 ```''';
-        context.editorController.insertText(template);
+        // Get the latest editor controller from the plugin context service
+        final contextService = PluginContextService.instance;
+        final currentContext = contextService.context;
+        debugPrint('Mermaid plugin executing with controller: ${currentContext.editorController.runtimeType}');
+        currentContext.editorController.insertText(template);
       },
     );
     
