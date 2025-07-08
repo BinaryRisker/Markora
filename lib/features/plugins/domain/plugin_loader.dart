@@ -1040,8 +1040,15 @@ graph TD
     final mermaidRegex = RegExp(r'```mermaid\s*\n([\s\S]*?)\n```');
     final match = mermaidRegex.firstMatch(content);
     if (match != null) {
-      final extractedCode = match.group(1)?.trim() ?? '';
+      var extractedCode = match.group(1)?.trim() ?? '';
       debugPrint('Regex extraction result: $extractedCode');
+      
+      // Clean up potential encoding issues
+      extractedCode = extractedCode
+          .replaceAll(RegExp(r'[^\x20-\x7E\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]'), '')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
+      
       return extractedCode;
     }
     
@@ -1065,7 +1072,18 @@ graph TD
     
     final result = codeLines.join('\n').trim();
     debugPrint('Line-by-line extraction result: $result');
-    return result;
+    
+    // Clean up potential encoding issues
+    final cleanedResult = result
+        .replaceAll(RegExp(r'[^\x20-\x7E\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]'), '') // Keep only ASCII and CJK characters
+        .replaceAll(RegExp(r'\s+'), ' ') // Normalize whitespace
+        .trim();
+    
+    if (cleanedResult != result) {
+      debugPrint('Cleaned mermaid code: $cleanedResult');
+    }
+    
+    return cleanedResult;
   }
 }
 
@@ -1859,10 +1877,19 @@ class WebMermaidDisplayWidget extends StatelessWidget {
             child: Text(
               code,
               style: const TextStyle(
-                fontFamily: 'monospace',
+                fontFamily: 'Consolas',
                 fontSize: 14,
                 color: Colors.black87,
-                fontFamilyFallback: ['Arial', 'Microsoft YaHei', 'SimSun'],
+                fontFamilyFallback: [
+                  'Monaco', 
+                  'Menlo',
+                  'Ubuntu Mono',
+                  'Courier New', 
+                  'Microsoft YaHei',
+                  'SimSun',
+                  'Arial',
+                  'sans-serif'
+                ],
               ),
             ),
           ),

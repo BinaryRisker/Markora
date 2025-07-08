@@ -20,6 +20,7 @@ import 'features/editor/domain/services/global_editor_manager.dart';
 import 'features/plugins/presentation/pages/plugin_management_page.dart';
 import 'features/plugins/domain/plugin_context_service.dart';
 import 'features/plugins/domain/plugin_manager.dart';
+import 'core/utils/markdown_block_cache.dart';
 
 /// Application shell - main interface container
 class AppShell extends ConsumerStatefulWidget {
@@ -123,6 +124,17 @@ ${l10n.blockFormula}：
       final blockRules = syntaxRegistry.blockSyntaxRules;
       debugPrint('Available plugins after initialization: ${blockRules.keys.toList()}');
       
+      // Force toolbar refresh after plugin initialization
+      if (mounted) {
+        setState(() {
+          _pluginToolbarRefreshKey++;
+        });
+        debugPrint('Triggered toolbar refresh after plugin initialization');
+        
+        // Clear preview cache to force re-rendering with new plugins
+        _clearPreviewCache();
+      }
+      
       debugPrint('Plugin system initialized successfully');
     } catch (e) {
       debugPrint('Failed to initialize plugins: $e');
@@ -146,6 +158,16 @@ ${l10n.blockFormula}：
       debugPrint('Plugin toolbar listeners setup completed');
     } catch (e) {
       debugPrint('Failed to setup plugin listeners: $e');
+    }
+  }
+
+  /// Clear preview cache to force re-rendering with new plugins
+  void _clearPreviewCache() {
+    try {
+      markdownBlockCache.clear();
+      debugPrint('Preview cache cleared after plugin initialization');
+    } catch (e) {
+      debugPrint('Failed to clear preview cache: $e');
     }
   }
 
@@ -200,6 +222,7 @@ ${l10n.blockFormula}：
   /// Build toolbar
   Widget _buildToolbar() {
     return Container(
+      key: ValueKey('toolbar_$_pluginToolbarRefreshKey'),
       height: AppConstants.toolbarHeight,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,

@@ -65,9 +65,13 @@ class MathParser {
     
     for (final match in regex.allMatches(text)) {
       final rawContent = match.group(0)!;
-      final content = match.group(1)!.trim();
+      var content = match.group(1)!.trim();
+      
+      // Additional cleaning: remove any remaining $ symbols inside
+      content = content.replaceAll('\$', '');
       
       if (content.isNotEmpty) {
+        debugPrint('Parsed block formula: raw="$rawContent", cleaned="$content"');
         formulas.add(MathFormula(
           type: MathType.block,
           content: content,
@@ -101,9 +105,13 @@ class MathParser {
       
       if (!isOverlapping) {
         final rawContent = match.group(0)!;
-        final content = match.group(1)!.trim();
+        var content = match.group(1)!.trim();
+        
+        // Additional cleaning: remove any remaining $ symbols inside
+        content = content.replaceAll('\$', '');
         
         if (content.isNotEmpty && _isValidMathContent(content)) {
+          debugPrint('Parsed inline formula: raw="$rawContent", cleaned="$content"');
           formulas.add(MathFormula(
             type: MathType.inline,
             content: content,
