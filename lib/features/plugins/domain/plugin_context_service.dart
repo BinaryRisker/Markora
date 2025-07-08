@@ -20,17 +20,21 @@ class PluginContextService {
     _toolbarRegistry = ToolbarRegistryImpl();
     _syntaxRegistry = SyntaxRegistryImpl();
     _menuRegistry = MenuRegistryImpl();
+    debugPrint('PluginContextService initialized successfully');
   }
   
   /// Set the current editor controller
   void setEditorController(EditorController controller) {
     _editorController = controller;
+    debugPrint('Plugin context service: Editor controller set to ${controller.runtimeType}');
   }
   
   /// Get the plugin context
   PluginContext get context {
+    final controller = _editorController ?? _DummyEditorController();
+    debugPrint('Plugin context requested: using ${controller.runtimeType}');
     return PluginContext(
-      editorController: _editorController ?? _DummyEditorController(),
+      editorController: controller,
       syntaxRegistry: _syntaxRegistry,
       toolbarRegistry: _toolbarRegistry,
       menuRegistry: _menuRegistry,

@@ -17,6 +17,7 @@ import '../../../../core/utils/plugin_block_processor.dart';
 import '../../../../core/utils/performance_monitor.dart';
 
 import '../../../math/domain/services/math_parser.dart';
+import '../../../plugins/domain/plugin_context_service.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../syntax_highlighting/presentation/widgets/code_block_widget.dart';
 
@@ -586,7 +587,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
         styleSheet: _buildMarkdownStyleSheet(),
         extensionSet: md.ExtensionSet.gitHubFlavored,
         builders: {
-          'code': CodeElementBuilder(fontFamily: settings.fontFamily),
+          'code': _buildCustomCodeBlock,
         },
         onTapLink: (text, href, title) {
           if (href != null) {
@@ -612,7 +613,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
         styleSheet: _buildMarkdownStyleSheet(),
         extensionSet: md.ExtensionSet.gitHubFlavored,
         builders: {
-          'code': CodeElementBuilder(fontFamily: settings.fontFamily),
+          'code': _buildCustomCodeBlock,
         },
         onTapLink: (text, href, title) {
           if (href != null) {
@@ -671,7 +672,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       styleSheet: _buildMarkdownStyleSheet(),
       extensionSet: md.ExtensionSet.gitHubFlavored,
       builders: {
-        'code': CodeElementBuilder(fontFamily: settings.fontFamily),
+        'code': _buildCustomCodeBlock,
       },
       onTapLink: (text, href, title) {
         if (href != null) {
@@ -772,6 +773,9 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
 
 
+
+  /// Custom code element builder that supports mermaid
+  MarkdownElementBuilder get _buildCustomCodeBlock => MermaidCodeElementBuilder(ref);
 
   /// Build Markdown style sheet
   MarkdownStyleSheet _buildMarkdownStyleSheet() {
@@ -1101,6 +1105,117 @@ class CodeElementBuilder extends MarkdownElementBuilder {
       );
     }
     return null;
+  }
+}
+
+/// Custom code element builder that supports Mermaid charts
+class MermaidCodeElementBuilder extends MarkdownElementBuilder {
+  MermaidCodeElementBuilder(this.ref);
+  
+  final WidgetRef ref;
+  
+  @override
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    // Check if this is a code block element
+    if (element.tag == 'pre') {
+      // Get the first child (should be a code element)
+      final children = element.children;
+      if (children != null && children.isNotEmpty) {
+        final firstChild = children.first;
+        if (firstChild is md.Element && firstChild.tag == 'code') {
+          final textContent = firstChild.textContent;
+          final className = firstChild.attributes['class'] ?? '';
+          
+          // Check if this is a mermaid code block
+          if (className.startsWith('language-mermaid')) {
+            return _buildMermaidChart(textContent);
+          }
+        }
+      }
+    }
+    
+    // Fall back to default code block rendering
+    final settings = ref.watch(settingsProvider);
+    return CodeElementBuilder(fontFamily: settings.fontFamily).visitElementAfter(element, preferredStyle);
+  }
+  
+  /// Build mermaid chart widget
+  Widget _buildMermaidChart(String content) {
+    try {
+      final contextService = PluginContextService.instance;
+      final syntaxRegistry = contextService.syntaxRegistry;
+      final blockRules = syntaxRegistry.blockSyntaxRules;
+      
+      // Look for mermaid block syntax rule
+      final mermaidRule = blockRules['mermaid'];
+      if (mermaidRule != null) {
+        // Use plugin to render mermaid
+        final fullContent = '```mermaid\n$content\n```';
+        return mermaidRule.builder(fullContent);
+      }
+    } catch (e) {
+      debugPrint('Error rendering mermaid with plugin: $e');
+    }
+    
+    // Fallback: show as mermaid placeholder
+    final settings = ref.watch(settingsProvider);
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.blue.withOpacity(0.1),
+        border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.account_tree,
+                color: Colors.blue[700],
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Mermaid Chart',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue[700],
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              content,
+              style: TextStyle(
+                fontFamily: settings.fontFamily,
+                fontSize: settings.fontSize * 0.9,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Loading Mermaid plugin...',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.blue[600],
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
