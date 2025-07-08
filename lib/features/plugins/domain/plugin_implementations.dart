@@ -18,6 +18,7 @@ class EditorControllerImpl implements EditorController {
   
   @override
   void insertText(String text) {
+    debugPrint('EditorControllerImpl.insertText called: $text');
     final selection = _textController.selection;
     final newText = _textController.text.replaceRange(
       selection.start,
@@ -28,6 +29,7 @@ class EditorControllerImpl implements EditorController {
     _textController.selection = TextSelection.collapsed(
       offset: selection.start + text.length,
     );
+    debugPrint('Text inserted successfully. New text length: ${_textController.text.length}');
   }
   
   @override
