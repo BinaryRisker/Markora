@@ -111,20 +111,51 @@ class PluginManager extends ChangeNotifier {
   /// Scan known plugins (Web environment only)
   Future<void> _scanKnownPlugins() async {
     try {
-      // Manually add mermaid plugin
-      final mermaidPluginDir = Directory('plugins/mermaid_plugin');
-      await _scanPluginDirectory(mermaidPluginDir);
-      
-      // Automatically enable mermaid plugin
-      final mermaidPlugin = _plugins['mermaid_plugin'];
-      if (mermaidPlugin != null) {
-        _plugins['mermaid_plugin'] = mermaidPlugin.copyWith(status: PluginStatus.enabled);
-        debugPrint('Mermaid plugin automatically enabled');
+      if (kIsWeb) {
+        // In web environment, directly create built-in plugins without file system access
+        debugPrint('Web environment: Creating built-in mermaid plugin');
+        
+        final mermaidMetadata = PluginMetadata(
+          id: 'mermaid_plugin',
+          name: 'Mermaid图表',
+          version: '1.0.0',
+          description: '支持Mermaid图表渲染的插件',
+          author: 'Markora Team',
+          type: PluginType.syntax,
+          minVersion: '1.0.0',
+          homepage: null,
+          repository: null,
+          license: 'MIT',
+          tags: ['chart', 'diagram', 'mermaid'],
+          dependencies: [],
+        );
+        
+        final mermaidPlugin = Plugin(
+          metadata: mermaidMetadata,
+          status: PluginStatus.enabled,  // Auto-enable in web
+          installPath: 'builtin://mermaid_plugin',  // Virtual path
+          installDate: DateTime.now(),
+          lastUpdated: DateTime.now(),
+        );
+        
+        _plugins['mermaid_plugin'] = mermaidPlugin;
+        debugPrint('Built-in mermaid plugin created and enabled');
+      } else {
+        // For non-web platforms, scan the actual plugin directory
+        final mermaidPluginDir = Directory('plugins/mermaid_plugin');
+        await _scanPluginDirectory(mermaidPluginDir);
+        
+        // Automatically enable mermaid plugin
+        final mermaidPlugin = _plugins['mermaid_plugin'];
+        if (mermaidPlugin != null) {
+          _plugins['mermaid_plugin'] = mermaidPlugin.copyWith(status: PluginStatus.enabled);
+          debugPrint('Mermaid plugin automatically enabled');
+        }
       }
       
-      debugPrint('Web environment plugin scanning completed');
+      debugPrint('Known plugins scanning completed');
     } catch (e) {
-      debugPrint('Web environment plugin scanning failed: $e');
+      debugPrint('Known plugins scanning failed: $e');
     }
   }
   
