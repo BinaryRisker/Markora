@@ -19,6 +19,7 @@ import 'features/export/presentation/widgets/export_dialog.dart';
 import 'features/editor/domain/services/global_editor_manager.dart';
 import 'features/plugins/presentation/pages/plugin_management_page.dart';
 import 'features/plugins/domain/plugin_context_service.dart';
+import 'features/plugins/domain/plugin_loader.dart';
 
 /// Application shell - main interface container
 class AppShell extends ConsumerStatefulWidget {
@@ -93,9 +94,29 @@ ${l10n.blockFormula}：
     super.initState();
     // Update sample documents with localized content after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializePlugins();
       _updateSampleDocuments();
       _setupPluginListeners();
     });
+  }
+  
+  /// Initialize plugins
+  Future<void> _initializePlugins() async {
+    try {
+      debugPrint('Initializing plugin system...');
+      
+      // Initialize plugin context service
+      final contextService = PluginContextService.instance;
+      contextService.initialize();
+      
+      // Load plugins
+      final pluginLoader = PluginLoader();
+      await pluginLoader.loadPlugins();
+      
+      debugPrint('Plugin system initialized successfully');
+    } catch (e) {
+      debugPrint('Failed to initialize plugins: $e');
+    }
   }
 
   /// Setup plugin listeners

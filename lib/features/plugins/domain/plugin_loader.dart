@@ -42,13 +42,23 @@ class PluginLoader {
   /// Load plugin instance
   Future<MarkoraPlugin?> loadPlugin(Plugin plugin) async {
     try {
+      debugPrint('Loading plugin: ${plugin.metadata.id} with installPath: ${plugin.installPath}');
+      
+      // Skip directory checks for built-in plugins in web environment
       if (plugin.installPath == null) {
         throw Exception('插件安装路径为空');
       }
       
-      final pluginDir = Directory(plugin.installPath!);
-      if (!await pluginDir.exists()) {
-        throw Exception('插件目录不存在: ${plugin.installPath}');
+      // Check if it's a built-in plugin (virtual path)
+      final isBuiltInPlugin = plugin.installPath!.startsWith('builtin://');
+      
+      if (!isBuiltInPlugin) {
+        final pluginDir = Directory(plugin.installPath!);
+        if (!await pluginDir.exists()) {
+          throw Exception('插件目录不存在: ${plugin.installPath}');
+        }
+      } else {
+        debugPrint('Built-in plugin detected, skipping directory checks');
       }
       
       // Load different plugin implementations based on plugin type
@@ -68,8 +78,9 @@ class PluginLoader {
         default:
           throw Exception('不支持的插件类型: ${plugin.metadata.type}');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('加载插件失败 ${plugin.metadata.id}: $e');
+      debugPrint('Stack trace: $stackTrace');
       return null;
     }
   }
@@ -96,19 +107,28 @@ class PluginLoader {
     try {
       // Check if it's a Mermaid plugin
       if (plugin.metadata.id == 'mermaid_plugin') {
-        // Dynamically import Mermaid plugin
-        final pluginMainFile = File(path.join(plugin.installPath!, 'lib', 'main.dart'));
-        if (await pluginMainFile.exists()) {
-          // Here we directly instantiate MermaidPlugin
-          // In actual projects, might need to use dart:mirrors or other dynamic loading mechanisms
+        // For built-in plugins, skip file system checks
+        final isBuiltInPlugin = plugin.installPath!.startsWith('builtin://');
+        
+        if (isBuiltInPlugin) {
+          debugPrint('Built-in mermaid plugin detected');
           return _createMermaidPlugin(plugin.metadata);
+        } else {
+          // Dynamically import Mermaid plugin
+          final pluginMainFile = File(path.join(plugin.installPath!, 'lib', 'main.dart'));
+          if (await pluginMainFile.exists()) {
+            // Here we directly instantiate MermaidPlugin
+            // In actual projects, might need to use dart:mirrors or other dynamic loading mechanisms
+            return _createMermaidPlugin(plugin.metadata);
+          }
         }
       }
       
       // Default renderer plugin implementation
       return RendererPluginImpl(plugin.metadata);
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('加载渲染器插件失败: $e');
+      debugPrint('Stack trace: $stackTrace');
       return null;
     }
   }
@@ -117,10 +137,25 @@ class PluginLoader {
   MarkoraPlugin _createMermaidPlugin(PluginMetadata metadata) {
     // Import the actual MermaidPlugin
     try {
+      debugPrint('_createMermaidPlugin called with metadata: ${metadata.id}');
+      debugPrint('kIsWeb: $kIsWeb');
+      
+      // For web environment, use the most simplified version
+      if (kIsWeb) {
+        debugPrint('Web environment: Creating minimal mermaid plugin');
+        final plugin = _MinimalWebMermaidPlugin(metadata);
+        debugPrint('Minimal mermaid plugin created successfully: ${plugin.runtimeType}');
+        return plugin;
+      }
+      
       // Use the improved MermaidPlugin with proper WebView implementation
-      return _WorkingMermaidPlugin(metadata);
-    } catch (e) {
+      debugPrint('Desktop environment: Creating working mermaid plugin');
+      final plugin = _WorkingMermaidPlugin(metadata);
+      debugPrint('Working mermaid plugin created successfully: ${plugin.runtimeType}');
+      return plugin;
+    } catch (e, stackTrace) {
       debugPrint('创建MermaidPlugin失败: $e');
+      debugPrint('Stack trace: $stackTrace');
       return _ImprovedMermaidPluginProxy(metadata);
     }
   }
@@ -903,6 +938,339 @@ class PluginElement {
   }
 }
 
+/// Minimal web Mermaid plugin (testing only)
+class _MinimalWebMermaidPlugin extends BasePlugin {
+  _MinimalWebMermaidPlugin(super.metadata);
+  
+  @override
+  Future<void> onLoad(PluginContext context) async {
+    try {
+      debugPrint('Minimal Web Mermaid plugin: Starting onLoad');
+      
+      // Test basic access to context properties without using them
+      debugPrint('Context editor controller type: ${context.editorController.runtimeType}');
+      debugPrint('Context syntax registry type: ${context.syntaxRegistry.runtimeType}');
+      debugPrint('Context toolbar registry type: ${context.toolbarRegistry.runtimeType}');
+      debugPrint('Context menu registry type: ${context.menuRegistry.runtimeType}');
+      
+      // Register toolbar button to test
+      debugPrint('Registering toolbar action...');
+      context.toolbarRegistry.registerAction(
+        const PluginAction(
+          id: 'mermaid',
+          title: 'Mermaid图表',
+          description: '插入Mermaid图表代码块',
+          icon: 'account_tree',
+        ),
+        () {
+          try {
+            debugPrint('Minimal Mermaid button clicked');
+            // Insert Mermaid code block template
+            final template = '''```mermaid
+graph TD
+    A[开始] --> B{判断条件}
+    B -->|是| C[执行操作]
+    B -->|否| D[结束]
+    C --> D
+```''';
+            debugPrint('Inserting mermaid template...');
+            
+            // Get the latest editor controller from the plugin context service
+            final contextService = PluginContextService.instance;
+            final currentContext = contextService.context;
+            debugPrint('Using editor controller: ${currentContext.editorController.runtimeType}');
+            currentContext.editorController.insertText(template);
+            debugPrint('Template inserted successfully');
+          } catch (e) {
+            debugPrint('Mermaid button execution error: $e');
+          }
+        },
+      );
+      debugPrint('Toolbar action registered successfully');
+      
+      // Register mermaid syntax for web (simplified approach)
+      debugPrint('Registering mermaid block syntax...');
+      try {
+        // Use a more flexible pattern that matches various mermaid block formats
+        final mermaidPattern = RegExp(r'```mermaid\s*\n([\s\S]*?)\n```');
+        context.syntaxRegistry.registerBlockSyntax(
+          'mermaid',
+          mermaidPattern,
+          (content) {
+            debugPrint('Mermaid block syntax triggered for content: ${content.substring(0, content.length > 50 ? 50 : content.length)}...');
+            final extractedCode = _extractMermaidCode(content);
+            debugPrint('Extracted mermaid code: $extractedCode');
+            return WebMermaidDisplayWidget(code: extractedCode);
+          },
+        );
+        debugPrint('Mermaid block syntax registered successfully');
+      } catch (e) {
+        debugPrint('Failed to register mermaid syntax: $e');
+      }
+      
+      await super.onLoad(context);
+      debugPrint('Minimal Web Mermaid插件已加载成功');
+    } catch (e, stackTrace) {
+      debugPrint('Minimal Web Mermaid plugin onLoad error: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+  
+  @override
+  Future<void> onUnload() async {
+    await super.onUnload();
+    debugPrint('Minimal Web Mermaid插件已卸载');
+  }
+  
+  @override
+  Map<String, dynamic> getStatus() {
+    return {
+      ...super.getStatus(),
+      'webOptimized': true,
+      'minimal': true,
+    };
+  }
+  
+  /// Extract mermaid code from markdown content
+  String _extractMermaidCode(String content) {
+    debugPrint('Extracting mermaid code from: $content');
+    
+    // Try regex first for more reliable extraction
+    final mermaidRegex = RegExp(r'```mermaid\s*\n([\s\S]*?)\n```');
+    final match = mermaidRegex.firstMatch(content);
+    if (match != null) {
+      final extractedCode = match.group(1)?.trim() ?? '';
+      debugPrint('Regex extraction result: $extractedCode');
+      return extractedCode;
+    }
+    
+    // Fallback: Simple line-by-line extraction
+    final lines = content.split('\n');
+    final codeLines = <String>[];
+    bool inMermaidBlock = false;
+    
+    for (final line in lines) {
+      if (line.trim().startsWith('```mermaid')) {
+        inMermaidBlock = true;
+        continue;
+      }
+      if (line.trim() == '```' && inMermaidBlock) {
+        break;
+      }
+      if (inMermaidBlock) {
+        codeLines.add(line);
+      }
+    }
+    
+    final result = codeLines.join('\n').trim();
+    debugPrint('Line-by-line extraction result: $result');
+    return result;
+  }
+}
+
+/// Web-optimized Mermaid plugin (without WebView)
+class _WebMermaidPlugin extends BasePlugin {
+  _WebMermaidPlugin(super.metadata);
+  
+  Map<String, dynamic> _config = {
+    'theme': 'default',
+    'enableInteraction': true,
+    'defaultWidth': 800.0,
+    'defaultHeight': 400.0,
+  };
+  
+  @override
+  Future<void> onLoad(PluginContext context) async {
+    try {
+      await super.onLoad(context);
+      
+      // Only register toolbar action for web - skip syntax registration to avoid namespace issues
+      context.toolbarRegistry.registerAction(
+        const PluginAction(
+          id: 'mermaid',
+          title: 'Mermaid图表',
+          description: '插入Mermaid图表代码块',
+          icon: 'account_tree',
+        ),
+        () {
+          try {
+            // Insert Mermaid code block template
+            final template = '''```mermaid
+graph TD
+    A[开始] --> B{判断条件}
+    B -->|是| C[执行操作]
+    B -->|否| D[结束]
+    C --> D
+```''';
+            // Get the latest editor controller from the plugin context service
+            final contextService = PluginContextService.instance;
+            final currentContext = contextService.context;
+            debugPrint('Web Mermaid plugin executing with controller: ${currentContext.editorController.runtimeType}');
+            currentContext.editorController.insertText(template);
+          } catch (e) {
+            debugPrint('Web Mermaid plugin execution error: $e');
+          }
+        },
+      );
+      
+      debugPrint('Web Mermaid插件已加载（无WebView，仅工具栏）');
+    } catch (e) {
+      debugPrint('Web Mermaid plugin onLoad error: $e');
+      rethrow;
+    }
+  }
+  
+  @override
+  Future<void> onUnload() async {
+    await super.onUnload();
+    debugPrint('Web Mermaid插件已卸载');
+  }
+  
+  @override
+  void onConfigChanged(Map<String, dynamic> config) {
+    _config = {..._config, ...config};
+  }
+  
+  @override
+  Map<String, dynamic> getStatus() {
+    return {
+      ...super.getStatus(),
+      'config': _config,
+      'webOptimized': true,
+    };
+  }
+}
+
+/// Web Mermaid block syntax implementation (no WebView)
+class WebMermaidBlockSyntax {
+  final Map<String, dynamic> config;
+  
+  WebMermaidBlockSyntax(this.config);
+  
+  /// Parse Mermaid code block for web
+  Widget parseBlock(String content) {
+    // Extract mermaid code
+    final lines = content.split('\n');
+    final codeLines = <String>[];
+    bool inMermaidBlock = false;
+    
+    for (final line in lines) {
+      if (line.trim().startsWith('```mermaid')) {
+        inMermaidBlock = true;
+        continue;
+      }
+      if (line.trim() == '```' && inMermaidBlock) {
+        break;
+      }
+      if (inMermaidBlock) {
+        codeLines.add(line);
+      }
+    }
+    
+    final mermaidCode = codeLines.join('\n');
+    return WebMermaidWidget(code: mermaidCode, config: config);
+  }
+}
+
+/// Web-optimized Mermaid widget (fallback only)
+class WebMermaidWidget extends StatelessWidget {
+  const WebMermaidWidget({
+    super.key,
+    required this.code,
+    required this.config,
+  });
+  
+  final String code;
+  final Map<String, dynamic> config;
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: (config['defaultHeight'] ?? 400).toDouble(),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blue.shade300),
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.blue.shade50,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.account_tree,
+                color: Colors.blue.shade700,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Mermaid 图表',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Text(
+                  code,
+                  style: const TextStyle(
+                    fontFamily: 'Courier New',
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.orange.shade300),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Colors.orange.shade700,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Web环境中图表功能有限，请使用桌面版获得完整体验',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Working Mermaid plugin with proper WebView implementation
 class _WorkingMermaidPlugin extends BasePlugin {
   _WorkingMermaidPlugin(super.metadata);
@@ -916,44 +1284,56 @@ class _WorkingMermaidPlugin extends BasePlugin {
   
   @override
   Future<void> onLoad(PluginContext context) async {
-    await super.onLoad(context);
-    
-    // Register Mermaid block syntax
-    context.syntaxRegistry.registerBlockSyntax(
-      'mermaid',
-      RegExp(r'^```mermaid\s*\n([\s\S]*?)\n```', multiLine: true),
-      (content) {
-        final syntax = WorkingMermaidBlockSyntax(_config);
-        return syntax.parseBlock(content);
-      },
-    );
-    
-    // Register toolbar button
-    context.toolbarRegistry.registerAction(
-      const PluginAction(
-        id: 'mermaid',
-        title: 'Mermaid图表',
-        description: '插入Mermaid图表代码块',
-        icon: 'account_tree',
-      ),
-      () {
-        // Insert Mermaid code block template
-        final template = '''```mermaid
+    try {
+      await super.onLoad(context);
+      
+      // Only register syntax and toolbar for non-web platforms
+      if (!kIsWeb) {
+        // Register Mermaid block syntax
+        context.syntaxRegistry.registerBlockSyntax(
+          'mermaid',
+          RegExp(r'^```mermaid\s*\n([\s\S]*?)\n```', multiLine: true),
+          (content) {
+            final syntax = WorkingMermaidBlockSyntax(_config);
+            return syntax.parseBlock(content);
+          },
+        );
+      }
+      
+      // Register toolbar button (works for both web and desktop)
+      context.toolbarRegistry.registerAction(
+        const PluginAction(
+          id: 'mermaid',
+          title: 'Mermaid图表',
+          description: '插入Mermaid图表代码块',
+          icon: 'account_tree',
+        ),
+        () {
+          try {
+            // Insert Mermaid code block template
+            final template = '''```mermaid
 graph TD
     A[开始] --> B{判断条件}
     B -->|是| C[执行操作]
     B -->|否| D[结束]
     C --> D
 ```''';
-        // Get the latest editor controller from the plugin context service
-        final contextService = PluginContextService.instance;
-        final currentContext = contextService.context;
-        debugPrint('Mermaid plugin executing with controller: ${currentContext.editorController.runtimeType}');
-        currentContext.editorController.insertText(template);
-      },
-    );
-    
-    debugPrint('Working Mermaid插件已加载');
+            // Get the latest editor controller from the plugin context service
+            final contextService = PluginContextService.instance;
+            final currentContext = contextService.context;
+            debugPrint('Mermaid plugin executing with controller: ${currentContext.editorController.runtimeType}');
+            currentContext.editorController.insertText(template);
+          } catch (e) {
+            debugPrint('Mermaid plugin execution error: $e');
+          }
+        },
+      );
+      
+      debugPrint('Working Mermaid插件已加载 (kIsWeb: $kIsWeb)');
+    } catch (e) {
+      debugPrint('Working Mermaid plugin onLoad error: $e');
+      rethrow;
+    }
   }
   
   @override
@@ -1028,31 +1408,45 @@ class WorkingMermaidWidget extends StatefulWidget {
 }
 
 class _WorkingMermaidWidgetState extends State<WorkingMermaidWidget> {
-  late final WebViewController _controller;
+  WebViewController? _controller;
   bool _isLoading = true;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _initializeWebView();
+    // Only initialize WebView for non-web platforms
+    if (!kIsWeb) {
+      _initializeWebView();
+    } else {
+      // For web platforms, skip WebView initialization
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _initializeWebView() {
+    if (kIsWeb) return; // Safety check
+    
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (String url) {
-            setState(() {
-              _isLoading = false;
-            });
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
           },
           onWebResourceError: (WebResourceError error) {
-            setState(() {
-              _error = error.description;
-              _isLoading = false;
-            });
+            if (mounted) {
+              setState(() {
+                _error = error.description;
+                _isLoading = false;
+              });
+            }
           },
         ),
       )
@@ -1185,28 +1579,33 @@ ${widget.code}
     }
 
     // For non-web platforms, use WebView
-    return Container(
-      height: (widget.config['defaultHeight'] ?? 400).toDouble(),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Stack(
-          children: [
-            WebViewWidget(controller: _controller),
-            if (_isLoading)
-              Container(
-                color: Colors.white.withOpacity(0.8),
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-          ],
+    if (_controller != null) {
+      return Container(
+        height: (widget.config['defaultHeight'] ?? 400).toDouble(),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
         ),
-      ),
-    );
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Stack(
+            children: [
+              WebViewWidget(controller: _controller!),
+              if (_isLoading)
+                Container(
+                  color: Colors.white.withOpacity(0.8),
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Fallback if controller is null
+    return _buildWebFallback();
   }
 
   /// Build web fallback for mermaid rendering
@@ -1380,6 +1779,122 @@ class _WorkingMermaidConfigWidgetState extends State<WorkingMermaidConfigWidget>
                 _enableInteraction = value;
               });
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Web Mermaid display widget for syntax rendering
+class WebMermaidDisplayWidget extends StatelessWidget {
+  const WebMermaidDisplayWidget({
+    super.key,
+    required this.code,
+  });
+  
+  final String code;
+  
+  @override
+  Widget build(BuildContext context) {
+    if (code.trim().isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.grey.shade50,
+        ),
+        child: const Text(
+          'Empty Mermaid diagram',
+          style: TextStyle(
+            color: Colors.grey,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      );
+    }
+    
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blue.shade300),
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.blue.shade50,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Icon(
+                Icons.account_tree,
+                color: Colors.blue.shade700,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Mermaid Diagram',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          
+          // Code display
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Text(
+              code,
+              style: const TextStyle(
+                fontFamily: 'Courier New',
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 8),
+          
+          // Info message
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.orange.shade300),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 14,
+                  color: Colors.orange.shade700,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Web环境显示代码预览，桌面版可渲染完整图表',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.orange.shade800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
