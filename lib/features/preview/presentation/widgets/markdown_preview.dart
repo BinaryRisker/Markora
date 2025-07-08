@@ -13,12 +13,13 @@ import '../../../../types/syntax_highlighting.dart';
 import '../../../../main.dart';
 import '../../../../core/utils/markdown_block_parser.dart';
 import '../../../../core/utils/markdown_block_cache.dart';
+import '../../../../core/utils/plugin_block_processor.dart';
 
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../syntax_highlighting/presentation/widgets/code_block_widget.dart';
 
-import '../../../plugins/domain/plugin_implementations.dart';
+
 import '../../../export/presentation/widgets/export_dialog.dart';
 import '../../../export/domain/entities/export_settings.dart';
 import '../../../document/presentation/providers/document_providers.dart';
@@ -479,26 +480,62 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
   /// Build plugin block
   Widget _buildPluginBlock(MarkdownBlock block) {
-    // Try to process plugin syntax
-    try {
-      final syntaxRegistry = globalSyntaxRegistry;
-      final blockRules = syntaxRegistry.blockSyntaxRules;
+    // Process plugin elements
+    final pluginElements = PluginBlockProcessor.processPluginBlock(block);
+    
+    if (pluginElements.isEmpty) {
+      // No plugin elements found, treat as paragraph
+      return _buildParagraphBlock(block);
+    }
+    
+    // If only one plugin element that covers the entire block, return it directly
+    if (pluginElements.length == 1 && 
+        pluginElements.first.startIndex == 0 && 
+        pluginElements.first.endIndex == block.content.length) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: pluginElements.first.widget,
+      );
+    }
+    
+    // Multiple plugin elements or mixed content, build mixed layout
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: _buildMixedPluginContent(block.content, pluginElements),
+    );
+  }
 
-      for (final rule in blockRules.values) {
-        final match = rule.pattern.firstMatch(block.content);
-        if (match != null) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: rule.builder(match.group(0)!),
-          );
+  /// Build mixed content with plugin elements
+  Widget _buildMixedPluginContent(String content, List<PluginElement> pluginElements) {
+    final widgets = <Widget>[];
+    int currentIndex = 0;
+
+    for (final element in pluginElements) {
+      // Add text before plugin element
+      if (currentIndex < element.startIndex) {
+        final textContent = content.substring(currentIndex, element.startIndex);
+        if (textContent.trim().isNotEmpty) {
+          widgets.add(_buildContentWithMath(textContent));
         }
       }
-    } catch (e) {
-      print('Plugin syntax error: $e');
+
+      // Add plugin widget
+      widgets.add(element.widget);
+      currentIndex = element.endIndex;
     }
 
-    // Fallback to paragraph
-    return _buildParagraphBlock(block);
+    // Add remaining text
+    if (currentIndex < content.length) {
+      final remainingContent = content.substring(currentIndex);
+      if (remainingContent.trim().isNotEmpty) {
+        widgets.add(_buildContentWithMath(remainingContent));
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widgets,
+    );
   }
 
   /// Build content with math formulas support
@@ -1017,94 +1054,3 @@ class CodeElementBuilder extends MarkdownElementBuilder {
   }
 }
 
-/// Special element type
-enum _SpecialElementType {
-  math,   // Math formula
-  plugin, // Plugin component
-}
-
-/// Special element
-class _SpecialElement {
-  const _SpecialElement({
-    required this.type,
-    required this.startIndex,
-    required this.endIndex,
-    required this.data,
-  });
-
-  final _SpecialElementType type;
-  final int startIndex;
-  final int endIndex;
-  final dynamic data;
-}
-
-/// Plugin element
-class _PluginElement {
-  const _PluginElement({
-    required this.start,
-    required this.end,
-    required this.content,
-    required this.widget,
-  });
-
-  final int start;
-  final int end;
-  final String content;
-  final Widget widget;
-}
-
-/// Processed content
-class _ProcessedContent {
-  const _ProcessedContent({
-    required this.content,
-    required this.pluginWidgets,
-  });
-
-  final String content;
-  final List<_PluginElement> pluginWidgets;
-}
-
-/// Process plugin syntax
-_ProcessedContent _processPluginSyntax(String content) {
-  final pluginWidgets = <_PluginElement>[];
-  String processedContent = content;
-  int offset = 0;
-
-  try {
-    // Get global syntax registry
-     final syntaxRegistry = globalSyntaxRegistry;
-     final blockRules = syntaxRegistry.blockSyntaxRules;
-
-    for (final rule in blockRules.values) {
-      final matches = rule.pattern.allMatches(content);
-      
-      for (final match in matches) {
-        try {
-          final widget = rule.builder(match.group(0)!);
-          pluginWidgets.add(_PluginElement(
-            start: match.start - offset,
-            end: match.end - offset,
-            content: match.group(0)!,
-            widget: widget,
-          ));
-          
-          // Remove matched text from content
-           final before = processedContent.substring(0, match.start - offset);
-           final after = processedContent.substring(match.end - offset);
-           processedContent = before + after;
-           offset += (match.end - match.start);
-        } catch (e) {
-          // Plugin rendering error, skip
-          print('Plugin syntax error: $e');
-        }
-      }
-    }
-  } catch (e) {
-    print('Error processing plugin syntax: $e');
-  }
-
-  return _ProcessedContent(
-    content: processedContent,
-    pluginWidgets: pluginWidgets,
-  );
-}
