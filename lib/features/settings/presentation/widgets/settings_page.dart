@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -91,7 +92,7 @@ class SettingsPage extends ConsumerWidget {
                 Text('🇺🇸', 
                   style: TextStyle(
                     fontSize: 18,
-                    fontFamily: Platform.isWindows ? 'Segoe UI Emoji' : null,
+                    fontFamily: (!kIsWeb && Platform.isWindows) ? 'Segoe UI Emoji' : null,
                     fontFamilyFallback: const ['Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji'],
                   ),
                 ),
@@ -108,7 +109,7 @@ class SettingsPage extends ConsumerWidget {
                 Text('🇨🇳', 
                   style: TextStyle(
                     fontSize: 18,
-                    fontFamily: Platform.isWindows ? 'Segoe UI Emoji' : null,
+                    fontFamily: (!kIsWeb && Platform.isWindows) ? 'Segoe UI Emoji' : null,
                     fontFamilyFallback: const ['Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji'],
                   ),
                 ),

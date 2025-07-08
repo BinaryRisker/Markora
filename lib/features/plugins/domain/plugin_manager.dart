@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 import '../../../types/plugin.dart';
 import 'plugin_interface.dart';
 import 'plugin_loader.dart';
+import 'plugin_context_service.dart';
 
 /// Plugin Manager
 class PluginManager extends ChangeNotifier {
@@ -227,6 +228,14 @@ class PluginManager extends ChangeNotifier {
       
       if (_context != null) {
         await pluginInstance.onLoad(_context!);
+        
+        // Debug: Check toolbar registry after plugin load
+        final contextService = PluginContextService.instance;
+        final toolbarRegistry = contextService.toolbarRegistry;
+        debugPrint('After plugin onLoad - Number of actions in toolbar registry: ${toolbarRegistry.actions.length}');
+        for (final actionId in toolbarRegistry.actions.keys) {
+          debugPrint('  - Action: $actionId');
+        }
       }
       
       _loadedPlugins[pluginId] = pluginInstance;

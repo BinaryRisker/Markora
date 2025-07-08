@@ -577,6 +577,11 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   Widget _buildContentWithMath(String content) {
     // Parse math formulas
     final mathFormulas = MathParser.parseFormulas(content);
+    debugPrint('Math formula parsing: found ${mathFormulas.length} formulas in content: ${content.substring(0, content.length > 100 ? 100 : content.length)}...');
+    
+    for (final formula in mathFormulas) {
+      debugPrint('Math formula found: ${formula.toString()}');
+    }
     
     if (mathFormulas.isEmpty) {
       // No math formulas, use normal Markdown rendering
@@ -1141,17 +1146,23 @@ class MermaidCodeElementBuilder extends MarkdownElementBuilder {
   
   /// Build mermaid chart widget
   Widget _buildMermaidChart(String content) {
+    debugPrint('Building mermaid chart for content: $content');
     try {
       final contextService = PluginContextService.instance;
       final syntaxRegistry = contextService.syntaxRegistry;
       final blockRules = syntaxRegistry.blockSyntaxRules;
       
+      debugPrint('Available block syntax rules: ${blockRules.keys.toList()}');
+      
       // Look for mermaid block syntax rule
       final mermaidRule = blockRules['mermaid'];
       if (mermaidRule != null) {
+        debugPrint('Found mermaid rule, rendering with plugin');
         // Use plugin to render mermaid
         final fullContent = '```mermaid\n$content\n```';
         return mermaidRule.builder(fullContent);
+      } else {
+        debugPrint('No mermaid rule found in block syntax rules');
       }
     } catch (e) {
       debugPrint('Error rendering mermaid with plugin: $e');
