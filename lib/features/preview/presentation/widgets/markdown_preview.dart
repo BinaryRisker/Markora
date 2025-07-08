@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -11,6 +12,7 @@ import '../../../../types/document.dart';
 import '../../../../types/syntax_highlighting.dart';
 import '../../../../main.dart';
 import '../../../../core/utils/markdown_block_parser.dart';
+import '../../../../core/utils/markdown_block_cache.dart';
 
 import '../../../math/domain/services/math_parser.dart';
 import '../../../math/presentation/widgets/math_formula_widget.dart';
@@ -56,8 +58,6 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   Timer? _debounceTimer;
   String _lastRenderedContent = '';
   List<MarkdownBlock> _cachedBlocks = [];
-  final Map<String, Widget> _blockWidgetCache = {};
-  static const int _maxCacheSize = 100;
   static const Duration _debounceDelay = Duration(milliseconds: 300);
 
   
@@ -99,7 +99,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     
     if (shouldClearCache) {
       // Settings changed, clear cache and force rebuild
-      _blockWidgetCache.clear();
+      markdownBlockCache.clear();
       _cachedBlocks.clear();
       _lastRenderedContent = '';
     }
@@ -179,7 +179,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     _lastRenderedContent = widget.content;
 
     // Clean expired cache
-    _cleanExpiredCache();
+    markdownBlockCache.cleanExpired();
 
     return _buildBlockListView();
   }
@@ -206,8 +206,20 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
 
   /// Build widget for a single block
   Widget _buildBlockWidget(MarkdownBlock block) {
+    final settings = ref.watch(settingsProvider);
+    final currentLanguage = Localizations.localeOf(context).languageCode;
+    
+    // Generate cache key with current settings
+    final cacheKey = CacheKeyGenerator.forBlock(
+      block,
+      fontFamily: settings.fontFamily,
+      fontSize: settings.fontSize.toDouble(),
+      theme: Theme.of(context).brightness.name,
+      language: currentLanguage,
+    );
+
     // Check cache first
-    final cachedWidget = _blockWidgetCache[block.hash];
+    final cachedWidget = markdownBlockCache.get(cacheKey);
     if (cachedWidget != null) {
       return cachedWidget;
     }
@@ -251,22 +263,12 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     }
 
     // Cache the widget
-    _blockWidgetCache[block.hash] = widget;
-
-    // Limit cache size
-    if (_blockWidgetCache.length > _maxCacheSize) {
-      final oldestKey = _blockWidgetCache.keys.first;
-      _blockWidgetCache.remove(oldestKey);
-    }
+    markdownBlockCache.put(cacheKey, widget);
 
     return widget;
   }
 
-  /// Clean expired cache
-  void _cleanExpiredCache() {
-    // For block cache, we don't use timestamp-based expiry
-    // Instead, we rely on LRU-like behavior with size limits
-  }
+
 
   /// Build empty state
   Widget _buildEmptyState() {
@@ -575,6 +577,13 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
             tooltip: AppLocalizations.of(context)!.refreshPreview,
             onPressed: () => _refreshPreview(),
           ),
+          // Debug: Cache statistics (only in debug mode)
+          if (kDebugMode)
+            _buildToolbarButton(
+              icon: Icons.analytics_outlined,
+              tooltip: 'Cache Statistics',
+              onPressed: () => _showCacheStatistics(),
+            ),
           const SizedBox(width: 8),
         ],
       ),
@@ -902,8 +911,50 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
   /// Refresh preview
   void _refreshPreview() {
     setState(() {
-      // Force rebuild preview
+      markdownBlockCache.clear();
+      _cachedBlocks.clear();
+      _lastRenderedContent = '';
     });
+  }
+
+  /// Show cache statistics (debug only)
+  void _showCacheStatistics() {
+    if (!kDebugMode) return;
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cache Statistics'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                markdownBlockCache.getEfficiencyReport(),
+                style: const TextStyle(fontFamily: 'monospace'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              markdownBlockCache.clear();
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Cache cleared')),
+              );
+            },
+            child: const Text('Clear Cache'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
