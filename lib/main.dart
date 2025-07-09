@@ -48,8 +48,7 @@ void main() async {
   await globalDocumentRepository.init();
   await _createSampleDocuments(globalDocumentRepository);
 
-  // Initialize plugin manager
-  await _initializePluginManager();
+  // Plugin manager will be initialized in app.dart
 
   // Run application
   runApp(
@@ -77,23 +76,7 @@ Future<void> _cleanupHiveData() async {
   }
 }
 
-/// Initialize plugin manager
-Future<void> _initializePluginManager() async {
-  try {
-    final pluginManager = PluginManager.instance;
-    final contextService = PluginContextService.instance;
-    
-    // Initialize plugin context service
-    contextService.initialize();
-    
-    // Initialize plugin manager with real context
-    await pluginManager.initialize(contextService.context);
-    
-    print('Plugin manager initialized successfully');
-  } catch (e) {
-    print('Plugin manager initialization failed: $e');
-  }
-}
+// Plugin manager initialization moved to app.dart to avoid conflicts
 
 
 
