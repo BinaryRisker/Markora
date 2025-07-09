@@ -236,6 +236,10 @@ class PluginManager extends ChangeNotifier {
         for (final actionId in toolbarRegistry.actions.keys) {
           debugPrint('  - Action: $actionId');
         }
+        
+        // Force toolbar refresh by triggering change listeners
+        debugPrint('Manually triggering toolbar registry change notification...');
+        toolbarRegistry.notifyChange();
       }
       
       _loadedPlugins[pluginId] = pluginInstance;

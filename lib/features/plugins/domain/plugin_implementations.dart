@@ -165,6 +165,11 @@ class ToolbarRegistryImpl implements ToolbarRegistry {
       listener();
     }
   }
+  
+  /// Public method to manually trigger change notification
+  void notifyChange() {
+    _notifyListeners();
+  }
 }
 
 /// Menu registry implementation

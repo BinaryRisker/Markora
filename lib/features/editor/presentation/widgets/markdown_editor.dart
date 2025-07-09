@@ -267,12 +267,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     final editorTheme = isDark ? EditorTheme.dark : EditorTheme.light;
     final activeDocument = ref.watch(activeDocumentProvider);
     
-    // Ensure plugin system registration when there's an active document
-    if (activeDocument != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _registerToPluginSystem();
-      });
-    }
+    // Plugin system registration is now handled in initState and _updateActiveTab
     
     return Container(
       decoration: BoxDecoration(

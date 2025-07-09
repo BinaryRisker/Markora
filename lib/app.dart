@@ -97,7 +97,6 @@ ${l10n.blockFormula}：
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializePlugins();
       _updateSampleDocuments();
-      _setupPluginListeners();
     });
   }
   
@@ -110,6 +109,9 @@ ${l10n.blockFormula}：
       final contextService = PluginContextService.instance;
       contextService.initialize();
       debugPrint('Plugin context service initialized');
+      
+      // Setup plugin listeners BEFORE initializing plugin manager
+      _setupPluginListeners(contextService);
       
       // Initialize plugin manager with context
       final pluginManager = PluginManager.instance;
@@ -124,12 +126,21 @@ ${l10n.blockFormula}：
       final blockRules = syntaxRegistry.blockSyntaxRules;
       debugPrint('Available plugins after initialization: ${blockRules.keys.toList()}');
       
-      // Force toolbar refresh after plugin initialization
+      // Force multiple toolbar refreshes to ensure UI updates
       if (mounted) {
         setState(() {
           _pluginToolbarRefreshKey++;
         });
-        debugPrint('Triggered toolbar refresh after plugin initialization');
+        debugPrint('Triggered initial toolbar refresh after plugin initialization');
+        
+        // Additional delayed refresh to handle any timing issues
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (mounted) {
+          setState(() {
+            _pluginToolbarRefreshKey++;
+          });
+          debugPrint('Triggered delayed toolbar refresh');
+        }
         
         // Clear preview cache to force re-rendering with new plugins
         _clearPreviewCache();
@@ -142,16 +153,17 @@ ${l10n.blockFormula}：
   }
 
   /// Setup plugin listeners
-  void _setupPluginListeners() {
+  void _setupPluginListeners(PluginContextService contextService) {
     try {
-      final contextService = ref.read(pluginContextServiceProvider);
       final toolbarRegistry = contextService.toolbarRegistry;
       
       toolbarRegistry.addChangeListener(() {
+        debugPrint('Toolbar registry change detected, refreshing UI...');
         if (mounted) {
           setState(() {
             _pluginToolbarRefreshKey++;
           });
+          debugPrint('Toolbar refresh triggered: key = $_pluginToolbarRefreshKey');
         }
       });
       
@@ -288,8 +300,8 @@ ${l10n.blockFormula}：
           
           const VerticalDivider(),
           
-          // Plugin buttons
-          ..._buildPluginButtons(),
+          // Plugin buttons with refresh key
+              ...(_pluginToolbarRefreshKey >= 0 ? _buildPluginButtons() : <Widget>[]),
           
           const Spacer(),
           
@@ -339,7 +351,14 @@ ${l10n.blockFormula}：
       final toolbarRegistry = contextService.toolbarRegistry;
       final actions = toolbarRegistry.actions;
       
+      debugPrint('Building plugin buttons - refresh key: $_pluginToolbarRefreshKey');
+       debugPrint('Number of toolbar actions available: ${actions.length}');
+       for (final entry in actions.entries) {
+         debugPrint('  - Action ID: ${entry.key}, Title: ${entry.value.action.title}');
+       }
+      
       if (actions.isEmpty) {
+        debugPrint('No plugin actions available, returning empty list');
         return [];
       }
       
@@ -357,20 +376,21 @@ ${l10n.blockFormula}：
                 actionItem.callback();
               } catch (e) {
                 debugPrint('Plugin action failed: $e');
-                                 if (context.mounted) {
-                   ScaffoldMessenger.of(context).showSnackBar(
-                     SnackBar(
-                       content: Text('插件操作失败: $e'),
-                       backgroundColor: Colors.red,
-                     ),
-                   );
-                 }
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('插件操作失败: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               }
             },
           ),
         );
       }
       
+      debugPrint('Generated ${buttons.length} plugin buttons');
       return buttons;
     } catch (e) {
       debugPrint('Failed to build plugin buttons: $e');
