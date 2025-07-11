@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
@@ -45,7 +46,20 @@ class DocumentService {
       updatedAt: DateTime.now(),
     );
 
+    // Save to repository (Hive database)
     await _repository.saveDocument(updatedDocument);
+    
+    // If document has a file path, also save to the original file
+    if (updatedDocument.filePath != null && updatedDocument.filePath!.isNotEmpty && !kIsWeb) {
+      try {
+        final file = File(updatedDocument.filePath!);
+        await file.writeAsString(updatedDocument.content, encoding: utf8);
+      } catch (e) {
+        // If file save fails, still keep the database save successful
+        // This ensures the document is not lost even if file write fails
+        print('Warning: Failed to save to file ${updatedDocument.filePath}: $e');
+      }
+    }
   }
 
   /// Save as

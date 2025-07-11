@@ -68,8 +68,20 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
 
   /// Open document tab
   void openDocumentTab(Document document) {
-    // 检查文档是否已经打开
-    final existingIndex = state.indexWhere((tab) => tab.document.id == document.id);
+    // 检查文档是否已经打开（优先检查文件路径，其次检查ID）
+    int existingIndex = -1;
+    
+    if (document.filePath != null && document.filePath!.isNotEmpty) {
+      // 如果有文件路径，按文件路径查找
+      existingIndex = state.indexWhere((tab) => 
+          tab.document.filePath != null && 
+          tab.document.filePath == document.filePath);
+    }
+    
+    if (existingIndex < 0) {
+      // 如果按文件路径没找到，再按ID查找
+      existingIndex = state.indexWhere((tab) => tab.document.id == document.id);
+    }
     
     if (existingIndex >= 0) {
       // 如果已经打开，切换到该Tab
