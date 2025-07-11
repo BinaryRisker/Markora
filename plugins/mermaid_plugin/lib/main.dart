@@ -3,7 +3,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:markora/features/plugins/domain/plugin_interface.dart';
 import 'package:markora/types/plugin.dart';
 
-/// Mermaid图表插件
+/// Mermaid chart plugin
 class MermaidPlugin extends MarkoraPlugin {
   late PluginContext _context;
   Map<String, dynamic> _config = {};
@@ -12,15 +12,15 @@ class MermaidPlugin extends MarkoraPlugin {
   @override
   PluginMetadata get metadata => const PluginMetadata(
     id: 'mermaid_plugin',
-    name: 'Mermaid 图表插件',
+    name: 'Mermaid Chart Plugin',
     version: '1.0.0',
-    description: '支持在Markdown中渲染Mermaid图表，包括流程图、序列图、甘特图等多种图表类型',
+    description: 'Support rendering Mermaid charts in Markdown, including flowcharts, sequence diagrams, Gantt charts and other chart types',
     author: 'Markora Team',
     homepage: 'https://github.com/markora/mermaid-plugin',
     repository: 'https://github.com/markora/mermaid-plugin.git',
     license: 'MIT',
     type: PluginType.syntax,
-    tags: ['图表', 'mermaid', '可视化', '流程图'],
+    tags: ['chart', 'mermaid', 'visualization', 'flowchart'],
     minVersion: '1.0.0',
   );
 
@@ -31,7 +31,7 @@ class MermaidPlugin extends MarkoraPlugin {
   Future<void> onLoad(PluginContext context) async {
     _context = context;
     
-    // 注册mermaid块级语法
+    // Register mermaid block syntax
     _context.syntaxRegistry.registerBlockSyntax(
       'mermaid',
       RegExp(r'^```mermaid\s*\n([\s\S]*?)\n```', multiLine: true),
@@ -51,12 +51,12 @@ class MermaidPlugin extends MarkoraPlugin {
 
   @override
   Future<void> onActivate() async {
-    // 插件激活时的操作
+    // Operations when plugin is activated
   }
 
   @override
   Future<void> onDeactivate() async {
-    // 插件停用时的操作
+    // Operations when plugin is deactivated
   }
 
   @override
@@ -82,7 +82,7 @@ class MermaidPlugin extends MarkoraPlugin {
   }
 }
 
-/// Mermaid图表渲染组件
+/// Mermaid chart rendering component
 class MermaidWidget extends StatefulWidget {
   const MermaidWidget({
     super.key,
@@ -179,10 +179,10 @@ ${widget.code}
             }
         });
         
-        // 错误处理
+        // Error handling
         window.addEventListener('error', function(e) {
             document.getElementById('mermaid-container').innerHTML = 
-                '<div class="error">图表渲染失败: ' + e.message + '</div>';
+                '<div class="error">Chart rendering failed: ' + e.message + '</div>';
         });
     </script>
 </body>
@@ -209,7 +209,7 @@ ${widget.code}
                 Icon(Icons.error, color: Colors.red.shade700),
                 const SizedBox(width: 8),
                 Text(
-                  'Mermaid图表渲染失败',
+                  'Mermaid Chart Rendering Failed',
                   style: TextStyle(
                     color: Colors.red.shade700,
                     fontWeight: FontWeight.bold,
@@ -249,7 +249,7 @@ ${widget.code}
   }
 }
 
-/// Mermaid插件配置组件
+/// Mermaid plugin configuration component
 class MermaidConfigWidget extends StatefulWidget {
   const MermaidConfigWidget({
     super.key,
@@ -288,14 +288,14 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Mermaid插件配置',
+            'Mermaid Plugin Configuration',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 24),
           
-          // 主题选择
+          // Theme selection
           Text(
-            '主题',
+            'Theme',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -303,30 +303,30 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
             value: _config['theme'] ?? 'default',
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
-              hintText: '选择主题',
+              hintText: 'Select theme',
             ),
             items: const [
-              DropdownMenuItem(value: 'default', child: Text('默认')),
-              DropdownMenuItem(value: 'dark', child: Text('深色')),
-              DropdownMenuItem(value: 'forest', child: Text('森林')),
-              DropdownMenuItem(value: 'neutral', child: Text('中性')),
+              DropdownMenuItem(value: 'default', child: Text('Default')),
+              DropdownMenuItem(value: 'dark', child: Text('Dark')),
+              DropdownMenuItem(value: 'forest', child: Text('Forest')),
+              DropdownMenuItem(value: 'neutral', child: Text('Neutral')),
             ],
             onChanged: (value) => _updateConfig('theme', value),
           ),
           const SizedBox(height: 16),
           
-          // 启用交互
+          // Enable interaction
           SwitchListTile(
-            title: const Text('启用交互'),
-            subtitle: const Text('允许用户与图表进行交互'),
+            title: const Text('Enable Interaction'),
+            subtitle: const Text('Allow users to interact with charts'),
             value: _config['enableInteraction'] ?? true,
             onChanged: (value) => _updateConfig('enableInteraction', value),
           ),
           const SizedBox(height: 16),
           
-          // 默认宽度
+          // Default width
           Text(
-            '默认宽度',
+            'Default Width',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -334,7 +334,7 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
             initialValue: (_config['defaultWidth'] ?? 800).toString(),
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
-              hintText: '输入默认宽度（像素）',
+              hintText: 'Enter default width (pixels)',
               suffixText: 'px',
             ),
             keyboardType: TextInputType.number,
@@ -347,9 +347,9 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
           ),
           const SizedBox(height: 16),
           
-          // 默认高度
+          // Default height
           Text(
-            '默认高度',
+            'Default Height',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -357,7 +357,7 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
             initialValue: (_config['defaultHeight'] ?? 600).toString(),
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
-              hintText: '输入默认高度（像素）',
+              hintText: 'Enter default height (pixels)',
               suffixText: 'px',
             ),
             keyboardType: TextInputType.number,

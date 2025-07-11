@@ -1,35 +1,35 @@
 import '../../../../types/document.dart';
 
-/// 文档仓库接口
+/// Document repository interface
 abstract class DocumentRepository {
-  /// 创建新文档
+  /// Create new document
   Future<Document> createDocument({
     String? title,
     String? content,
     DocumentType type = DocumentType.markdown,
   });
 
-  /// 获取文档
+  /// Get document
   Future<Document?> getDocument(String id);
 
-  /// 获取所有文档
+  /// Get all documents
   Future<List<Document>> getAllDocuments();
 
-  /// 保存文档
+  /// Save document
   Future<void> saveDocument(Document document);
 
-  /// 删除文档
+  /// Delete document
   Future<void> deleteDocument(String id);
 
-  /// 导入文档
+  /// Import document
   Future<Document> importDocument(String filePath);
 
-  /// 导出文档
+  /// Export document
   Future<String> exportDocument(Document document, String exportPath);
 
-  /// 搜索文档
+  /// Search documents
   Future<List<Document>> searchDocuments(String query);
 
-  /// 获取最近文档
+  /// Get recent documents
   Future<List<Document>> getRecentDocuments({int limit = 10});
-} 
+}

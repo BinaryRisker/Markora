@@ -426,20 +426,20 @@ class SettingsPage extends ConsumerWidget {
 
   /// Font name mapping: English names to Chinese names
   static const Map<String, String> _fontNameMap = {
-    'Microsoft YaHei': '微软雅黑',
-    'SimHei': '黑体',
-    'SimSun': '宋体',
-    'KaiTi': '楷体',
-    'FangSong': '仿宋',
-    'Microsoft JhengHei': '微软正黑体',
-    'PingFang SC': '苹方',
-    'Hiragino Sans GB': '冬青黑体简体中文',
-    'STHeiti': '华文黑体',
-    'STSong': '华文宋体',
-    'STKaiti': '华文楷体',
-    'STFangsong': '华文仿宋',
-    'Noto Sans CJK SC': '思源黑体',
-    'Source Han Sans CN': '思源黑体 CN',
+    'Microsoft YaHei': 'Microsoft YaHei',
+    'SimHei': 'SimHei',
+    'SimSun': 'SimSun',
+    'KaiTi': 'KaiTi',
+    'FangSong': 'FangSong',
+    'Microsoft JhengHei': 'Microsoft JhengHei',
+    'PingFang SC': 'PingFang SC',
+    'Hiragino Sans GB': 'Hiragino Sans GB',
+    'STHeiti': 'STHeiti',
+    'STSong': 'STSong',
+    'STKaiti': 'STKaiti',
+    'STFangsong': 'STFangsong',
+    'Noto Sans CJK SC': 'Noto Sans CJK SC',
+    'Source Han Sans CN': 'Source Han Sans CN',
   };
 
   /// Get font display name (handle legacy English names)

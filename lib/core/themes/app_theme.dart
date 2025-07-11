@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-/// Markora应用主题配置
+/// Markora application theme configuration
 class AppTheme {
-  // 阻止实例化
+  // Prevent instantiation
   AppTheme._();
 
-  /// 浅色主题
+  /// Light theme
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -66,7 +66,7 @@ class AppTheme {
     );
   }
 
-  /// 深色主题
+  /// Dark theme
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
@@ -128,7 +128,7 @@ class AppTheme {
   }
 }
 
-/// 编辑器主题配置
+/// Editor theme configuration
 class EditorTheme {
   const EditorTheme({
     required this.backgroundColor,
@@ -148,7 +148,7 @@ class EditorTheme {
   final Color currentLineColor;
   final SyntaxColors syntaxColors;
 
-  /// 浅色编辑器主题
+  /// Light editor theme
   static const EditorTheme light = EditorTheme(
     backgroundColor: Color(0xFFFFFFFF),
     textColor: Color(0xFF212121),
@@ -159,7 +159,7 @@ class EditorTheme {
     syntaxColors: SyntaxColors.light,
   );
 
-  /// 深色编辑器主题
+  /// Dark editor theme
   static const EditorTheme dark = EditorTheme(
     backgroundColor: Color(0xFF1E1E1E),
     textColor: Color(0xFFD4D4D4),
@@ -171,7 +171,7 @@ class EditorTheme {
   );
 }
 
-/// 语法高亮颜色配置
+/// Syntax highlighting color configuration
 class SyntaxColors {
   const SyntaxColors({
     required this.keyword,
@@ -205,7 +205,7 @@ class SyntaxColors {
   final Color strong;
   final Color code;
 
-  /// 浅色语法颜色
+  /// Light syntax colors
   static const SyntaxColors light = SyntaxColors(
     keyword: Color(0xFF0000FF),
     string: Color(0xFF008000),
@@ -223,7 +223,7 @@ class SyntaxColors {
     code: Color(0xFFE31A1C),
   );
 
-  /// 深色语法颜色
+  /// Dark syntax colors
   static const SyntaxColors dark = SyntaxColors(
     keyword: Color(0xFF569CD6),
     string: Color(0xFFCE9178),
@@ -240,4 +240,4 @@ class SyntaxColors {
     strong: Color(0xFFD4D4D4),
     code: Color(0xFFD7BA7D),
   );
-} 
+}

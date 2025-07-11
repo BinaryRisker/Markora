@@ -33,7 +33,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       }
     } catch (e) {
       // Use default settings when loading fails
-      debugPrint('加载设置失败: $e');
+      debugPrint('Failed to load settings: $e');
     }
   }
 
@@ -42,7 +42,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     try {
       await _repository.saveSettings(state);
     } catch (e) {
-      debugPrint('保存设置失败: $e');
+      debugPrint('Failed to save settings: $e');
     }
   }
 
@@ -129,8 +129,8 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       state = AppSettings.fromJson(settingsJson);
       await _saveSettings();
     } catch (e) {
-      debugPrint('导入设置失败: $e');
-      throw Exception('设置格式无效');
+      debugPrint('Failed to import settings: $e');
+      throw Exception('Invalid settings format');
     }
   }
 }

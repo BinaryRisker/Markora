@@ -70,7 +70,7 @@ class MathFormulaWidget extends StatelessWidget {
       
       // Validate LaTeX syntax
       if (!MathParser.validateLatex(processedLatex)) {
-        return _buildErrorWidget(context, '无效的LaTeX语法');
+        return _buildErrorWidget(context, 'Invalid LaTeX syntax');
       }
 
       return Math.tex(
@@ -88,7 +88,7 @@ class MathFormulaWidget extends StatelessWidget {
       );
     } catch (e) {
       onError?.call(e.toString());
-      return _buildErrorWidget(context, '渲染错误: ${e.toString()}');
+      return _buildErrorWidget(context, 'Rendering error: ${e.toString()}');
     }
   }
 
@@ -203,7 +203,7 @@ class _MathFormulaPreviewState extends State<MathFormulaPreview> {
         onError: (error) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('数学公式渲染错误: $error'),
+              content: Text('Math formula rendering error: $error'),
               backgroundColor: Colors.red,
             ),
           );
@@ -242,7 +242,7 @@ class _MathFormulaPreviewState extends State<MathFormulaPreview> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'LaTeX 源码',
+                  'LaTeX Source',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -251,7 +251,7 @@ class _MathFormulaPreviewState extends State<MathFormulaPreview> {
                 ),
                 const Spacer(),
                 Text(
-                  '点击切换到渲染视图',
+                  'Click to switch to render view',
                   style: TextStyle(
                     fontSize: 10,
                     color: Theme.of(context).colorScheme.outline,
@@ -280,7 +280,7 @@ class MathFormulaDialog extends StatefulWidget {
   const MathFormulaDialog({
     super.key,
     this.initialLatex = '',
-    this.title = '插入数学公式',
+    this.title = 'Insert Math Formula',
   });
 
   /// Initial LaTeX code
@@ -332,8 +332,8 @@ class _MathFormulaDialogState extends State<MathFormulaDialog> {
             TextField(
               controller: _controller,
               decoration: const InputDecoration(
-                labelText: 'LaTeX 代码',
-                hintText: '例如: E = mc^2',
+                labelText: 'LaTeX Code',
+                hintText: 'e.g.: E = mc^2',
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -343,7 +343,7 @@ class _MathFormulaDialogState extends State<MathFormulaDialog> {
             
             // Preview
             Text(
-              '预览:',
+              'Preview:',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
@@ -364,7 +364,7 @@ class _MathFormulaDialogState extends State<MathFormulaDialog> {
                     ? MathFormulaPreview(latex: _currentLatex)
                     : Center(
                         child: Text(
-                          '在上方输入LaTeX代码查看预览',
+                          'Enter LaTeX code above to see preview',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.outline,
                           ),
@@ -399,13 +399,13 @@ class _MathFormulaDialogState extends State<MathFormulaDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: _currentLatex.isNotEmpty
               ? () => Navigator.of(context).pop(_currentLatex)
               : null,
-          child: const Text('插入'),
+          child: const Text('Insert'),
         ),
       ],
     );

@@ -5,7 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../providers/document_providers.dart';
 
-/// 文档Tab栏组件
+/// Document tab bar component
 class DocumentTabs extends ConsumerStatefulWidget {
   const DocumentTabs({super.key});
 
@@ -74,7 +74,7 @@ class _DocumentTabsState extends ConsumerState<DocumentTabs> {
       ),
       child: Row(
         children: [
-          // Tab列表
+          // Tab list
           Expanded(
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -92,7 +92,7 @@ class _DocumentTabsState extends ConsumerState<DocumentTabs> {
               },
             ),
           ),
-          // 新建Tab按钮
+          // New tab button
           _NewTabButton(),
         ],
       ),
@@ -100,7 +100,7 @@ class _DocumentTabsState extends ConsumerState<DocumentTabs> {
   }
 }
 
-/// 单个文档Tab项
+/// Single document tab item
 class _DocumentTabItem extends StatelessWidget {
   const _DocumentTabItem({
     required this.tab,
@@ -143,14 +143,14 @@ class _DocumentTabItem extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 文档图标
+                // Document icon
                 PhosphorIcon(
                   PhosphorIconsRegular.fileText,
                   size: 16,
                   color: theme.colorScheme.onSurface.withOpacity(0.7),
                 ),
                 const SizedBox(width: 8),
-                // 文档标题
+                // Document title
                 Expanded(
                   child: Text(
                     tab.document.title,
@@ -163,7 +163,7 @@ class _DocumentTabItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                // 修改状态指示器
+                // Modified state indicator
                 if (tab.isModified) ...[
                   const SizedBox(width: 4),
                   Container(
@@ -176,7 +176,7 @@ class _DocumentTabItem extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(width: 4),
-                // 关闭按钮
+                // Close button
                 InkWell(
                   onTap: onClose,
                   borderRadius: BorderRadius.circular(12),
@@ -202,7 +202,7 @@ class _DocumentTabItem extends StatelessWidget {
   }
 }
 
-/// 新建Tab按钮
+/// New tab button
 class _NewTabButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -233,7 +233,7 @@ class _NewTabButton extends ConsumerWidget {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('创建新文档失败: $e'),
+                    content: Text('Failed to create new document: $e'),
                     backgroundColor: theme.colorScheme.error,
                   ),
                 );

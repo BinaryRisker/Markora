@@ -123,7 +123,7 @@ class UndoRedoManager {
     
     final state = _history[_currentIndex];
     
-    // 延迟重置标志，避免在应用状态时触发新的历史记录
+    // Delay resetting flag to avoid triggering new history when applying state
     Future.microtask(() => _isApplying = false);
     
     return state;

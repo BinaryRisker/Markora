@@ -9,23 +9,23 @@ import 'package:pdf/widgets.dart' as pw;
 import '../../../../types/document.dart';
 import '../entities/export_settings.dart';
 
-/// 导出服务接口
+/// Export service interface
 abstract class ExportService {
-  /// 导出文档
+  /// Export document
   Future<ExportResult> exportDocument(
     Document document,
     ExportSettings settings, {
     Function(ExportProgress)? onProgress,
   });
 
-  /// 检查格式是否支持
+  /// Check if format is supported
   bool isFormatSupported(ExportFormat format);
 
-  /// 获取建议的文件名
+  /// Get suggested filename
   String getSuggestedFileName(Document document, ExportFormat format);
 }
 
-/// 导出服务实现
+/// Export service implementation
 class ExportServiceImpl implements ExportService {
   @override
   Future<ExportResult> exportDocument(
@@ -34,7 +34,7 @@ class ExportServiceImpl implements ExportService {
     Function(ExportProgress)? onProgress,
   }) async {
     try {
-      // 初始化进度
+      // Initialize progress
       onProgress?.call(const ExportProgress(
         progress: 0.0,
         status: 'Starting export...',
@@ -52,7 +52,7 @@ class ExportServiceImpl implements ExportService {
           return await _exportToDocx(document, settings, onProgress);
       }
     } catch (e) {
-      return ExportResult.failure('导出失败: $e');
+      return ExportResult.failure('Export failed: $e');
     }
   }
 
@@ -62,12 +62,12 @@ class ExportServiceImpl implements ExportService {
       case ExportFormat.html:
         return true;
       case ExportFormat.pdf:
-        return true; // PDF导出已实现
+        return true; // PDF export implemented
       case ExportFormat.png:
       case ExportFormat.jpeg:
-        return false; // 需要添加图像导出支持
+        return false; // Need to add image export support
       case ExportFormat.docx:
-        return false; // 需要添加docx包支持
+        return false; // Need to add docx package support
     }
   }
 
@@ -77,7 +77,7 @@ class ExportServiceImpl implements ExportService {
     return '$baseName.${format.extension}';
   }
 
-  /// 导出为HTML
+  /// Export as HTML
   Future<ExportResult> _exportToHtml(
     Document document,
     ExportSettings settings,
@@ -86,25 +86,25 @@ class ExportServiceImpl implements ExportService {
     try {
       onProgress?.call(const ExportProgress(
         progress: 0.2,
-        status: '生成HTML...',
-        currentStep: '解析Markdown内容',
+        status: 'Generating HTML...',
+        currentStep: 'Parsing Markdown content',
       ));
 
-      // 生成HTML内容
+      // Generate HTML content
       final htmlContent = _generateHtmlContent(document, settings.htmlSettings);
 
       onProgress?.call(const ExportProgress(
         progress: 0.8,
-        status: '保存文件...',
-        currentStep: '写入HTML文件',
+        status: 'Saving file...',
+        currentStep: 'Writing HTML file',
       ));
 
-      // 模拟文件保存（在Web环境中实际实现会有所不同）
+      // Simulate file saving (actual implementation will differ in web environment)
       await _saveHtmlFile(htmlContent, settings.fullPath);
 
       onProgress?.call(const ExportProgress(
         progress: 1.0,
-        status: '导出完成',
+        status: 'Export completed',
         isCompleted: true,
       ));
 
@@ -114,11 +114,11 @@ class ExportServiceImpl implements ExportService {
         duration: const Duration(seconds: 1),
       );
     } catch (e) {
-      return ExportResult.failure('HTML导出失败: $e');
+      return ExportResult.failure('HTML export failed: $e');
     }
   }
 
-  /// 导出为PDF
+  /// Export as PDF
   Future<ExportResult> _exportToPdf(
     Document document,
     ExportSettings settings,
@@ -127,20 +127,20 @@ class ExportServiceImpl implements ExportService {
     try {
       onProgress?.call(const ExportProgress(
         progress: 0.2,
-        status: '生成PDF...',
-        currentStep: '解析文档结构',
+        status: 'Generating PDF...',
+        currentStep: 'Parsing document structure',
       ));
 
-      // 首先生成HTML，然后转换为PDF
+      // First generate HTML, then convert to PDF
       final htmlContent = _generateHtmlContent(document, settings.htmlSettings);
 
       onProgress?.call(const ExportProgress(
         progress: 0.5,
-        status: '渲染页面...',
-        currentStep: '应用PDF样式',
+        status: 'Rendering pages...',
+        currentStep: 'Applying PDF styles',
       ));
 
-      // 生成PDF
+      // Generate PDF
       final pdfBytes = await _generatePdfFromHtml(
         document, 
         htmlContent, 
@@ -150,15 +150,15 @@ class ExportServiceImpl implements ExportService {
 
       onProgress?.call(const ExportProgress(
         progress: 0.9,
-        status: '保存PDF...',
-        currentStep: '写入PDF文件',
+        status: 'Saving PDF...',
+        currentStep: 'Writing PDF file',
       ));
 
       await _savePdfFile(pdfBytes, settings.fullPath);
 
       onProgress?.call(const ExportProgress(
         progress: 1.0,
-        status: '导出完成',
+        status: 'Export completed',
         isCompleted: true,
       ));
 
@@ -168,37 +168,37 @@ class ExportServiceImpl implements ExportService {
         duration: const Duration(seconds: 2),
       );
     } catch (e) {
-      return ExportResult.failure('PDF导出失败: $e');
+      return ExportResult.failure('PDF export failed: $e');
     }
   }
 
-  /// 导出为图像
+  /// Export as image
   Future<ExportResult> _exportToImage(
     Document document,
     ExportSettings settings,
     Function(ExportProgress)? onProgress,
   ) async {
-    // 图像导出需要使用WebView或其他渲染技术
-    return ExportResult.failure('图像导出功能尚未实现');
+    // Image export requires WebView or other rendering technology
+    return ExportResult.failure('Image export feature not yet implemented');
   }
 
-  /// 导出为DOCX
+  /// Export as DOCX
   Future<ExportResult> _exportToDocx(
     Document document,
     ExportSettings settings,
     Function(ExportProgress)? onProgress,
   ) async {
-    // DOCX导出需要使用docx包
-    return ExportResult.failure('DOCX导出功能尚未实现');
+    // DOCX export requires docx package
+    return ExportResult.failure('DOCX export feature not yet implemented');
   }
 
-  /// 生成HTML内容
+  /// Generate HTML content
   String _generateHtmlContent(Document document, HtmlExportSettings settings) {
     final title = settings.title.isNotEmpty ? settings.title : document.title;
     final author = settings.author;
     final description = settings.description;
 
-    // 基础HTML模板
+    // Basic HTML template
     final html = '''
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -229,7 +229,7 @@ class ExportServiceImpl implements ExportService {
     return html;
   }
 
-  /// 生成HTML样式
+  /// Generate HTML styles
   String _generateHtmlStyles(HtmlExportSettings settings) {
     final responsiveStyles = settings.responsiveDesign ? '''
 @media (max-width: 768px) {
@@ -246,7 +246,7 @@ class ExportServiceImpl implements ExportService {
 
     final styles = '''
 <style>
-/* 基础样式 */
+/* Basic styles */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
@@ -261,7 +261,7 @@ body {
     background: #fff;
 }
 
-/* 标题样式 */
+/* Heading styles */
 h1, h2, h3, h4, h5, h6 {
     margin-top: 2rem;
     margin-bottom: 1rem;
@@ -276,12 +276,12 @@ h4 { font-size: 1.25em; }
 h5 { font-size: 1.1em; }
 h6 { font-size: 1em; color: #666; }
 
-/* 段落和列表 */
+/* Paragraph and list styles */
 p { margin-bottom: 1rem; }
 ul, ol { margin-bottom: 1rem; padding-left: 2rem; }
 li { margin-bottom: 0.25rem; }
 
-/* 代码样式 */
+/* Code styles */
 code {
     background: #f6f8fa;
     border-radius: 3px;
@@ -303,7 +303,7 @@ pre code {
     padding: 0;
 }
 
-/* 引用样式 */
+/* Quote styles */
 blockquote {
     border-left: 4px solid #dfe2e5;
     padding-left: 1rem;
@@ -312,7 +312,7 @@ blockquote {
     color: #666;
 }
 
-/* 表格样式 */
+/* Table styles */
 table {
     border-collapse: collapse;
     width: 100%;
@@ -330,7 +330,7 @@ th {
     font-weight: 600;
 }
 
-/* 链接样式 */
+/* Link styles */
 a {
     color: #0366d6;
     text-decoration: none;
@@ -340,7 +340,7 @@ a:hover {
     text-decoration: underline;
 }
 
-/* 图片样式 */
+/* Image styles */
 img {
     max-width: 100%;
     height: auto;
@@ -348,7 +348,7 @@ img {
     margin: 1rem 0;
 }
 
-/* 目录样式 */
+/* Table of contents styles */
 .toc {
     background: #f6f8fa;
     border-radius: 6px;
@@ -367,10 +367,10 @@ img {
     margin-bottom: 0;
 }
 
-/* 响应式设计 */
+/* Responsive design */
 ${responsiveStyles}
 
-/* 自定义CSS */
+/* Custom CSS */
 ${settings.customCss}
 </style>
 ''';
@@ -378,7 +378,7 @@ ${settings.customCss}
     return styles;
   }
 
-  /// 获取MathJax脚本
+  /// Get MathJax script
   String _getMathJaxScript() {
     return '''
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -394,12 +394,12 @@ MathJax = {
 ''';
   }
 
-  /// 获取Mermaid脚本
+  /// Get Mermaid script
   String _getMermaidScript() {
     return '<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>';
   }
 
-  /// 生成目录
+  /// Generate table of contents
   String _generateTableOfContents(String content) {
     final lines = content.split('\n');
     final tocItems = <String>[];
@@ -423,7 +423,7 @@ MathJax = {
 
     return '''
 <div class="toc">
-    <h2>目录</h2>
+    <h2>Table of Contents</h2>
     <ul>
         ${tocItems.join('\n        ')}
     </ul>
@@ -431,11 +431,11 @@ MathJax = {
 ''';
   }
 
-  /// 转换Markdown为HTML（简化版）
+  /// Convert Markdown to HTML (simplified version)
   String _convertMarkdownToHtml(String content, HtmlExportSettings settings) {
     var html = content;
 
-    // 标题
+    // Headings
     html = html.replaceAllMapped(RegExp(r'^(#{1,6})\s+(.+)$', multiLine: true), (match) {
       final level = match.group(1)!.length;
       final title = match.group(2)!;
@@ -445,47 +445,47 @@ MathJax = {
       return '<h$level id="$anchor">$title</h$level>';
     });
 
-    // 粗体
+    // Bold
     html = html.replaceAllMapped(RegExp(r'\*\*(.*?)\*\*'), (match) {
       return '<strong>${match.group(1)}</strong>';
     });
 
-    // 斜体
+    // Italic
     html = html.replaceAllMapped(RegExp(r'\*(.*?)\*'), (match) {
       return '<em>${match.group(1)}</em>';
     });
 
-    // 行内代码
+    // Inline code
     html = html.replaceAllMapped(RegExp(r'`([^`]+)`'), (match) {
       return '<code>${match.group(1)}</code>';
     });
 
-    // 代码块
+    // Code blocks
     html = html.replaceAllMapped(RegExp(r'```(\w+)?\n([\s\S]*?)\n```'), (match) {
       final language = match.group(1) ?? '';
       final code = match.group(2)!;
       return '<pre><code class="language-$language">$code</code></pre>';
     });
 
-    // 链接
+    // Links
     html = html.replaceAllMapped(RegExp(r'\[([^\]]+)\]\(([^)]+)\)'), (match) {
       final text = match.group(1)!;
       final url = match.group(2)!;
       return '<a href="$url">$text</a>';
     });
 
-    // 段落
+    // Paragraphs
     final paragraphs = html.split('\n\n')
         .where((p) => p.trim().isNotEmpty)
         .map((p) {
-          if (p.trim().startsWith('<')) return p; // 已经是HTML
+          if (p.trim().startsWith('<')) return p; // Already HTML
           return '<p>${p.trim()}</p>';
         }).join('\n\n');
 
     return paragraphs;
   }
 
-  /// 从HTML生成PDF
+  /// Generate PDF from HTML
   Future<Uint8List> _generatePdfFromHtml(
     Document document,
     String htmlContent, 
@@ -494,14 +494,14 @@ MathJax = {
   ) async {
     final pdf = pw.Document();
     
-    // 获取文档标题
+    // Get document title
     final title = htmlSettings.title.isNotEmpty 
         ? htmlSettings.title 
         : document.title.isNotEmpty 
             ? document.title 
             : 'Document';
     
-    // 创建PDF页面
+    // Create PDF page
     pdf.addPage(
       pw.MultiPage(
         pageFormat: _getPdfPageFormat(pdfSettings.pageSize),
@@ -540,43 +540,43 @@ MathJax = {
     return pdf.save();
   }
 
-  /// 保存HTML文件
+  /// Save HTML file
   Future<void> _saveHtmlFile(String content, String path) async {
     try {
       final file = File(path);
       
-      // 确保目录存在
+      // Ensure directory exists
       final directory = Directory(path.substring(0, path.lastIndexOf(Platform.pathSeparator)));
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
       
       await file.writeAsString(content, encoding: utf8);
-      debugPrint('HTML文件已保存到: $path');
+      debugPrint('HTML file saved to: $path');
     } catch (e) {
-      throw Exception('保存HTML文件失败: $e');
+      throw Exception('Failed to save HTML file: $e');
     }
   }
 
-  /// 保存PDF文件
+  /// Save PDF file
   Future<void> _savePdfFile(Uint8List bytes, String path) async {
     try {
       final file = File(path);
       
-      // 确保目录存在
+      // Ensure directory exists
       final directory = Directory(path.substring(0, path.lastIndexOf(Platform.pathSeparator)));
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
       
       await file.writeAsBytes(bytes);
-      debugPrint('PDF文件已保存到: $path');
+      debugPrint('PDF file saved to: $path');
     } catch (e) {
-      throw Exception('保存PDF文件失败: $e');
+      throw Exception('Failed to save PDF file: $e');
     }
   }
   
-  /// 获取PDF页面格式
+  /// Get PDF page format
   PdfPageFormat _getPdfPageFormat(String pageSize) {
     switch (pageSize.toLowerCase()) {
       case 'a3':
@@ -594,13 +594,13 @@ MathJax = {
     }
   }
   
-  /// 转换边距为点数
+  /// Convert margin to points
   double _convertToPoints(double margin) {
-    // 假设输入的边距单位是厘米，转换为点数 (1cm = 28.35 points)
+    // Assume input margin unit is centimeters, convert to points (1cm = 28.35 points)
     return margin * 28.35;
   }
   
-  /// 移除HTML标签，保留纯文本
+  /// Remove HTML tags, keep plain text
   String _stripHtmlTags(String html) {
     return html
         .replaceAll(RegExp(r'<[^>]*>'), '')

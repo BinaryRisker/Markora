@@ -10,7 +10,7 @@ import '../../../export/domain/entities/export_settings.dart';
 /// Document repository provider
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
   final repo = HiveDocumentRepository();
-  // 注意：初始化将在main.dart中完成
+  // Note: Initialization will be completed in main.dart
   return repo;
 });
 
@@ -68,26 +68,26 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
 
   /// Open document tab
   void openDocumentTab(Document document) {
-    // 检查文档是否已经打开（优先检查文件路径，其次检查ID）
+    // Check if document is already open (prioritize file path, then ID)
     int existingIndex = -1;
     
     if (document.filePath != null && document.filePath!.isNotEmpty) {
-      // 如果有文件路径，按文件路径查找
+      // If has file path, search by file path
       existingIndex = state.indexWhere((tab) => 
           tab.document.filePath != null && 
           tab.document.filePath == document.filePath);
     }
     
     if (existingIndex < 0) {
-      // 如果按文件路径没找到，再按ID查找
+      // If not found by file path, search by ID
       existingIndex = state.indexWhere((tab) => tab.document.id == document.id);
     }
     
     if (existingIndex >= 0) {
-      // 如果已经打开，切换到该Tab
+      // If already open, switch to that tab
       setActiveTab(existingIndex);
     } else {
-      // 如果没有打开，创建新Tab
+      // If not open, create new tab
       final newTab = DocumentTab(document: document);
       state = [...state, newTab];
       _activeTabIndex = state.length - 1;
@@ -118,15 +118,15 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
     newState.removeAt(index);
     state = newState;
 
-    // 调整激活Tab索引
+    // Adjust active tab index
     if (_activeTabIndex == index) {
-      // 如果关闭的是当前激活Tab
+      // If closing the currently active tab
       if (newState.isEmpty) {
         _activeTabIndex = -1;
       } else if (index >= newState.length) {
         _activeTabIndex = newState.length - 1;
       }
-      // 否则保持当前索引
+      // Otherwise keep current index
     } else if (_activeTabIndex > index) {
       _activeTabIndex--;
     }
@@ -136,7 +136,7 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
   void setActiveTab(int index) {
     if (index >= 0 && index < state.length && _activeTabIndex != index) {
       _activeTabIndex = index;
-      // 通知状态变化，触发UI更新
+      // Notify state change, trigger UI update
       state = [...state];
     }
   }
@@ -170,7 +170,7 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
       final tab = state[index];
       await _documentService.saveDocument(tab.document);
       
-      // 更新Tab状态为已保存
+      // Update tab state to saved
       final updatedTab = tab.copyWith(isModified: false);
       final newState = List<DocumentTab>.from(state);
       newState[index] = updatedTab;
@@ -212,7 +212,7 @@ final documentTabsProvider = StateNotifierProvider<DocumentTabsNotifier, List<Do
 /// Current active document provider
 final activeDocumentProvider = Provider<Document?>((ref) {
   final tabsNotifier = ref.read(documentTabsProvider.notifier);
-  ref.watch(documentTabsProvider); // 监听tabs变化
+  ref.watch(documentTabsProvider); // Listen to tabs changes
   return tabsNotifier.activeDocument;
 });
 
@@ -234,7 +234,7 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
       );
       state = document;
     } catch (e) {
-      // 错误处理
+      // Error handling
       rethrow;
     }
   }
@@ -268,7 +268,7 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
     if (state != null) {
       try {
         await _documentService.saveDocument(state!);
-        // 更新保存时间
+        // Update save time
         state = state!.copyWith(
           updatedAt: DateTime.now(),
         );
@@ -323,7 +323,7 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
         rethrow;
       }
     }
-    throw Exception('没有可导出的文档');
+    throw Exception('No document to export');
   }
 
   /// Set current document
@@ -371,6 +371,6 @@ final documentModifiedProvider = Provider<bool>((ref) {
   final currentDocument = ref.watch(currentDocumentProvider);
   if (currentDocument == null) return false;
   
-  // 检查文档是否已修改（这里简单地检查更新时间）
-  return true; // 实际实现中可以比较内容哈希或其他标识
+  // Check if document is modified (simple check of update time here)
+  return true; // In actual implementation, can compare content hash or other identifiers
 });

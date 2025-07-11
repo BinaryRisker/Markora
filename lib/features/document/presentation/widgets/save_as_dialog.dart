@@ -10,11 +10,11 @@ import '../../../export/domain/entities/export_settings.dart';
 
 /// File save format
 enum SaveFormat {
-  markdown('Markdown', '.md', 'Markdown文件'),
-  html('HTML', '.html', 'HTML文件'),
-  pdf('PDF', '.pdf', 'PDF文件'),
-  docx('Word', '.docx', 'Word文档'),
-  txt('纯文本', '.txt', '纯文本文件');
+  markdown('Markdown', '.md', 'Markdown File'),
+  html('HTML', '.html', 'HTML File'),
+  pdf('PDF', '.pdf', 'PDF File'),
+  docx('Word', '.docx', 'Word Document'),
+  txt('Plain Text', '.txt', 'Plain Text File');
 
   const SaveFormat(this.displayName, this.extension, this.description);
   
@@ -141,7 +141,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('选择目录失败: $e'),
+            content: Text('Failed to select directory: $e'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -157,22 +157,22 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
   String? _validateInput() {
     final fileName = _fileNameController.text.trim();
     if (fileName.isEmpty) {
-      return '请输入文件名';
+      return 'Please enter filename';
     }
 
     final directory = _selectedDirectory;
     if (directory == null || directory.isEmpty) {
-      return '请选择保存目录';
+      return 'Please select save directory';
     }
 
     if (!Directory(directory).existsSync()) {
-      return '选择的目录不存在';
+      return 'Selected directory does not exist';
     }
 
     // Check if filename contains illegal characters
     final invalidChars = RegExp(r'[<>:"/\\|?*]');
     if (invalidChars.hasMatch(fileName)) {
-      return '文件名包含非法字符';
+      return 'Filename contains illegal characters';
     }
 
     return null;
@@ -230,7 +230,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('保存失败: $e'),
+            content: Text('Save failed: $e'),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -257,7 +257,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
             color: theme.colorScheme.primary,
           ),
           const SizedBox(width: 8),
-          const Text('另存为'),
+          const Text('Save As'),
         ],
       ),
       content: SizedBox(
@@ -268,14 +268,14 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
           children: [
             // Filename input
             Text(
-              '文件名',
+              'Filename',
               style: theme.textTheme.labelMedium,
             ),
             const SizedBox(height: 8),
             TextField(
               controller: _fileNameController,
               decoration: const InputDecoration(
-                hintText: '输入文件名',
+                hintText: 'Enter filename',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -283,7 +283,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
             
             // Save format selection
             Text(
-              '保存格式',
+              'Save Format',
               style: theme.textTheme.labelMedium,
             ),
             const SizedBox(height: 8),
@@ -321,7 +321,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
             
             // Save path selection
             Text(
-              '保存位置',
+              'Save Location',
               style: theme.textTheme.labelMedium,
             ),
             const SizedBox(height: 8),
@@ -331,7 +331,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
                   child: TextField(
                     controller: _pathController,
                     decoration: const InputDecoration(
-                      hintText: '选择保存位置',
+                      hintText: 'Select save location',
                       border: OutlineInputBorder(),
                     ),
                     readOnly: true,
@@ -350,7 +350,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
                           PhosphorIconsRegular.folder,
                           size: 16,
                         ),
-                  label: const Text('浏览'),
+                  label: const Text('Browse'),
                 ),
               ],
             ),
@@ -372,7 +372,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '完整路径:',
+                      'Full Path:',
                       style: theme.textTheme.labelSmall,
                     ),
                     const SizedBox(height: 4),
@@ -393,7 +393,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _saveFile,
@@ -403,7 +403,7 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('保存'),
+              : const Text('Save'),
         ),
       ],
     );
@@ -462,7 +462,7 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog> {
     final theme = Theme.of(context);
     
     return AlertDialog(
-      title: const Text('选择保存目录'),
+      title: const Text('Select Save Directory'),
       content: SizedBox(
         width: 400,
         child: Column(
@@ -473,8 +473,8 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog> {
             TextField(
               controller: _pathController,
               decoration: const InputDecoration(
-                labelText: '目录路径',
-                hintText: '输入或选择目录路径',
+                labelText: 'Directory Path',
+                hintText: 'Enter or select directory path',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -482,7 +482,7 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog> {
             
             // Common paths
             Text(
-              '常用位置',
+              'Common Locations',
               style: theme.textTheme.labelMedium,
             ),
             const SizedBox(height: 8),
@@ -524,7 +524,7 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -534,13 +534,13 @@ class _DirectoryPickerDialogState extends State<_DirectoryPickerDialog> {
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('请选择有效的目录路径'),
+                  content: const Text('Please select a valid directory path'),
                   backgroundColor: theme.colorScheme.error,
                 ),
               );
             }
           },
-          child: const Text('确定'),
+          child: const Text('OK'),
         ),
       ],
     );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'undo_redo_manager.dart';
 
-/// 全局撤销重做状态
+/// Global undo/redo state
 class GlobalUndoRedoState {
   final bool canUndo;
   final bool canRedo;

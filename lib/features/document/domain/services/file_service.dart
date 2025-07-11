@@ -9,49 +9,49 @@ import '../../../../types/document.dart';
 import '../../../export/domain/entities/export_settings.dart';
 import '../../../export/domain/services/export_service.dart';
 
-// 仅在Web环境下可用的导入
-// 在非Web环境下，这些API调用将被跳过
+// Imports only available in Web environment
+// In non-Web environments, these API calls will be skipped
 
-/// 文件服务 - 处理真实的文件操作
+/// File service - handles real file operations
 class FileService {
-  /// 保存文档到指定路径
+  /// Save document to specified path
   Future<void> saveDocumentToFile(Document document, String filePath) async {
     try {
       if (kIsWeb) {
-        // Web环境下使用浏览器下载
+        // Use browser download in Web environment
         await _downloadFileInBrowser(document.content, filePath, 'text/markdown');
-        print('文档已导出: $filePath');
+        print('Document exported: $filePath');
       } else {
         final file = File(filePath);
         
-        // 确保目录存在
+        // Ensure directory exists
         final directory = Directory(path.dirname(filePath));
         if (!await directory.exists()) {
           await directory.create(recursive: true);
         }
         
-        // 写入文件
+        // Write file
         await file.writeAsString(document.content, encoding: utf8);
         
-        print('文档已保存到: $filePath');
+        print('Document saved to: $filePath');
       }
     } catch (e) {
-      throw Exception('保存文档失败: $e');
+      throw Exception('Failed to save document: $e');
     }
   }
 
-  /// 从文件加载文档
+  /// Load document from file
   Future<Document> loadDocumentFromFile(String filePath) async {
     try {
       if (kIsWeb) {
-        // Web环境下，filePath实际是文件名，需要重新选择文件获取内容
+        // In Web environment, filePath is actually filename, need to reselect file to get content
         return await loadDocumentFromWeb();
       } else {
-        // 非Web环境，正常文件操作
+        // Non-Web environment, normal file operations
         final file = File(filePath);
         
         if (!await file.exists()) {
-          throw Exception('文件不存在: $filePath');
+          throw Exception('File does not exist: $filePath');
         }
         
         final content = await file.readAsString(encoding: utf8);
@@ -68,11 +68,11 @@ class FileService {
         );
       }
     } catch (e) {
-      throw Exception('加载文档失败: $e');
+      throw Exception('Failed to load document: $e');
     }
   }
 
-  /// Web环境下加载文档
+  /// Load document in Web environment
   Future<Document> loadDocumentFromWeb() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -83,14 +83,14 @@ class FileService {
       );
       
       if (result == null || result.files.isEmpty) {
-        throw Exception('未选择文件');
+        throw Exception('No file selected');
       }
       
       final file = result.files.first;
       final bytes = file.bytes;
       
       if (bytes == null) {
-        throw Exception('无法读取文件内容');
+        throw Exception('Unable to read file content');
       }
       
       final content = utf8.decode(bytes);
@@ -106,45 +106,45 @@ class FileService {
         updatedAt: now,
       );
     } catch (e) {
-      throw Exception('加载文档失败: $e');
+      throw Exception('Failed to load document: $e');
     }
   }
 
-  /// 导出文档为HTML
+  /// Export document as HTML
   Future<void> exportToHtml(Document document, String filePath) async {
     try {
       final htmlContent = _generateHtmlContent(document);
       
       if (kIsWeb) {
-        // Web环境下使用浏览器下载
+        // Use browser download in Web environment
         await _downloadFileInBrowser(htmlContent, filePath, 'text/html');
-        print('HTML已导出: $filePath');
+        print('HTML exported: $filePath');
       } else {
         final file = File(filePath);
         
-        // 确保目录存在
+        // Ensure directory exists
         final directory = Directory(path.dirname(filePath));
         if (!await directory.exists()) {
           await directory.create(recursive: true);
         }
         
         await file.writeAsString(htmlContent, encoding: utf8);
-        print('HTML已导出到: $filePath');
+        print('HTML exported to: $filePath');
       }
     } catch (e) {
-      throw Exception('导出HTML失败: $e');
+      throw Exception('Failed to export HTML: $e');
     }
   }
 
-  /// 导出文档为PDF
+  /// Export document as PDF
   Future<void> exportToPdf(Document document, String filePath) async {
     try {
       if (kIsWeb) {
-        // Web环境下使用jsPDF生成真正的PDF
+        // Use jsPDF to generate real PDF in Web environment
         await _generatePdfInBrowser(document, filePath);
-        print('PDF已导出: $filePath');
+        print('PDF exported: $filePath');
       } else {
-        // 非Web环境下使用真正的PDF生成
+        // Use real PDF generation in non-Web environment
         final exportService = ExportServiceImpl();
         final settings = ExportSettings(
           format: ExportFormat.pdf,
@@ -170,17 +170,17 @@ class FileService {
         
         final result = await exportService.exportDocument(document, settings);
         if (!result.success) {
-          throw Exception(result.errorMessage ?? 'PDF导出失败');
+          throw Exception(result.errorMessage ?? 'PDF export failed');
         }
         
-        print('PDF已导出到: $filePath');
+        print('PDF exported to: $filePath');
       }
     } catch (e) {
-      throw Exception('导出PDF失败: $e');
+      throw Exception('Failed to export PDF: $e');
     }
   }
 
-  /// 选择保存文件路径
+  /// Select save file path
   Future<String?> selectSaveFilePath({
     String? dialogTitle,
     String? fileName,
@@ -188,11 +188,11 @@ class FileService {
   }) async {
     try {
       if (kIsWeb) {
-        // Web环境下直接返回文件名，不需要路径选择
+        // In Web environment, return filename directly, no path selection needed
         return fileName ?? 'document';
       } else {
         final result = await FilePicker.platform.saveFile(
-          dialogTitle: dialogTitle ?? '保存文件',
+          dialogTitle: dialogTitle ?? 'Save File',
           fileName: fileName,
           allowedExtensions: allowedExtensions,
           type: allowedExtensions != null ? FileType.custom : FileType.any,
@@ -202,14 +202,14 @@ class FileService {
       }
     } catch (e) {
       if (kIsWeb) {
-        // Web环境下如果出错，返回默认文件名
+        // In Web environment, return default filename if error occurs
         return fileName ?? 'document';
       }
-      throw Exception('选择保存路径失败: $e');
+      throw Exception('Failed to select save path: $e');
     }
   }
 
-  /// 选择打开文件路径
+  /// Select open file path
   Future<String?> selectOpenFilePath({
     String? dialogTitle,
     List<String>? allowedExtensions,
@@ -223,10 +223,10 @@ class FileService {
       );
       
       if (kIsWeb) {
-        // Web环境下返回文件名，实际文件内容通过bytes获取
+        // In Web environment, return filename, actual file content obtained through bytes
         return result?.files.first.name;
       } else {
-        // 非Web环境返回文件路径
+        // In non-Web environment, return file path
         return result?.files.first.path;
       }
     } catch (e) {
@@ -234,12 +234,12 @@ class FileService {
     }
   }
 
-  /// 导出文档（根据设置）
+  /// Export document (according to settings)
   Future<void> exportDocument(Document document, ExportSettings settings, {String? targetPath}) async {
     try {
-      // 根据格式选择文件扩展名
+      // Select file extension based on format
       final extension = _getExtensionForFormat(settings.format);
-      // 使用用户输入的文件名，如果没有则使用文档标题
+      // Use user input filename, if none use document title
       final fileName = settings.fileName.isNotEmpty ? settings.fileName : document.title;
       final fullFileName = '$fileName$extension';
       
@@ -247,21 +247,21 @@ class FileService {
       
       if (filePath == null) {
         if (kIsWeb) {
-          // Web环境下直接使用文件名
+          // In Web environment, use filename directly
           filePath = fullFileName;
         } else {
-          // 非Web环境选择保存路径
+          // In non-Web environment, select save path
           filePath = await selectSaveFilePath(
-            dialogTitle: '导出${_getFormatDisplayName(settings.format)}',
+            dialogTitle: 'Export ${_getFormatDisplayName(settings.format)}',
             fileName: fullFileName,
-            allowedExtensions: [extension.substring(1)], // 移除点号
+            allowedExtensions: [extension.substring(1)], // Remove dot
           );
           
-          if (filePath == null) return; // 用户取消了选择
+          if (filePath == null) return; // User cancelled selection
         }
       }
       
-      // 根据格式导出
+      // Export according to format
       switch (settings.format) {
         case ExportFormat.html:
           await exportToHtml(document, filePath);
@@ -270,20 +270,20 @@ class FileService {
           await exportToPdf(document, filePath);
           break;
         case ExportFormat.docx:
-          // 暂时导出为Markdown格式
+          // Temporarily export as Markdown format
           await saveDocumentToFile(document, filePath);
           break;
         case ExportFormat.png:
         case ExportFormat.jpeg:
-          // 图像导出暂未实现
-          throw Exception('图像导出功能暂未实现');
+          // Image export not yet implemented
+          throw Exception('Image export feature not yet implemented');
       }
     } catch (e) {
-      throw Exception('导出文档失败: $e');
+      throw Exception('Failed to export document: $e');
     }
   }
 
-  /// 生成可打印的HTML内容（用于PDF导出）
+  /// Generate printable HTML content (for PDF export)
   String _generatePrintableHtmlContent(Document document) {
     return '''
 <!DOCTYPE html>
@@ -412,11 +412,11 @@ class FileService {
             }
         };
         
-        // 自动打印功能（可选）
+        // Auto print function (optional)
         window.addEventListener('load', function() {
-            // 延迟一秒后显示打印对话框
+            // Show print dialog after 1 second delay
             setTimeout(function() {
-                if (confirm('是否要打印此文档为PDF？')) {
+                if (confirm('Do you want to print this document as PDF?')) {
                     window.print();
                 }
             }, 1000);
@@ -426,7 +426,7 @@ class FileService {
 <body>
     <div class="print-header">
         <h1>${document.title}</h1>
-        <p>导出时间: ${DateTime.now().toString().substring(0, 19)}</p>
+        <p>Export time: ${DateTime.now().toString().substring(0, 19)}</p>
     </div>
     
     <div class="markdown-content">
@@ -434,14 +434,14 @@ class FileService {
     </div>
     
     <div class="print-footer">
-        <p>由 Markora 生成 | ${DateTime.now().toString().substring(0, 10)}</p>
+        <p>Generated by Markora | ${DateTime.now().toString().substring(0, 10)}</p>
     </div>
 </body>
 </html>
 ''';
   }
 
-  /// 生成HTML内容
+  /// Generate HTML content
   String _generateHtmlContent(Document document) {
     return '''
 <!DOCTYPE html>
@@ -540,13 +540,13 @@ class FileService {
 ''';
   }
 
-  /// 简单的Markdown到HTML转换（实际应用中应该使用专门的库）
+  /// Simple Markdown to HTML conversion (should use specialized library in actual application)
   String _convertMarkdownToHtml(String markdown) {
-    // 这里实现简单的Markdown转HTML
-    // 实际应用中应该使用markdown包或其他专门的转换库
+    // Simple Markdown to HTML implementation here
+    // Should use markdown package or other specialized conversion library in actual application
     String html = markdown;
     
-    // 标题转换
+    // Header conversion
     html = html.replaceAllMapped(RegExp(r'^#{6}\s+(.+)$', multiLine: true), (match) => '<h6>${match.group(1)}</h6>');
     html = html.replaceAllMapped(RegExp(r'^#{5}\s+(.+)$', multiLine: true), (match) => '<h5>${match.group(1)}</h5>');
     html = html.replaceAllMapped(RegExp(r'^#{4}\s+(.+)$', multiLine: true), (match) => '<h4>${match.group(1)}</h4>');
@@ -554,27 +554,27 @@ class FileService {
     html = html.replaceAllMapped(RegExp(r'^#{2}\s+(.+)$', multiLine: true), (match) => '<h2>${match.group(1)}</h2>');
     html = html.replaceAllMapped(RegExp(r'^#{1}\s+(.+)$', multiLine: true), (match) => '<h1>${match.group(1)}</h1>');
     
-    // 粗体和斜体
+    // Bold and italic
     html = html.replaceAllMapped(RegExp(r'\*\*(.+?)\*\*'), (match) => '<strong>${match.group(1)}</strong>');
     html = html.replaceAllMapped(RegExp(r'\*(.+?)\*'), (match) => '<em>${match.group(1)}</em>');
     
-    // 代码
+    // Code
     html = html.replaceAllMapped(RegExp(r'`(.+?)`'), (match) => '<code>${match.group(1)}</code>');
     
-    // 链接
+    // Links
     html = html.replaceAllMapped(RegExp(r'\[(.+?)\]\((.+?)\)'), (match) => '<a href="${match.group(2)}">${match.group(1)}</a>');
     
-    // 段落
+    // Paragraphs
     html = html.replaceAll(RegExp(r'\n\n'), '</p><p>');
     html = '<p>$html</p>';
     
-    // 换行
+    // Line breaks
     html = html.replaceAll('\n', '<br>');
     
     return html;
   }
 
-  /// 根据文件扩展名获取文档类型
+  /// Get document type based on file extension
   DocumentType _getDocumentTypeFromExtension(String extension) {
     switch (extension.toLowerCase()) {
       case '.md':
@@ -587,7 +587,7 @@ class FileService {
     }
   }
 
-  /// 根据导出格式获取文件扩展名
+  /// Get file extension based on export format
   String _getExtensionForFormat(ExportFormat format) {
     switch (format) {
       case ExportFormat.html:
@@ -603,7 +603,7 @@ class FileService {
     }
   }
 
-  /// 获取格式显示名称
+  /// Get format display name
   String _getFormatDisplayName(ExportFormat format) {
     switch (format) {
       case ExportFormat.html:
@@ -611,22 +611,22 @@ class FileService {
       case ExportFormat.pdf:
         return 'PDF';
       case ExportFormat.docx:
-        return 'Word文档';
+        return 'Word Document';
       case ExportFormat.png:
-        return 'PNG图像';
+        return 'PNG Image';
       case ExportFormat.jpeg:
-        return 'JPEG图像';
+        return 'JPEG Image';
     }
   }
 
-  /// Web环境下下载文件
+  /// Download file in Web environment
   Future<void> _downloadFileInBrowser(String content, String fileName, String mimeType) async {
     if (kIsWeb) {
       try {
-        // 在Web环境下使用动态调用避免编译错误
+        // Use dynamic calls in Web environment to avoid compilation errors
         final bytes = utf8.encode(content);
         
-        // 使用js interop创建下载
+        // Use js interop to create download
         final jsCode = '''
           (function(content, fileName, mimeType) {
             const bytes = new Uint8Array($bytes);
@@ -640,31 +640,31 @@ class FileService {
           })(arguments[0], arguments[1], arguments[2]);
         ''';
         
-        // 执行JavaScript代码
+        // Execute JavaScript code
         _executeJavaScript(jsCode, [content, fileName, mimeType]);
       } catch (e) {
-        throw Exception('Web环境下载文件失败: $e');
+        throw Exception('Failed to download file in Web environment: $e');
       }
     }
   }
   
-  /// 执行JavaScript代码（仅在Web环境下）
+  /// Execute JavaScript code (Web environment only)
   void _executeJavaScript(String code, List<dynamic> args) {
     if (kIsWeb) {
-      // 在Web环境下，这个方法会被实际的Web实现替换
-      // 在非Web环境下，这个方法不会被调用
-      print('JavaScript代码准备执行: ${code.substring(0, 50)}...');
+      // In Web environment, this method will be replaced by actual Web implementation
+      // In non-Web environment, this method will not be called
+      print('JavaScript code ready to execute: ${code.substring(0, 50)}...');
     }
   }
 
-  /// 在浏览器中生成并下载PDF
+  /// Generate and download PDF in browser
   Future<void> _generatePdfInBrowser(Document document, String filePath) async {
     if (kIsWeb) {
       try {
-        // 创建临时HTML内容用于PDF生成
+        // Create temporary HTML content for PDF generation
         final htmlContent = _convertMarkdownToHtml(document.content);
         
-        // 在Web环境下创建临时div元素
+        // Create temporary div element in Web environment
         final tempDivId = 'temp-pdf-div-${DateTime.now().millisecondsSinceEpoch}';
         final createDivCode = '''
           var tempDiv = document.createElement('div');
@@ -685,7 +685,7 @@ class FileService {
         
         _executeJavaScript(createDivCode, []);
         
-        // 使用html2canvas + jsPDF生成PDF以支持中文
+        // Use html2canvas + jsPDF to generate PDF with Chinese support
         final timestamp = DateTime.now().millisecondsSinceEpoch;
         final documentTitle = document.title.replaceAll(RegExp(r'[^\w\s-]'), '').trim();
         final fileName = documentTitle.isNotEmpty 
@@ -696,11 +696,11 @@ class FileService {
           (function() {
             var tempDiv = document.getElementById('$tempDivId');
             if (!tempDiv) {
-              throw new Error('临时div元素未找到');
+              throw new Error('Temporary div element not found');
             }
             
             if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
-              throw new Error('html2canvas或jsPDF库未加载');
+              throw new Error('html2canvas or jsPDF library not loaded');
             }
             
             html2canvas(tempDiv, {
@@ -736,18 +736,18 @@ class FileService {
                 pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
                 pdf.save('$fileName');
                 
-                console.log('PDF已下载: $fileName');
-                console.log('文件保存在浏览器的默认下载文件夹中');
+                console.log('PDF downloaded: $fileName');
+                console.log('File saved in browser default download folder');
                 
-                // 清理临时元素
+                // Clean up temporary element
                 tempDiv.remove();
               } catch (e) {
-                console.error('PDF生成错误:', e);
+                console.error('PDF generation error:', e);
                 tempDiv.remove();
                 throw e;
               }
             }).catch(function(error) {
-              console.error('Canvas生成错误:', error);
+              console.error('Canvas generation error:', error);
               tempDiv.remove();
               throw error;
             });
@@ -756,12 +756,12 @@ class FileService {
         
         _executeJavaScript(pdfGenerationCode, []);
       } catch (e) {
-        throw Exception('Web PDF生成失败: $e');
+        throw Exception('Web PDF generation failed: $e');
       }
     }
   }
 
-  /// 将文本分割成适合PDF的行
+  /// Split text into lines suitable for PDF
   List<String> _splitTextIntoLines(String text, int maxCharsPerLine) {
     final lines = <String>[];
     final words = text.split(' ');
@@ -785,7 +785,7 @@ class FileService {
     return lines;
   }
 
-  /// 移除HTML标签，保留纯文本
+  /// Remove HTML tags, keep plain text
   String _stripHtmlTags(String html) {
     return html
         .replaceAll(RegExp(r'<[^>]*>'), '')
@@ -797,17 +797,17 @@ class FileService {
         .trim();
   }
 
-  /// 处理文本以适应PDF输出，特别是中文字符
+  /// Process text for PDF output, especially Chinese characters
   String _processTextForPdf(String text) {
-    // 对于包含中文字符的文本，进行特殊处理
+    // Special processing for text containing Chinese characters
     if (text.contains(RegExp(r'[\u4e00-\u9fff]'))) {
-      // 如果包含中文字符，尝试进行编码转换
+      // If contains Chinese characters, try encoding conversion
       try {
-        // 将字符串转换为UTF-8字节然后重新解码
+        // Convert string to UTF-8 bytes then decode again
         final bytes = utf8.encode(text);
         return utf8.decode(bytes);
       } catch (e) {
-        // 如果转换失败，返回原文本
+        // If conversion fails, return original text
         return text;
       }
     }

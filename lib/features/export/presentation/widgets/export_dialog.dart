@@ -402,7 +402,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 
                 // Feature toggles
                 _buildSettingsSwitch(
-                  '包含目录',
+                  'Include Table of Contents',
                   _pdfSettings.includeTableOfContents,
                   (value) => setState(() {
                     _pdfSettings = _pdfSettings.copyWith(includeTableOfContents: value);
@@ -410,7 +410,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 ),
                 
                 _buildSettingsSwitch(
-                  '包含页码',
+                  'Include Page Numbers',
                   _pdfSettings.includePageNumbers,
                   (value) => setState(() {
                     _pdfSettings = _pdfSettings.copyWith(includePageNumbers: value);
@@ -418,7 +418,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
                 ),
                 
                 _buildSettingsSwitch(
-                  '启用语法高亮',
+                  'Enable Syntax Highlighting',
                   _pdfSettings.enableSyntaxHighlighting,
                   (value) => setState(() {
                     _pdfSettings = _pdfSettings.copyWith(enableSyntaxHighlighting: value);
@@ -438,7 +438,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '图像导出设置',
+          'Image Export Settings',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -451,7 +451,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
             child: Column(
               children: [
                 Text(
-                  '图像导出功能正在开发中',
+                  'Image export feature is under development',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -476,7 +476,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Word文档导出设置',
+          'Word Document Export Settings',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -489,7 +489,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
             child: Column(
               children: [
                 Text(
-                  'Word文档导出功能正在开发中',
+                  'Word document export feature is under development',
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -526,7 +526,7 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
           const SizedBox(height: 24),
           
           Text(
-            _currentProgress?.status ?? '准备导出...',
+            _currentProgress?.status ?? 'Preparing export...',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -722,36 +722,36 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
         
         // Add location info for web PDF exports
         if (_selectedFormat == ExportFormat.pdf && kIsWeb) {
-          message += '\n文件已保存到浏览器的默认下载文件夹';
+          message += '\nFile saved to browser\'s default download folder';
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
             backgroundColor: Theme.of(context).colorScheme.primary,
-            duration: const Duration(seconds: 5), // 延长显示时间
+            duration: const Duration(seconds: 5), // Extended display time
             action: _selectedFormat == ExportFormat.pdf && kIsWeb
                 ? SnackBarAction(
-                    label: '查看下载',
+                    label: 'View Downloads',
                     textColor: Colors.white,
                     onPressed: () {
-                      // 显示更详细的说明对话框
+                      // Show more detailed explanation dialog
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text('PDF文件已下载'),
+                          title: const Text('PDF File Downloaded'),
                           content: const Text(
-                            'PDF文件已保存到您浏览器的默认下载文件夹中。\n\n'
-                            '通常位置：\n'
-                            '• Windows: C:\\Users\\用户名\\Downloads\\\n'
-                            '• macOS: /Users/用户名/Downloads/\n'
-                            '• Linux: /home/用户名/Downloads/\n\n'
-                            '您也可以按 Ctrl+J (Windows/Linux) 或 Cmd+Shift+J (macOS) 查看浏览器下载记录。'
+                            'PDF file has been saved to your browser\'s default download folder.\n\n'
+            'Common locations:\n'
+            '• Windows: C:\\Users\\username\\Downloads\\\n'
+            '• macOS: /Users/username/Downloads/\n'
+            '• Linux: /home/username/Downloads/\n\n'
+            'You can also press Ctrl+J (Windows/Linux) or Cmd+Shift+J (macOS) to view browser download history.'
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              child: const Text('知道了'),
+                              child: const Text('Got it'),
                             ),
                           ],
                         ),
