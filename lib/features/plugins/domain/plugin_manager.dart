@@ -118,9 +118,9 @@ class PluginManager extends ChangeNotifier {
         
         final mermaidMetadata = PluginMetadata(
           id: 'mermaid_plugin',
-          name: 'Mermaid图表',
+          name: 'Mermaid Chart',
           version: '1.0.0',
-          description: '支持Mermaid图表渲染的插件',
+          description: 'Plugin for Mermaid chart rendering',
           author: 'Markora Team',
           type: PluginType.syntax,
           minVersion: '1.0.0',

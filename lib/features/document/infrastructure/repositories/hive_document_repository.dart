@@ -31,7 +31,7 @@ class HiveDocumentRepository implements DocumentRepository {
     final now = DateTime.now();
     final document = Document(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: title ?? '未命名文档',
+      title: title ?? 'Untitled Document',
       content: content ?? '',
       type: type,
       createdAt: now,
@@ -70,13 +70,13 @@ class HiveDocumentRepository implements DocumentRepository {
   Future<Document> importDocument(String filePath) async {
     // Implementation will be handled in DocumentService
     // This method is mainly used to save imported documents
-    throw UnimplementedError('请使用DocumentService的importDocument方法');
+    throw UnimplementedError('Please use DocumentService importDocument method');
   }
 
   @override
   Future<String> exportDocument(Document document, String exportPath) async {
     // Implementation will be handled in DocumentService
-    throw UnimplementedError('请使用DocumentService的exportDocument方法');
+    throw UnimplementedError('Please use DocumentService exportDocument method');
   }
 
   @override

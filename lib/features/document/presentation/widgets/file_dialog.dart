@@ -6,13 +6,13 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../types/document.dart';
 import '../providers/document_providers.dart';
 
-/// 文件选择对话框类型
+/// File dialog type
 enum FileDialogType {
-  open, // 打开文件
-  save, // 保存文件
+  open, // Open file
+  save, // Save file
 }
 
-/// 文件选择对话框
+/// File selection dialog
 class FileDialog extends ConsumerStatefulWidget {
   final FileDialogType type;
   final String? initialFileName;
@@ -42,7 +42,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     _searchController = TextEditingController();
     _fileNameController = TextEditingController(text: widget.initialFileName ?? '');
     
-    // 搜索输入监听
+    // Search input listener
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();
@@ -70,27 +70,27 @@ class _FileDialogState extends ConsumerState<FileDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 对话框标题和操作
+            // Dialog title and actions
             _buildHeader(theme),
             
             const SizedBox(height: 16),
             
-            // 搜索栏
+            // Search bar
             _buildSearchBar(theme),
             
             const SizedBox(height: 16),
             
-            // 主内容区域
+            // Main content area
             Expanded(
               child: Row(
                 children: [
-                  // 文件列表
+                  // File list
                   Expanded(
                     flex: _showPreview ? 1 : 2,
                     child: _buildFileList(documentsAsync, theme),
                   ),
                   
-                  // 预览区域
+                  // Preview area
                   if (_showPreview) ...[
                     const SizedBox(width: 16),
                     Expanded(
@@ -104,7 +104,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
             
             const SizedBox(height: 16),
             
-            // 底部区域
+            // Footer area
             _buildFooter(theme),
           ],
         ),
@@ -112,7 +112,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     );
   }
 
-  /// 构建头部
+  /// Build header
   Widget _buildHeader(ThemeData theme) {
     String title = widget.title ?? 
         (widget.type == FileDialogType.open ? 'Open Document' : 'Save Document');
@@ -131,7 +131,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
           ),
         ),
         const Spacer(),
-        // 预览切换按钮
+        // Preview toggle button
         IconButton(
           icon: Icon(_showPreview ? PhosphorIconsRegular.eyeSlash : PhosphorIconsRegular.eye),
           onPressed: () {
@@ -139,24 +139,24 @@ class _FileDialogState extends ConsumerState<FileDialog> {
               _showPreview = !_showPreview;
             });
           },
-          tooltip: _showPreview ? '隐藏预览' : '显示预览',
+          tooltip: _showPreview ? 'Hide Preview' : 'Show Preview',
         ),
-        // 关闭按钮
+        // Close button
         IconButton(
           icon: Icon(PhosphorIconsRegular.x),
           onPressed: () => Navigator.of(context).pop(),
-          tooltip: '关闭',
+          tooltip: 'Close',
         ),
       ],
     );
   }
 
-  /// 构建搜索栏
+  /// Build search bar
   Widget _buildSearchBar(ThemeData theme) {
     return TextField(
       controller: _searchController,
       decoration: InputDecoration(
-        hintText: '搜索文档...',
+        hintText: 'Search documents...',
         prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass),
         suffixIcon: _searchQuery.isNotEmpty
             ? IconButton(
@@ -173,13 +173,13 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     );
   }
 
-  /// 构建文件列表
+  /// Build file list
   Widget _buildFileList(AsyncValue<List<Document>> documentsAsync, ThemeData theme) {
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 列表头部
+          // List header
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -187,23 +187,23 @@ class _FileDialogState extends ConsumerState<FileDialog> {
                 Icon(PhosphorIconsRegular.files, size: 16),
                 const SizedBox(width: 8),
                 Text(
-                  '文档列表',
+                  'Document List',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const Spacer(),
-                // 排序按钮
+                // Sort button
                 PopupMenuButton<String>(
                   icon: Icon(PhosphorIconsRegular.sortAscending, size: 16),
-                  tooltip: '排序',
+                  tooltip: 'Sort',
                   itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'name', child: Text('按名称')),
-                    const PopupMenuItem(value: 'date', child: Text('按日期')),
-                    const PopupMenuItem(value: 'size', child: Text('按大小')),
+                    const PopupMenuItem(value: 'name', child: Text('By Name')),
+                    const PopupMenuItem(value: 'date', child: Text('By Date')),
+                    const PopupMenuItem(value: 'size', child: Text('By Size')),
                   ],
                   onSelected: (value) {
-                    // TODO: 实现排序
+                    // TODO: Implement sorting
                   },
                 ),
               ],
@@ -212,7 +212,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
           
           const Divider(height: 1),
           
-          // 文件列表内容
+          // File list content
           Expanded(
             child: documentsAsync.when(
               data: (documents) => _buildDocumentList(documents, theme),
@@ -225,7 +225,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
                   children: [
                     Icon(PhosphorIconsRegular.warning, size: 48, color: theme.colorScheme.error),
                     const SizedBox(height: 16),
-                    Text('加载文档失败'),
+                    Text('Failed to load documents'),
                     const SizedBox(height: 8),
                     Text(
                       error.toString(),
@@ -242,9 +242,9 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     );
   }
 
-  /// 构建文档列表
+  /// Build document list
   Widget _buildDocumentList(List<Document> documents, ThemeData theme) {
-    // 过滤文档
+    // Filter documents
     final filteredDocuments = documents.where((doc) {
       if (_searchQuery.isEmpty) return true;
       return doc.title.toLowerCase().contains(_searchQuery) ||
@@ -259,13 +259,13 @@ class _FileDialogState extends ConsumerState<FileDialog> {
             Icon(PhosphorIconsRegular.fileX, size: 48, color: theme.colorScheme.outline),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isEmpty ? '暂无文档' : '未找到匹配的文档',
+              _searchQuery.isEmpty ? 'No documents' : 'No matching documents found',
               style: theme.textTheme.bodyLarge,
             ),
             if (_searchQuery.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                '尝试使用不同的关键词搜索',
+                'Try searching with different keywords',
                 style: theme.textTheme.bodySmall,
               ),
             ],
@@ -333,13 +333,13 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     );
   }
 
-  /// 构建预览区域
+  /// Build preview area
   Widget _buildPreviewArea(ThemeData theme) {
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 预览头部
+          // Preview header
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -347,7 +347,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
                 Icon(PhosphorIconsRegular.eye, size: 16),
                 const SizedBox(width: 8),
                 Text(
-                  '预览',
+                  'Preview',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -358,7 +358,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
           
           const Divider(height: 1),
           
-          // 预览内容
+          // Preview content
           Expanded(
             child: _selectedDocument != null
                 ? _buildDocumentPreview(_selectedDocument!, theme)
@@ -373,7 +373,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          '选择文档以查看预览',
+                          'Select a document to view preview',
                           style: theme.textTheme.bodyLarge?.copyWith(
                             color: theme.colorScheme.outline,
                           ),
@@ -387,25 +387,25 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     );
   }
 
-  /// 构建文档预览
+  /// Build document preview
   Widget _buildDocumentPreview(Document document, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 文档信息
-          _buildInfoRow(theme, '标题', document.title),
-          _buildInfoRow(theme, '创建时间', _formatDate(document.createdAt)),
-          _buildInfoRow(theme, '修改时间', _formatDate(document.updatedAt)),
-          _buildInfoRow(theme, '字符数', '${document.content.length}'),
-          _buildInfoRow(theme, '行数', '${document.content.split('\n').length}'),
+          // Document information
+          _buildInfoRow(theme, 'Title', document.title),
+          _buildInfoRow(theme, 'Created', _formatDate(document.createdAt)),
+          _buildInfoRow(theme, 'Modified', _formatDate(document.updatedAt)),
+          _buildInfoRow(theme, 'Characters', '${document.content.length}'),
+          _buildInfoRow(theme, 'Lines', '${document.content.split('\n').length}'),
           
           const SizedBox(height: 16),
           
-          // 内容预览
+          // Content preview
           Text(
-            '内容预览',
+            'Content Preview',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -423,7 +423,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
               ),
               child: SingleChildScrollView(
                 child: Text(
-                  document.content.isNotEmpty ? document.content : '(空文档)',
+                  document.content.isNotEmpty ? document.content : '(Empty document)',
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontFamily: 'monospace',
                     height: 1.4,
@@ -437,7 +437,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     );
   }
 
-  /// 构建信息行
+  /// Build info row
   Widget _buildInfoRow(ThemeData theme, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
@@ -464,15 +464,15 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     );
   }
 
-  /// 构建底部
+  /// Build footer
   Widget _buildFooter(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 保存模式的文件名输入
+        // File name input for save mode
         if (widget.type == FileDialogType.save) ...[
           Text(
-            '文件名',
+            'File Name',
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -481,7 +481,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
           TextField(
             controller: _fileNameController,
             decoration: InputDecoration(
-              hintText: '输入文件名...',
+              hintText: 'Enter file name...',
               suffixText: '.${AppConstants.defaultFileExtension}',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -491,13 +491,13 @@ class _FileDialogState extends ConsumerState<FileDialog> {
           const SizedBox(height: 16),
         ],
         
-        // 按钮区域
+        // Button area
         Row(
           children: [
-            // 统计信息
+            // Statistics
             if (_selectedDocument != null)
               Text(
-                '已选择: ${_selectedDocument!.title}',
+                'Selected: ${_selectedDocument!.title}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.primary,
                 ),
@@ -505,15 +505,15 @@ class _FileDialogState extends ConsumerState<FileDialog> {
             
             const Spacer(),
             
-            // 取消按钮
+            // Cancel button
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('取消'),
+              child: const Text('Cancel'),
             ),
             
             const SizedBox(width: 8),
             
-            // 确认按钮
+            // Confirm button
             FilledButton(
               onPressed: _canConfirm ? _handleConfirm : null,
               child: Text(widget.type == FileDialogType.open ? 'Open' : 'Save'),
@@ -524,7 +524,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     );
   }
 
-  /// 是否可以确认
+  /// Whether can confirm
   bool get _canConfirm {
     if (widget.type == FileDialogType.open) {
       return _selectedDocument != null;
@@ -533,7 +533,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     }
   }
 
-  /// 处理确认
+  /// Handle confirm
   void _handleConfirm() {
     if (!_canConfirm) return;
 
@@ -550,23 +550,23 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     }
   }
 
-  /// 格式化日期
+  /// Format date
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final diff = now.difference(date);
 
     if (diff.inDays == 0) {
-      return '今天 ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+      return 'Today ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     } else if (diff.inDays == 1) {
-      return '昨天 ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+      return 'Yesterday ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     } else if (diff.inDays < 7) {
-      return '${diff.inDays}天前';
+      return '${diff.inDays} days ago';
     } else {
       return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     }
   }
 
-  /// 格式化文件大小
+  /// Format file size
   String _formatFileSize(int bytes) {
     if (bytes < 1024) {
       return '${bytes}B';
@@ -577,22 +577,22 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     }
   }
 
-  /// 获取文档预览
+  /// Get document preview
   String _getDocumentPreview(String content) {
     final lines = content.split('\n');
     final firstLine = lines.isNotEmpty ? lines.first.trim() : '';
     
-    // 移除Markdown标记
-    String preview = firstLine.replaceAll(RegExp(r'^#+\s*'), ''); // 标题
-    preview = preview.replaceAll(RegExp(r'\*\*(.*?)\*\*'), r'$1'); // 粗体
-    preview = preview.replaceAll(RegExp(r'\*(.*?)\*'), r'$1'); // 斜体
-    preview = preview.replaceAll(RegExp(r'`(.*?)`'), r'$1'); // 代码
+    // Remove Markdown markers
+    String preview = firstLine.replaceAll(RegExp(r'^#+\s*'), ''); // Headers
+    preview = preview.replaceAll(RegExp(r'\*\*(.*?)\*\*'), r'$1'); // Bold
+    preview = preview.replaceAll(RegExp(r'\*(.*?)\*'), r'$1'); // Italic
+    preview = preview.replaceAll(RegExp(r'`(.*?)`'), r'$1'); // Code
     
-    return preview.isEmpty ? '(空文档)' : preview;
+    return preview.isEmpty ? '(Empty document)' : preview;
   }
 }
 
-/// 显示打开文件对话框
+/// Show open file dialog
 Future<Document?> showOpenFileDialog(BuildContext context) {
   return showDialog<Document>(
     context: context,
@@ -600,7 +600,7 @@ Future<Document?> showOpenFileDialog(BuildContext context) {
   );
 }
 
-/// 显示保存文件对话框
+/// Show save file dialog
 Future<String?> showSaveFileDialog(BuildContext context, {String? initialFileName}) {
   return showDialog<String>(
     context: context,

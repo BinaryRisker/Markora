@@ -34,7 +34,7 @@ class PluginLoader {
         dependencies: (json['dependencies'] as List<dynamic>?)?.cast<String>() ?? [],
       );
     } catch (e) {
-      debugPrint('加载插件元数据失败: $e');
+      debugPrint('Failed to load plugin metadata: $e');
       return null;
     }
   }
@@ -46,7 +46,7 @@ class PluginLoader {
       
       // Skip directory checks for built-in plugins in web environment
       if (plugin.installPath == null) {
-        throw Exception('插件安装路径为空');
+        throw Exception('Plugin install path is empty');
       }
       
       // Check if it's a built-in plugin (virtual path)
@@ -55,7 +55,7 @@ class PluginLoader {
       if (!isBuiltInPlugin) {
         final pluginDir = Directory(plugin.installPath!);
         if (!await pluginDir.exists()) {
-          throw Exception('插件目录不存在: ${plugin.installPath}');
+          throw Exception('Plugin directory does not exist: ${plugin.installPath}');
         }
       } else {
         debugPrint('Built-in plugin detected, skipping directory checks');
@@ -76,10 +76,10 @@ class PluginLoader {
         case PluginType.integration:
           return await _loadIntegrationPlugin(plugin);
         default:
-          throw Exception('不支持的插件类型: ${plugin.metadata.type}');
+          throw Exception('Unsupported plugin type: ${plugin.metadata.type}');
       }
     } catch (e, stackTrace) {
-      debugPrint('加载插件失败 ${plugin.metadata.id}: $e');
+      debugPrint('Failed to load plugin ${plugin.metadata.id}: $e');
       debugPrint('Stack trace: $stackTrace');
       return null;
     }
@@ -97,7 +97,7 @@ class PluginLoader {
       // Default syntax plugin implementation
       return SyntaxPluginImpl(plugin.metadata);
     } catch (e) {
-      debugPrint('加载语法插件失败: $e');
+      debugPrint('Failed to load syntax plugin: $e');
       return null;
     }
   }
@@ -127,7 +127,7 @@ class PluginLoader {
       // Default renderer plugin implementation
       return RendererPluginImpl(plugin.metadata);
     } catch (e, stackTrace) {
-      debugPrint('加载渲染器插件失败: $e');
+      debugPrint('Failed to load renderer plugin: $e');
       debugPrint('Stack trace: $stackTrace');
       return null;
     }
@@ -154,7 +154,7 @@ class PluginLoader {
       debugPrint('Working mermaid plugin created successfully: ${plugin.runtimeType}');
       return plugin;
     } catch (e, stackTrace) {
-      debugPrint('创建MermaidPlugin失败: $e');
+      debugPrint('Failed to create MermaidPlugin: $e');
       debugPrint('Stack trace: $stackTrace');
       return _ImprovedMermaidPluginProxy(metadata);
     }
@@ -200,7 +200,7 @@ class PluginLoader {
       case 'integration':
         return PluginType.integration;
       default:
-        throw Exception('未知的插件类型: $typeString');
+        throw Exception('Unknown plugin type: $typeString');
     }
   }
   
@@ -224,7 +224,7 @@ class PluginLoader {
       
       return true;
     } catch (e) {
-      debugPrint('验证插件失败: $e');
+      debugPrint('Failed to validate plugin: $e');
       return false;
     }
   }
@@ -379,30 +379,30 @@ class _ImprovedMermaidPluginProxy extends BasePlugin {
     context.toolbarRegistry.registerAction(
       const PluginAction(
         id: 'mermaid',
-        title: 'Mermaid图表',
-        description: '插入Mermaid图表代码块',
+        title: 'Mermaid Chart',
+        description: 'Insert Mermaid chart code block',
         icon: 'account_tree',
       ),
       () {
         // Insert Mermaid code block template
         final template = '''```mermaid
 graph TD
-    A[开始] --> B{判断条件}
-    B -->|是| C[执行操作]
-    B -->|否| D[结束]
+    A[Start] --> B{Condition}
+    B -->|Yes| C[Execute]
+    B -->|No| D[End]
     C --> D
 ```''';
         context.editorController.insertText(template);
       },
     );
     
-    debugPrint('改进的Mermaid插件已加载');
+    debugPrint('Improved Mermaid plugin loaded');
   }
   
   @override
   Future<void> onUnload() async {
     await super.onUnload();
-    debugPrint('改进的Mermaid插件已卸载');
+    debugPrint('Improved Mermaid plugin unloaded');
   }
   
   @override
@@ -446,30 +446,30 @@ class _MermaidPluginProxy extends BasePlugin {
     context.toolbarRegistry.registerAction(
       const PluginAction(
         id: 'mermaid',
-        title: 'Mermaid图表',
-        description: '插入Mermaid图表代码块',
+        title: 'Mermaid Chart',
+        description: 'Insert Mermaid chart code block',
         icon: 'account_tree',
       ),
       () {
         // Insert Mermaid code block template
         final template = '''```mermaid
 graph TD
-    A[开始] --> B{判断条件}
-    B -->|是| C[执行操作]
-    B -->|否| D[结束]
+    A[Start] --> B{Condition}
+    B -->|Yes| C[Execute]
+    B -->|No| D[End]
     C --> D
 ```''';
         context.editorController.insertText(template);
       },
     );
     
-    debugPrint('Mermaid插件已加载');
+    debugPrint('Mermaid plugin loaded');
   }
   
   @override
   Future<void> onUnload() async {
     await super.onUnload();
-    debugPrint('Mermaid插件已卸载');
+    debugPrint('Mermaid plugin unloaded');
   }
   
   @override
@@ -646,7 +646,7 @@ ${widget.code}
         // Error handling
         window.addEventListener('error', function(e) {
             document.getElementById('mermaid-container').innerHTML = 
-                '<div class="error">图表渲染失败: ' + e.message + '</div>';
+                '<div class="error">Chart rendering failed: ' + e.message + '</div>';
         });
     </script>
 </body>
@@ -674,7 +674,7 @@ ${widget.code}
             ),
             const SizedBox(height: 8),
             Text(
-              'Mermaid渲染错误',
+              'Mermaid rendering error',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -771,7 +771,7 @@ class _MermaidWidgetState extends State<MermaidWidget> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Mermaid图表',
+              'Mermaid Chart',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey.shade600,
@@ -779,7 +779,7 @@ class _MermaidWidgetState extends State<MermaidWidget> {
             ),
             const SizedBox(height: 8),
             Text(
-              '代码长度: ${widget.code.length} 字符',
+              'Code length: ${widget.code.length} characters',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey.shade500,
@@ -814,14 +814,14 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Mermaid插件配置',
+            'Mermaid Plugin Configuration',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
           
           // Theme selection
           Text(
-            '主题',
+            'Theme',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -832,10 +832,10 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
             items: const [
-              DropdownMenuItem(value: 'default', child: Text('默认')),
-              DropdownMenuItem(value: 'dark', child: Text('深色')),
-              DropdownMenuItem(value: 'forest', child: Text('森林')),
-              DropdownMenuItem(value: 'neutral', child: Text('中性')),
+              DropdownMenuItem(value: 'default', child: Text('Default')),
+              DropdownMenuItem(value: 'dark', child: Text('Dark')),
+              DropdownMenuItem(value: 'forest', child: Text('Forest')),
+              DropdownMenuItem(value: 'neutral', child: Text('Neutral')),
             ],
             onChanged: (value) {
               setState(() {
@@ -847,8 +847,8 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
           
           // Interaction options
           SwitchListTile(
-            title: const Text('启用交互'),
-            subtitle: const Text('允许用户与图表进行交互'),
+            title: const Text('Enable Interaction'),
+            subtitle: const Text('Allow users to interact with charts'),
             value: _enableInteraction,
             onChanged: (value) {
               setState(() {
@@ -860,7 +860,7 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
           
           // Default dimensions
           Text(
-            '默认尺寸',
+            'Default Size',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -869,7 +869,7 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
               Expanded(
                 child: TextFormField(
                   decoration: const InputDecoration(
-                    labelText: '宽度',
+                    labelText: 'Width',
                     border: OutlineInputBorder(),
                     suffixText: 'px',
                   ),
@@ -884,7 +884,7 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
               Expanded(
                 child: TextFormField(
                   decoration: const InputDecoration(
-                    labelText: '高度',
+                    labelText: 'Height',
                     border: OutlineInputBorder(),
                     suffixText: 'px',
                   ),
@@ -958,8 +958,8 @@ class _MinimalWebMermaidPlugin extends BasePlugin {
       context.toolbarRegistry.registerAction(
         const PluginAction(
           id: 'mermaid',
-          title: 'Mermaid图表',
-          description: '插入Mermaid图表代码块',
+          title: 'Mermaid Chart',
+          description: 'Insert Mermaid chart code block',
           icon: 'account_tree',
         ),
         () {
@@ -968,9 +968,9 @@ class _MinimalWebMermaidPlugin extends BasePlugin {
             // Insert Mermaid code block template
             final template = '''```mermaid
 graph TD
-    A[开始] --> B{判断条件}
-    B -->|是| C[执行操作]
-    B -->|否| D[结束]
+    A[Start] --> B{Condition}
+    B -->|Yes| C[Execute]
+    B -->|No| D[End]
     C --> D
 ```''';
             debugPrint('Inserting mermaid template...');
@@ -1009,7 +1009,7 @@ graph TD
       }
       
       await super.onLoad(context);
-      debugPrint('Minimal Web Mermaid插件已加载成功');
+      debugPrint('Minimal Web Mermaid plugin loaded successfully');
     } catch (e, stackTrace) {
       debugPrint('Minimal Web Mermaid plugin onLoad error: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -1020,7 +1020,7 @@ graph TD
   @override
   Future<void> onUnload() async {
     await super.onUnload();
-    debugPrint('Minimal Web Mermaid插件已卸载');
+    debugPrint('Minimal Web Mermaid plugin unloaded');
   }
   
   @override
@@ -1107,8 +1107,8 @@ class _WebMermaidPlugin extends BasePlugin {
       context.toolbarRegistry.registerAction(
         const PluginAction(
           id: 'mermaid',
-          title: 'Mermaid图表',
-          description: '插入Mermaid图表代码块',
+          title: 'Mermaid Chart',
+          description: 'Insert Mermaid chart code block',
           icon: 'account_tree',
         ),
         () {
@@ -1116,9 +1116,9 @@ class _WebMermaidPlugin extends BasePlugin {
             // Insert Mermaid code block template
             final template = '''```mermaid
 graph TD
-    A[开始] --> B{判断条件}
-    B -->|是| C[执行操作]
-    B -->|否| D[结束]
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Execute]
+    B -->|No| D[End]
     C --> D
 ```''';
             // Get the latest editor controller from the plugin context service
@@ -1132,7 +1132,7 @@ graph TD
         },
       );
       
-      debugPrint('Web Mermaid插件已加载（无WebView，仅工具栏）');
+      debugPrint('Web Mermaid plugin loaded (no WebView, toolbar only)');
     } catch (e) {
       debugPrint('Web Mermaid plugin onLoad error: $e');
       rethrow;
@@ -1142,7 +1142,7 @@ graph TD
   @override
   Future<void> onUnload() async {
     await super.onUnload();
-    debugPrint('Web Mermaid插件已卸载');
+    debugPrint('Web Mermaid plugin unloaded');
   }
   
   @override
@@ -1224,7 +1224,7 @@ class WebMermaidWidget extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Mermaid 图表',
+                'Mermaid Chart',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -1273,7 +1273,7 @@ class WebMermaidWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Web环境中图表功能有限，请使用桌面版获得完整体验',
+                    'Chart functionality is limited in web environment, please use desktop version for full experience',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.orange.shade800,
@@ -1322,8 +1322,8 @@ class _WorkingMermaidPlugin extends BasePlugin {
       context.toolbarRegistry.registerAction(
         const PluginAction(
           id: 'mermaid',
-          title: 'Mermaid图表',
-          description: '插入Mermaid图表代码块',
+          title: 'Mermaid Chart',
+          description: 'Insert Mermaid chart code block',
           icon: 'account_tree',
         ),
         () {
@@ -1331,9 +1331,9 @@ class _WorkingMermaidPlugin extends BasePlugin {
             // Insert Mermaid code block template
             final template = '''```mermaid
 graph TD
-    A[开始] --> B{判断条件}
-    B -->|是| C[执行操作]
-    B -->|否| D[结束]
+    A[Start] --> B{Decision}
+    B -->|Yes| C[Execute]
+    B -->|No| D[End]
     C --> D
 ```''';
             // Get the latest editor controller from the plugin context service
@@ -1347,7 +1347,7 @@ graph TD
         },
       );
       
-      debugPrint('Working Mermaid插件已加载 (kIsWeb: $kIsWeb)');
+      debugPrint('Working Mermaid plugin loaded (kIsWeb: $kIsWeb)');
     } catch (e) {
       debugPrint('Working Mermaid plugin onLoad error: $e');
       rethrow;
@@ -1357,7 +1357,7 @@ graph TD
   @override
   Future<void> onUnload() async {
     await super.onUnload();
-    debugPrint('Working Mermaid插件已卸载');
+    debugPrint('Working Mermaid plugin unloaded');
   }
   
   @override
@@ -1538,7 +1538,7 @@ ${widget.code}
         window.addEventListener('error', function(e) {
             console.error('Mermaid error:', e);
             document.getElementById('mermaid-container').innerHTML = 
-                '<div class="error">图表渲染失败: ' + e.message + '</div>';
+                '<div class="error">Chart rendering failed: ' + e.message + '</div>';
         });
         
         // Auto-resize
@@ -1571,7 +1571,7 @@ ${widget.code}
             ),
             const SizedBox(height: 8),
             Text(
-              'Mermaid渲染错误',
+              'Mermaid Rendering Error',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -1648,7 +1648,7 @@ ${widget.code}
               ),
               const SizedBox(width: 8),
               Text(
-                'Mermaid 图表',
+                'Mermaid Chart',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -1697,7 +1697,7 @@ ${widget.code}
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Web环境中图表功能有限，请使用桌面版获得完整体验',
+                    'Chart functionality is limited in web environment, please use desktop version for full experience',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.orange.shade800,
@@ -1735,14 +1735,14 @@ class _WorkingMermaidConfigWidgetState extends State<WorkingMermaidConfigWidget>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Mermaid插件配置',
+            'Mermaid Plugin Configuration',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 16),
           
           // Theme selection
           Text(
-            '主题',
+            'Theme',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -1753,10 +1753,10 @@ class _WorkingMermaidConfigWidgetState extends State<WorkingMermaidConfigWidget>
               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
             items: const [
-              DropdownMenuItem(value: 'default', child: Text('默认')),
-              DropdownMenuItem(value: 'dark', child: Text('深色')),
-              DropdownMenuItem(value: 'forest', child: Text('森林')),
-              DropdownMenuItem(value: 'neutral', child: Text('中性')),
+              DropdownMenuItem(value: 'default', child: Text('Default')),
+              DropdownMenuItem(value: 'dark', child: Text('Dark')),
+              DropdownMenuItem(value: 'forest', child: Text('Forest')),
+              DropdownMenuItem(value: 'neutral', child: Text('Neutral')),
             ],
             onChanged: (value) {
               setState(() {
@@ -1768,7 +1768,7 @@ class _WorkingMermaidConfigWidgetState extends State<WorkingMermaidConfigWidget>
           
           // Height setting
           Text(
-            '默认高度',
+            'Default Height',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
@@ -1789,8 +1789,8 @@ class _WorkingMermaidConfigWidgetState extends State<WorkingMermaidConfigWidget>
           
           // Interaction toggle
           SwitchListTile(
-            title: const Text('启用交互'),
-            subtitle: const Text('允许用户与图表交互'),
+            title: const Text('Enable Interaction'),
+            subtitle: const Text('Allow users to interact with charts'),
             value: _enableInteraction,
             onChanged: (value) {
               setState(() {
@@ -1914,7 +1914,7 @@ class WebMermaidDisplayWidget extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    'Web环境显示代码预览，桌面版可渲染完整图表',
+                    'Web environment shows code preview, desktop version can render full charts',
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.orange.shade800,
