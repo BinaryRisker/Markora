@@ -62,6 +62,7 @@ class FileService {
           title: fileName,
           content: content,
           type: _getDocumentTypeFromExtension(path.extension(filePath)),
+          filePath: filePath,
           createdAt: await file.lastModified(),
           updatedAt: await file.lastModified(),
         );
