@@ -14,6 +14,7 @@ class PluginContextService {
   SyntaxRegistryImpl? _syntaxRegistry;
   MenuRegistryImpl? _menuRegistry;
   EditorController? _editorController;
+  BuildContext? _context;
   bool _isInitialized = false;
   
   /// Initialize the plugin context service
@@ -40,6 +41,12 @@ class PluginContextService {
     debugPrint('Plugin context service: Editor controller set to ${controller.runtimeType}');
   }
   
+  /// Set the current build context
+  void setBuildContext(BuildContext context) {
+    _context = context;
+    debugPrint('Plugin context service: Build context set');
+  }
+  
   /// Get the plugin context
   PluginContext get context {
     _ensureInitialized();
@@ -50,6 +57,7 @@ class PluginContextService {
       syntaxRegistry: _syntaxRegistry!,
       toolbarRegistry: _toolbarRegistry!,
       menuRegistry: _menuRegistry!,
+      context: _context,
     );
   }
   

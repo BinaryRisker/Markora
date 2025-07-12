@@ -71,12 +71,14 @@ class PluginContext {
     required this.syntaxRegistry,
     required this.toolbarRegistry,
     required this.menuRegistry,
+    this.context,
   });
   
   final EditorController editorController;
   final SyntaxRegistry syntaxRegistry;
   final ToolbarRegistry toolbarRegistry;
   final MenuRegistry menuRegistry;
+  final BuildContext? context;
 }
 
 /// Markora plugin base class

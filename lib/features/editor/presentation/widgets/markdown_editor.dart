@@ -171,6 +171,7 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
         final contextService = ref.read(pluginContextServiceProvider);
         final editorController = EditorControllerImpl(_controller);
         contextService.setEditorController(editorController);
+        contextService.setBuildContext(context);
         debugPrint('Editor registered to plugin system');
       } catch (e) {
         debugPrint('Failed to register editor to plugin system: $e');
@@ -474,6 +475,10 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
         return Icons.format_list_bulleted;
       case 'format_list_numbered':
         return Icons.format_list_numbered;
+      case 'export':
+        return Icons.file_upload_outlined;
+      case 'import':
+        return Icons.file_download_outlined;
       default:
         return Icons.extension;
     }

@@ -165,6 +165,3 @@ flutter:
     - assets/icons/
     - assets/fonts/
     - assets/themes/
-    - assets/pandoc/windows/
-    - assets/pandoc/macos/
-    - assets/pandoc/linux/
