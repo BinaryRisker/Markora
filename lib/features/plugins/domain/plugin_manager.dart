@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as path;
 import '../../../types/plugin.dart';
 import 'plugin_interface.dart';
@@ -41,9 +42,9 @@ class PluginManager extends ChangeNotifier {
   /// Initialize plugin manager
   Future<void> initialize(PluginContext context) async {
     _context = context;
-    await _loadPluginConfigs();
-    await _scanPlugins();
-    await _loadEnabledPlugins();
+    await _loadPluginConfigs();  // 先加载配置
+    await _scanPlugins();        // 再扫描插件
+    await _loadEnabledPlugins(); // 最后加载启用的插件
   }
   
   /// Add event listener
@@ -181,11 +182,12 @@ class PluginManager extends ChangeNotifier {
         final mermaidPluginDir = Directory('plugins/mermaid_plugin');
         await _scanPluginDirectory(mermaidPluginDir);
         
-        // Automatically enable mermaid plugin
+        // 检查Mermaid插件是否需要自动启用（仅在首次加载时）
         final mermaidPlugin = _plugins['mermaid_plugin'];
-        if (mermaidPlugin != null) {
+        if (mermaidPlugin != null && mermaidPlugin.status == PluginStatus.installed) {
+          // 只有在状态为installed时才自动启用（首次加载）
           _plugins['mermaid_plugin'] = mermaidPlugin.copyWith(status: PluginStatus.enabled);
-          debugPrint('Mermaid plugin automatically enabled');
+          debugPrint('Mermaid plugin automatically enabled (first time)');
         }
         
         // Create and enable pandoc export plugin for non-web platforms
@@ -206,11 +208,15 @@ class PluginManager extends ChangeNotifier {
           dependencies: [],
         );
         
+        // 检查是否已有保存的状态
+        final existingPandocPlugin = _plugins['pandoc_export_plugin'];
+        final pandocStatus = existingPandocPlugin?.status ?? PluginStatus.enabled; // 默认启用
+        
         final pandocPlugin = Plugin(
           metadata: pandocMetadata,
-          status: PluginStatus.enabled,  // Auto-enable
+          status: pandocStatus,  // 使用保存的状态或默认启用
           installPath: 'builtin://pandoc_export_plugin',  // Virtual path
-          installDate: DateTime.now(),
+          installDate: existingPandocPlugin?.installDate ?? DateTime.now(),
           lastUpdated: DateTime.now(),
         );
         
@@ -246,9 +252,7 @@ class PluginManager extends ChangeNotifier {
       debugPrint('Successfully loaded plugin metadata: ${metadata.id} - ${metadata.name}');
       
       final existingPlugin = _plugins[metadata.id];
-      final status = existingPlugin?.status ?? 
-          (metadata.id == 'mermaid_plugin' || metadata.id == 'pandoc_export_plugin' 
-           ? PluginStatus.enabled : PluginStatus.installed);
+      final status = existingPlugin?.status ?? PluginStatus.installed;
       
       final plugin = Plugin(
         metadata: metadata,
@@ -366,7 +370,12 @@ class PluginManager extends ChangeNotifier {
     
     if (plugin.status == PluginStatus.enabled) return true;
     
-    return await loadPlugin(pluginId);
+    final success = await loadPlugin(pluginId);
+    if (success) {
+      // 保存插件状态
+      await _savePluginConfigs();
+    }
+    return success;
   }
   
   /// Disable plugin
@@ -376,7 +385,12 @@ class PluginManager extends ChangeNotifier {
     
     if (plugin.status != PluginStatus.enabled) return true;
     
-    return await unloadPlugin(pluginId);
+    final success = await unloadPlugin(pluginId);
+    if (success) {
+      // 保存插件状态
+      await _savePluginConfigs();
+    }
+    return success;
   }
   
   /// Install plugin
@@ -532,13 +546,88 @@ class PluginManager extends ChangeNotifier {
   
   /// Load plugin configurations
   Future<void> _loadPluginConfigs() async {
-    // TODO: Load plugin configurations from persistent storage
-    // Can use Hive, SharedPreferences, etc.
+    try {
+      // 使用Hive存储插件配置
+      final box = await Hive.openBox('plugin_configs');
+      
+      // 加载插件状态
+      final pluginStates = box.get('plugin_states', defaultValue: <String, String>{}) as Map<String, String>;
+      
+      // 加载插件配置
+      final pluginConfigs = box.get('plugin_configs', defaultValue: <String, Map<String, dynamic>>{}) as Map<String, Map<String, dynamic>>;
+      
+      // 应用加载的状态
+      for (final entry in pluginStates.entries) {
+        final pluginId = entry.key;
+        final statusString = entry.value;
+        final status = _parsePluginStatus(statusString);
+        
+        // 如果插件已存在，更新其状态
+        if (_plugins.containsKey(pluginId)) {
+          _plugins[pluginId] = _plugins[pluginId]!.copyWith(status: status);
+        }
+      }
+      
+      // 应用加载的配置
+      for (final entry in pluginConfigs.entries) {
+        final pluginId = entry.key;
+        final config = entry.value;
+        
+        _configs[pluginId] = PluginConfig(
+          pluginId: pluginId,
+          config: config,
+          isEnabled: pluginStates[pluginId] == 'enabled',
+        );
+      }
+      
+      debugPrint('Plugin configurations loaded successfully');
+    } catch (e) {
+      debugPrint('Failed to load plugin configurations: $e');
+    }
   }
   
   /// Save plugin configurations
   Future<void> _savePluginConfigs() async {
-    // TODO: Save plugin configurations to persistent storage
+    try {
+      // 使用Hive存储插件配置
+      final box = await Hive.openBox('plugin_configs');
+      
+      // 保存插件状态
+      final pluginStates = <String, String>{};
+      for (final plugin in _plugins.values) {
+        pluginStates[plugin.metadata.id] = plugin.status.name;
+      }
+      await box.put('plugin_states', pluginStates);
+      
+      // 保存插件配置
+      final pluginConfigs = <String, Map<String, dynamic>>{};
+      for (final config in _configs.values) {
+        pluginConfigs[config.pluginId] = config.config;
+      }
+      await box.put('plugin_configs', pluginConfigs);
+      
+      debugPrint('Plugin configurations saved successfully');
+    } catch (e) {
+      debugPrint('Failed to save plugin configurations: $e');
+    }
+  }
+  
+  /// 解析插件状态字符串
+  PluginStatus _parsePluginStatus(String statusString) {
+    switch (statusString) {
+      case 'enabled':
+        return PluginStatus.enabled;
+      case 'disabled':
+        return PluginStatus.disabled;
+      case 'installed':
+        return PluginStatus.installed;
+      case 'error':
+        return PluginStatus.error;
+      case 'loading':
+        return PluginStatus.loading;
+      default:
+        return PluginStatus.installed;
+    }
   }
   
   /// Get plugin instance

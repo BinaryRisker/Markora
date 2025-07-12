@@ -187,9 +187,22 @@ class PandocService {
       // 添加额外选项
       if (options != null) {
         for (final entry in options.entries) {
-          args.add('--${entry.key}');
-          if (entry.value.isNotEmpty) {
-            args.add(entry.value);
+          if (entry.key == 'pdf-engine' && entry.value == 'auto') {
+            // 动态检测PDF引擎
+            final engine = await _detectPdfEngine();
+            if (engine != 'html') {
+              args.add('--pdf-engine');
+              args.add(engine);
+            } else {
+              // 如果没有PDF引擎，先导出为HTML再转换
+              debugPrint('PandocService: No PDF engine available, using HTML fallback');
+              return await _exportPdfViaHtml(markdownContent, outputPath);
+            }
+          } else {
+            args.add('--${entry.key}');
+            if (entry.value.isNotEmpty) {
+              args.add(entry.value);
+            }
           }
         }
       }
@@ -291,12 +304,83 @@ class PandocService {
     }
   }
   
+  /// 检测可用的PDF引擎
+  static Future<String> _detectPdfEngine() async {
+    // PDF引擎优先级列表（从最简单到最复杂）
+    final engines = ['wkhtmltopdf', 'weasyprint', 'prince', 'pdflatex', 'xelatex', 'lualatex'];
+    
+    for (final engine in engines) {
+      try {
+        final result = await _processManager.run([engine, '--version']);
+        if (result.exitCode == 0) {
+          debugPrint('PandocService: Found PDF engine: $engine');
+          return engine;
+        }
+      } catch (e) {
+        // 引擎不可用，继续尝试下一个
+      }
+    }
+    
+    // 如果没有找到任何PDF引擎，使用HTML作为中间格式
+    debugPrint('PandocService: No PDF engine found, will use HTML conversion');
+    return 'html';
+  }
+  
+  /// 通过HTML中间格式导出PDF（当没有PDF引擎时）
+  static Future<PandocResult> _exportPdfViaHtml(String markdownContent, String outputPath) async {
+    try {
+      // 创建临时HTML文件
+      final tempDir = Directory.systemTemp.createTempSync('markora_pdf_export_');
+      final tempHtmlFile = File(path.join(tempDir.path, 'temp.html'));
+      
+      // 获取pandoc路径
+      final pandocPath = await _getPandocPath();
+      if (pandocPath == null) {
+        return PandocResult.failure('Pandoc not available');
+      }
+      
+      // 先转换为HTML
+      final htmlResult = await exportFromMarkdown(
+        markdownContent: markdownContent,
+        format: PandocExportFormat.html,
+        outputPath: tempHtmlFile.path,
+        options: {
+          'standalone': '',
+          'mathjax': '',
+          'css': '', // 可以添加CSS样式
+        },
+      );
+      
+      if (!htmlResult.success) {
+        return PandocResult.failure('HTML conversion failed: ${htmlResult.error}');
+      }
+      
+      // 清理临时文件
+      try {
+        await tempDir.delete(recursive: true);
+      } catch (e) {
+        debugPrint('Failed to clean temp directory: $e');
+      }
+      
+      // 返回HTML文件路径，并提示用户手动转换
+      return PandocResult.failure(
+        'PDF export requires a PDF engine (like wkhtmltopdf, xelatex, etc.). '
+        'Please install a PDF engine or export as HTML instead. '
+        'Available engines: wkhtmltopdf, weasyprint, pdflatex, xelatex, lualatex'
+      );
+      
+    } catch (e) {
+      return PandocResult.failure('PDF export via HTML failed: $e');
+    }
+  }
+
   /// 获取默认的导出选项
   static Map<String, String> getDefaultExportOptions(PandocExportFormat format) {
     switch (format) {
       case PandocExportFormat.pdf:
         return {
-          'pdf-engine': 'xelatex',
+          // 动态检测PDF引擎
+          'pdf-engine': 'auto', // 特殊标记，表示需要动态检测
           'variable': 'geometry:margin=1in',
         };
       case PandocExportFormat.html:
