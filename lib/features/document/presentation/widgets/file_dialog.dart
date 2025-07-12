@@ -6,6 +6,31 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../types/document.dart';
 import '../providers/document_providers.dart';
 
+/// File dialog constants
+class _FileDialogConstants {
+  static const double dialogWidth = 800.0;
+  static const double dialogHeight = 600.0;
+  static const double borderRadius = 8.0;
+  static const double spacing = 16.0;
+  static const double smallSpacing = 8.0;
+  static const double padding = 12.0;
+  static const int maxPreviewLength = 200;
+  static const int maxPreviewLines = 5;
+}
+
+/// Document sort type
+enum DocumentSortType {
+  name,
+  date,
+  size,
+}
+
+/// Document sort order
+enum SortOrder {
+  ascending,
+  descending,
+}
+
 /// File dialog type
 enum FileDialogType {
   open, // Open file
@@ -35,6 +60,19 @@ class _FileDialogState extends ConsumerState<FileDialog> {
   String _searchQuery = '';
   Document? _selectedDocument;
   bool _showPreview = false;
+  DocumentSortType _sortType = DocumentSortType.date;
+  SortOrder _sortOrder = SortOrder.descending;
+  
+  // Cached regex patterns for performance
+  static final RegExp _headerRegex = RegExp(r'^#+\s*');
+  static final RegExp _boldRegex = RegExp(r'\*\*(.*?)\*\*');
+  static final RegExp _italicRegex = RegExp(r'\*(.*?)\*');
+  static final RegExp _codeRegex = RegExp(r'`(.*?)`');
+  static final RegExp _linkRegex = RegExp(r'\[([^\]]+)\]\([^\)]+\)');
+  static final RegExp _imageRegex = RegExp(r'!\[([^\]]*)\]\([^\)]+\)');
+  static final RegExp _listRegex = RegExp(r'^[\s]*[-*+]\s+');
+  static final RegExp _numberedListRegex = RegExp(r'^[\s]*\d+\.\s+');
+  static final RegExp _blockquoteRegex = RegExp(r'^>\s*');
 
   @override
   void initState() {
@@ -64,21 +102,21 @@ class _FileDialogState extends ConsumerState<FileDialog> {
 
     return Dialog(
       child: Container(
-        width: 800,
-        height: 600,
-        padding: const EdgeInsets.all(16),
+        width: _FileDialogConstants.dialogWidth,
+        height: _FileDialogConstants.dialogHeight,
+        padding: const EdgeInsets.all(_FileDialogConstants.spacing),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Dialog title and actions
             _buildHeader(theme),
             
-            const SizedBox(height: 16),
+            const SizedBox(height: _FileDialogConstants.spacing),
             
             // Search bar
             _buildSearchBar(theme),
             
-            const SizedBox(height: 16),
+            const SizedBox(height: _FileDialogConstants.spacing),
             
             // Main content area
             Expanded(
@@ -92,7 +130,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
                   
                   // Preview area
                   if (_showPreview) ...[
-                    const SizedBox(width: 16),
+                    const SizedBox(width: _FileDialogConstants.spacing),
                     Expanded(
                       flex: 1,
                       child: _buildPreviewArea(theme),
@@ -102,7 +140,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
               ),
             ),
             
-            const SizedBox(height: 16),
+            const SizedBox(height: _FileDialogConstants.spacing),
             
             // Footer area
             _buildFooter(theme),
@@ -153,23 +191,51 @@ class _FileDialogState extends ConsumerState<FileDialog> {
 
   /// Build search bar
   Widget _buildSearchBar(ThemeData theme) {
-    return TextField(
-      controller: _searchController,
-      decoration: InputDecoration(
-        hintText: 'Search documents...',
-        prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass),
-        suffixIcon: _searchQuery.isNotEmpty
-            ? IconButton(
-                icon: Icon(PhosphorIconsRegular.x),
-                onPressed: () {
-                  _searchController.clear();
-                },
-              )
-            : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Search documents...',
+              prefixIcon: const Icon(PhosphorIconsRegular.magnifyingGlass),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(PhosphorIconsRegular.x),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(_FileDialogConstants.borderRadius),
+              ),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+          ),
         ),
-      ),
+        const SizedBox(width: _FileDialogConstants.smallSpacing),
+        _buildSortButton(theme),
+        const SizedBox(width: _FileDialogConstants.smallSpacing),
+        IconButton(
+          icon: Icon(
+            _showPreview ? PhosphorIconsRegular.eyeSlash : PhosphorIconsRegular.eye,
+          ),
+          onPressed: () {
+            setState(() {
+              _showPreview = !_showPreview;
+            });
+          },
+          tooltip: _showPreview ? 'Hide Preview' : 'Show Preview',
+        ),
+      ],
     );
   }
 
@@ -193,19 +259,7 @@ class _FileDialogState extends ConsumerState<FileDialog> {
                   ),
                 ),
                 const Spacer(),
-                // Sort button
-                PopupMenuButton<String>(
-                  icon: Icon(PhosphorIconsRegular.sortAscending, size: 16),
-                  tooltip: 'Sort',
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'name', child: Text('By Name')),
-                    const PopupMenuItem(value: 'date', child: Text('By Date')),
-                    const PopupMenuItem(value: 'size', child: Text('By Size')),
-                  ],
-                  onSelected: (value) {
-                    // TODO: Implement sorting
-                  },
-                ),
+
               ],
             ),
           ),
@@ -242,145 +296,383 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     );
   }
 
-  /// Build document list
-  Widget _buildDocumentList(List<Document> documents, ThemeData theme) {
-    // Filter documents
-    final filteredDocuments = documents.where((doc) {
-      if (_searchQuery.isEmpty) return true;
-      return doc.title.toLowerCase().contains(_searchQuery) ||
-             doc.content.toLowerCase().contains(_searchQuery);
-    }).toList();
-
-    if (filteredDocuments.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(PhosphorIconsRegular.fileX, size: 48, color: theme.colorScheme.outline),
-            const SizedBox(height: 16),
-            Text(
-              _searchQuery.isEmpty ? 'No documents' : 'No matching documents found',
-              style: theme.textTheme.bodyLarge,
-            ),
-            if (_searchQuery.isNotEmpty) ...[
-              const SizedBox(height: 8),
+  /// Build sort button
+  Widget _buildSortButton(ThemeData theme) {
+    return PopupMenuButton<String>(
+      icon: Icon(
+        _sortOrder == SortOrder.ascending 
+            ? PhosphorIconsRegular.sortAscending 
+            : PhosphorIconsRegular.sortDescending,
+        size: 20,
+      ),
+      tooltip: 'Sort documents',
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'name',
+          child: Row(
+            children: [
+              Icon(PhosphorIconsRegular.textAa, size: 16),
+              const SizedBox(width: 8),
+              const Text('By Name'),
+              if (_sortType == DocumentSortType.name) ...[
+                const Spacer(),
+                Icon(PhosphorIconsRegular.check, size: 16),
+              ],
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'date',
+          child: Row(
+            children: [
+              Icon(PhosphorIconsRegular.calendar, size: 16),
+              const SizedBox(width: 8),
+              const Text('By Date'),
+              if (_sortType == DocumentSortType.date) ...[
+                const Spacer(),
+                Icon(PhosphorIconsRegular.check, size: 16),
+              ],
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'size',
+          child: Row(
+            children: [
+              Icon(PhosphorIconsRegular.fileText, size: 16),
+              const SizedBox(width: 8),
+              const Text('By Size'),
+              if (_sortType == DocumentSortType.size) ...[
+                const Spacer(),
+                Icon(PhosphorIconsRegular.check, size: 16),
+              ],
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem(
+          value: 'toggle_order',
+          child: Row(
+            children: [
+              Icon(
+                _sortOrder == SortOrder.ascending 
+                    ? PhosphorIconsRegular.sortDescending 
+                    : PhosphorIconsRegular.sortAscending,
+                size: 16,
+              ),
+              const SizedBox(width: 8),
               Text(
-                'Try searching with different keywords',
-                style: theme.textTheme.bodySmall,
+                _sortOrder == SortOrder.ascending 
+                    ? 'Sort Descending' 
+                    : 'Sort Ascending',
               ),
             ],
-          ],
+          ),
         ),
+      ],
+      onSelected: (value) {
+        setState(() {
+          switch (value) {
+            case 'name':
+              _sortType = DocumentSortType.name;
+              break;
+            case 'date':
+              _sortType = DocumentSortType.date;
+              break;
+            case 'size':
+              _sortType = DocumentSortType.size;
+              break;
+            case 'toggle_order':
+              _sortOrder = _sortOrder == SortOrder.ascending 
+                  ? SortOrder.descending 
+                  : SortOrder.ascending;
+              break;
+          }
+        });
+      },
+    );
+  }
+
+  /// Build document list
+  Widget _buildDocumentList(List<Document> documents, ThemeData theme) {
+    try {
+      // Filter documents based on search query
+      final filteredDocuments = _filterDocuments(documents);
+      
+      // Sort documents
+      _sortDocuments(filteredDocuments);
+
+      if (filteredDocuments.isEmpty) {
+        return _buildEmptyState(theme);
+      }
+
+      return ListView.builder(
+        itemCount: filteredDocuments.length,
+        itemBuilder: (context, index) {
+          final document = filteredDocuments[index];
+          final isSelected = _selectedDocument?.id == document.id;
+          
+          return _buildDocumentListItem(document, isSelected, theme);
+        },
       );
+    } catch (e) {
+      return _buildErrorState(theme, e.toString());
     }
-
-    return ListView.builder(
-      itemCount: filteredDocuments.length,
-      itemBuilder: (context, index) {
-        final document = filteredDocuments[index];
-        final isSelected = _selectedDocument?.id == document.id;
-
-        return GestureDetector(
-          onDoubleTap: () {
-            if (widget.type == FileDialogType.open) {
-              _handleConfirm();
-            }
-          },
-          child: ListTile(
-            selected: isSelected,
-            leading: Icon(
-              PhosphorIconsRegular.fileText,
-              color: isSelected ? theme.colorScheme.primary : null,
+  }
+  
+  /// Filter documents based on search query
+  List<Document> _filterDocuments(List<Document> documents) {
+    if (_searchQuery.isEmpty) {
+      return List.from(documents);
+    }
+    
+    final query = _searchQuery.toLowerCase();
+    return documents.where((doc) {
+      return doc.title.toLowerCase().contains(query) ||
+             doc.content.toLowerCase().contains(query) ||
+             _getDocumentPreview(doc.content).toLowerCase().contains(query);
+    }).toList();
+  }
+  
+  /// Sort documents based on current sort settings
+  void _sortDocuments(List<Document> documents) {
+    documents.sort((a, b) {
+      int comparison;
+      switch (_sortType) {
+        case DocumentSortType.name:
+          comparison = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+          break;
+        case DocumentSortType.date:
+          comparison = a.updatedAt.compareTo(b.updatedAt);
+          break;
+        case DocumentSortType.size:
+          comparison = a.content.length.compareTo(b.content.length);
+          break;
+      }
+      return _sortOrder == SortOrder.ascending ? comparison : -comparison;
+    });
+  }
+  
+  /// Build empty state widget
+  Widget _buildEmptyState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            _searchQuery.isNotEmpty 
+                ? PhosphorIconsRegular.magnifyingGlass 
+                : PhosphorIconsRegular.fileX,
+            size: 48,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: _FileDialogConstants.spacing),
+          Text(
+            _searchQuery.isNotEmpty ? 'No documents found' : 'No documents available',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
-            title: Text(
-              document.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+          ),
+          if (_searchQuery.isNotEmpty) ...[
+            const SizedBox(height: _FileDialogConstants.smallSpacing),
+            Text(
+              'Try adjusting your search terms or clear the search',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+              textAlign: TextAlign.center,
             ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _formatDate(document.updatedAt),
-                  style: theme.textTheme.bodySmall,
-                ),
-                if (document.content.isNotEmpty)
-                  Text(
-                    _getDocumentPreview(document.content),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                    ),
-                  ),
-              ],
+          ] else ...[
+            const SizedBox(height: _FileDialogConstants.smallSpacing),
+            Text(
+              'Create your first document to get started',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
-            trailing: Text(
-              _formatFileSize(document.content.length),
+          ],
+        ],
+      ),
+    );
+  }
+  
+  /// Build error state widget
+  Widget _buildErrorState(ThemeData theme, String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            PhosphorIconsRegular.warning,
+            size: 48,
+            color: theme.colorScheme.error,
+          ),
+          const SizedBox(height: _FileDialogConstants.spacing),
+          Text(
+            'Error loading documents',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+          const SizedBox(height: _FileDialogConstants.smallSpacing),
+          Text(
+            'Please try again later',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+          if (error.isNotEmpty) ...[
+            const SizedBox(height: _FileDialogConstants.smallSpacing),
+            Text(
+              'Error: $error',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                fontFamily: 'monospace',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+  
+  /// Build document list item
+  Widget _buildDocumentListItem(Document document, bool isSelected, ThemeData theme) {
+    return GestureDetector(
+      onDoubleTap: () {
+        if (widget.type == FileDialogType.open) {
+          _handleConfirm();
+        }
+      },
+      child: ListTile(
+        selected: isSelected,
+        leading: Icon(
+          PhosphorIconsRegular.fileText,
+          color: isSelected ? theme.colorScheme.primary : null,
+        ),
+        title: Text(
+          document.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _formatDate(document.updatedAt),
               style: theme.textTheme.bodySmall,
             ),
-            onTap: () {
-              setState(() {
-                _selectedDocument = document;
-                if (widget.type == FileDialogType.save) {
-                  _fileNameController.text = document.title;
-                }
-              });
-            },
-          ),
-        );
-      },
+            if (document.content.isNotEmpty)
+              Text(
+                _getDocumentPreview(document.content),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+          ],
+        ),
+        trailing: Text(
+          _formatFileSize(document.content.length),
+          style: theme.textTheme.bodySmall,
+        ),
+        onTap: () {
+          setState(() {
+            _selectedDocument = document;
+            if (widget.type == FileDialogType.save) {
+              _fileNameController.text = document.title;
+            }
+          });
+        },
+      ),
     );
   }
 
   /// Build preview area
   Widget _buildPreviewArea(ThemeData theme) {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+        borderRadius: BorderRadius.circular(_FileDialogConstants.borderRadius),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Preview header
-          Padding(
-            padding: const EdgeInsets.all(12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(_FileDialogConstants.padding),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(_FileDialogConstants.borderRadius),
+                topRight: Radius.circular(_FileDialogConstants.borderRadius),
+              ),
+            ),
             child: Row(
               children: [
-                Icon(PhosphorIconsRegular.eye, size: 16),
-                const SizedBox(width: 8),
+                Icon(
+                  PhosphorIconsRegular.eye,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: _FileDialogConstants.smallSpacing),
                 Text(
                   'Preview',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+                if (_selectedDocument != null) ...[
+                  const Spacer(),
+                  Text(
+                    _formatFileSize(_selectedDocument!.content.length),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-          
-          const Divider(height: 1),
           
           // Preview content
           Expanded(
             child: _selectedDocument != null
                 ? _buildDocumentPreview(_selectedDocument!, theme)
-                : Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          PhosphorIconsRegular.fileText,
-                          size: 48,
-                          color: theme.colorScheme.outline,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Select a document to view preview',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: theme.colorScheme.outline,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                : _buildNoPreviewState(theme),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  /// Build no preview state
+  Widget _buildNoPreviewState(ThemeData theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            PhosphorIconsRegular.fileText,
+            size: 48,
+            color: theme.colorScheme.outline.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: _FileDialogConstants.spacing),
+          Text(
+            'Select a document to preview',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
+          ),
+          const SizedBox(height: _FileDialogConstants.smallSpacing),
+          Text(
+            'Document content will appear here',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.outline.withValues(alpha: 0.7),
+            ),
           ),
         ],
       ),
@@ -390,40 +682,88 @@ class _FileDialogState extends ConsumerState<FileDialog> {
   /// Build document preview
   Widget _buildDocumentPreview(Document document, ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(_FileDialogConstants.padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Document information
-          _buildInfoRow(theme, 'Title', document.title),
-          _buildInfoRow(theme, 'Created', _formatDate(document.createdAt)),
-          _buildInfoRow(theme, 'Modified', _formatDate(document.updatedAt)),
-          _buildInfoRow(theme, 'Characters', '${document.content.length}'),
-          _buildInfoRow(theme, 'Lines', '${document.content.split('\n').length}'),
+          // Document info
+          _buildInfoSection(document, theme),
           
-          const SizedBox(height: 16),
+          const SizedBox(height: _FileDialogConstants.spacing),
           
-          // Content preview
-          Text(
-            'Content Preview',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+          // Content preview section
+          _buildContentPreviewSection(document, theme),
+        ],
+      ),
+    );
+  }
+  
+  /// Build document info section
+  Widget _buildInfoSection(Document document, ThemeData theme) {
+    final stats = _getDocumentStats(document);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Document Info',
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
           ),
-          const SizedBox(height: 8),
+        ),
+        const SizedBox(height: _FileDialogConstants.smallSpacing),
+        _buildInfoRow(theme, 'Title', document.title),
+        _buildInfoRow(theme, 'Created', _formatDate(document.createdAt)),
+        _buildInfoRow(theme, 'Modified', _formatDate(document.updatedAt)),
+        _buildInfoRow(theme, 'Size', _formatFileSize(document.content.length)),
+        _buildInfoRow(theme, 'Lines', '${stats['lines']}'),
+        _buildInfoRow(theme, 'Words', '${stats['words']}'),
+        _buildInfoRow(theme, 'Characters', '${stats['characters']}'),
+      ],
+    );
+  }
+  
+  /// Build content preview section
+  Widget _buildContentPreviewSection(Document document, ThemeData theme) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Content Preview',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              if (document.content.length > _FileDialogConstants.maxPreviewLength * 5)
+                Text(
+                  'Truncated',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: _FileDialogConstants.smallSpacing),
           
           Expanded(
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(_FileDialogConstants.padding),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(_FileDialogConstants.borderRadius),
+                border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
               ),
               child: SingleChildScrollView(
                 child: Text(
-                  document.content.isNotEmpty ? document.content : '(Empty document)',
+                  document.content.isNotEmpty 
+                      ? _getLimitedContent(document.content)
+                      : '(Empty document)',
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontFamily: 'monospace',
                     height: 1.4,
@@ -435,6 +775,44 @@ class _FileDialogState extends ConsumerState<FileDialog> {
         ],
       ),
     );
+  }
+  
+  /// Get document statistics
+  Map<String, int> _getDocumentStats(Document document) {
+    final content = document.content;
+    final lines = content.split('\n');
+    final words = content.trim().isEmpty 
+        ? 0 
+        : content.trim().split(RegExp(r'\s+')).length;
+    
+    return {
+      'lines': lines.length,
+      'words': words,
+      'characters': content.length,
+    };
+  }
+  
+  /// Get limited content for preview
+  String _getLimitedContent(String content) {
+    const maxLines = 50;
+    const maxChars = 2000;
+    
+    final lines = content.split('\n');
+    
+    if (lines.length <= maxLines && content.length <= maxChars) {
+      return content;
+    }
+    
+    if (lines.length > maxLines) {
+      final limitedLines = lines.take(maxLines).join('\n');
+      return '$limitedLines\n\n... (${lines.length - maxLines} more lines)';
+    }
+    
+    if (content.length > maxChars) {
+      return '${content.substring(0, maxChars)}\n\n... (${content.length - maxChars} more characters)';
+    }
+    
+    return content;
   }
 
   /// Build info row
@@ -477,51 +855,122 @@ class _FileDialogState extends ConsumerState<FileDialog> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: _FileDialogConstants.smallSpacing),
           TextField(
             controller: _fileNameController,
             decoration: InputDecoration(
               hintText: 'Enter file name...',
               suffixText: '.${AppConstants.defaultFileExtension}',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(_FileDialogConstants.borderRadius),
               ),
+              errorText: _getFileNameError(),
             ),
+            onChanged: (value) {
+              setState(() {}); // Trigger rebuild to update error state
+            },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: _FileDialogConstants.spacing),
         ],
         
-        // Button area
+        // Status and button area
         Row(
           children: [
-            // Statistics
-            if (_selectedDocument != null)
-              Text(
-                'Selected: ${_selectedDocument!.title}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            
-            const Spacer(),
-            
-            // Cancel button
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+            // Status information
+            Expanded(
+              child: _buildStatusInfo(theme),
             ),
             
-            const SizedBox(width: 8),
-            
-            // Confirm button
-            FilledButton(
-              onPressed: _canConfirm ? _handleConfirm : null,
-              child: Text(widget.type == FileDialogType.open ? 'Open' : 'Save'),
-            ),
+            // Action buttons
+            _buildActionButtons(theme),
           ],
         ),
       ],
     );
+  }
+  
+  /// Build status information
+  Widget _buildStatusInfo(ThemeData theme) {
+    if (_selectedDocument != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Selected: ${_selectedDocument!.title}',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            '${_formatFileSize(_selectedDocument!.content.length)} • ${_formatDate(_selectedDocument!.updatedAt)}',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
+      );
+    }
+    
+    if (widget.type == FileDialogType.save && _fileNameController.text.isNotEmpty) {
+      return Text(
+        'File will be saved as: ${_fileNameController.text}.${AppConstants.defaultFileExtension}',
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
+      );
+    }
+    
+    return const SizedBox.shrink();
+  }
+  
+  /// Build action buttons
+  Widget _buildActionButtons(ThemeData theme) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Cancel button
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        
+        const SizedBox(width: _FileDialogConstants.smallSpacing),
+        
+        // Confirm button
+        FilledButton(
+          onPressed: _canConfirm ? _handleConfirm : null,
+          child: Text(widget.type == FileDialogType.open ? 'Open' : 'Save'),
+        ),
+      ],
+    );
+  }
+  
+  /// Get file name validation error
+  String? _getFileNameError() {
+    if (widget.type != FileDialogType.save) return null;
+    
+    final fileName = _fileNameController.text.trim();
+    if (fileName.isEmpty) return null;
+    
+    // Check for invalid characters
+    final invalidChars = RegExp(r'[<>:"/\\|?*]');
+    if (invalidChars.hasMatch(fileName)) {
+      return 'File name contains invalid characters';
+    }
+    
+    // Check for reserved names (Windows)
+    final reservedNames = ['CON', 'PRN', 'AUX', 'NUL', 'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9', 'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'];
+    if (reservedNames.contains(fileName.toUpperCase())) {
+      return 'File name is reserved';
+    }
+    
+    // Check length
+    if (fileName.length > 255) {
+      return 'File name is too long';
+    }
+    
+    return null;
   }
 
   /// Whether can confirm
@@ -529,7 +978,8 @@ class _FileDialogState extends ConsumerState<FileDialog> {
     if (widget.type == FileDialogType.open) {
       return _selectedDocument != null;
     } else {
-      return _fileNameController.text.trim().isNotEmpty;
+      final fileName = _fileNameController.text.trim();
+      return fileName.isNotEmpty && _getFileNameError() == null;
     }
   }
 
@@ -579,16 +1029,58 @@ class _FileDialogState extends ConsumerState<FileDialog> {
 
   /// Get document preview
   String _getDocumentPreview(String content) {
-    final lines = content.split('\n');
-    final firstLine = lines.isNotEmpty ? lines.first.trim() : '';
+    if (content.isEmpty) {
+      return '(Empty document)';
+    }
     
-    // Remove Markdown markers
-    String preview = firstLine.replaceAll(RegExp(r'^#+\s*'), ''); // Headers
-    preview = preview.replaceAll(RegExp(r'\*\*(.*?)\*\*'), r'$1'); // Bold
-    preview = preview.replaceAll(RegExp(r'\*(.*?)\*'), r'$1'); // Italic
-    preview = preview.replaceAll(RegExp(r'`(.*?)`'), r'$1'); // Code
+    final lines = content.split('\n');
+    final previewLines = lines.take(_FileDialogConstants.maxPreviewLines).toList();
+    
+    // Join lines and limit length
+    String preview = previewLines.join(' ').trim();
+    
+    // Remove Markdown markers using cached regex patterns
+    preview = _cleanMarkdownText(preview);
+    
+    // Limit preview length
+    if (preview.length > _FileDialogConstants.maxPreviewLength) {
+      preview = '${preview.substring(0, _FileDialogConstants.maxPreviewLength)}...';
+    }
     
     return preview.isEmpty ? '(Empty document)' : preview;
+  }
+  
+  /// Clean markdown text by removing formatting
+  String _cleanMarkdownText(String text) {
+    String cleaned = text;
+    
+    // Remove headers
+    cleaned = cleaned.replaceAll(_headerRegex, '');
+    
+    // Remove bold and italic
+    cleaned = cleaned.replaceAll(_boldRegex, r'$1');
+    cleaned = cleaned.replaceAll(_italicRegex, r'$1');
+    
+    // Remove inline code
+    cleaned = cleaned.replaceAll(_codeRegex, r'$1');
+    
+    // Remove links but keep text
+    cleaned = cleaned.replaceAll(_linkRegex, r'$1');
+    
+    // Remove images
+    cleaned = cleaned.replaceAll(_imageRegex, r'$1');
+    
+    // Remove list markers
+    cleaned = cleaned.replaceAll(_listRegex, '');
+    cleaned = cleaned.replaceAll(_numberedListRegex, '');
+    
+    // Remove blockquotes
+    cleaned = cleaned.replaceAll(_blockquoteRegex, '');
+    
+    // Clean up extra whitespace
+    cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
+    
+    return cleaned;
   }
 }
 
