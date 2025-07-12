@@ -15,7 +15,7 @@ import 'features/document/domain/services/file_service.dart';
 import 'features/document/presentation/widgets/document_tabs.dart';
 import 'features/document/presentation/widgets/save_as_dialog.dart';
 import 'features/settings/presentation/widgets/settings_page.dart';
-import 'features/export/presentation/widgets/export_dialog.dart';
+
 import 'features/editor/domain/services/global_editor_manager.dart';
 import 'features/plugins/presentation/pages/plugin_management_page.dart';
 import 'features/plugins/domain/plugin_context_service.dart';
@@ -785,19 +785,11 @@ ${l10n.blockFormula}：
   }
 
   void _handleExportDocument() {
-    // Get current document or create temporary document
-    final currentDoc = ref.read(currentDocumentProvider);
-    final l10n = AppLocalizations.of(context)!;
-    final documentToExport = currentDoc ?? Document(
-      id: 'temp_export',
-      title: l10n.untitledDocument,
-      content: _currentContent,
-      type: DocumentType.markdown,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+    // Export functionality has been moved to plugins
+    // Show notification for now
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Export functionality is now available through plugins')),
     );
-
-    showExportDialog(context, documentToExport);
   }
 
   void _handleUndo() {

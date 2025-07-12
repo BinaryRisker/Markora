@@ -6,8 +6,7 @@ import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
 
 import '../../../../types/document.dart';
-import '../../../export/domain/entities/export_settings.dart';
-import '../../../export/domain/services/export_service.dart';
+
 
 // Imports only available in Web environment
 // In non-Web environments, these API calls will be skipped
@@ -110,75 +109,9 @@ class FileService {
     }
   }
 
-  /// Export document as HTML
-  Future<void> exportToHtml(Document document, String filePath) async {
-    try {
-      final htmlContent = _generateHtmlContent(document);
-      
-      if (kIsWeb) {
-        // Use browser download in Web environment
-        await _downloadFileInBrowser(htmlContent, filePath, 'text/html');
-        print('HTML exported: $filePath');
-      } else {
-        final file = File(filePath);
-        
-        // Ensure directory exists
-        final directory = Directory(path.dirname(filePath));
-        if (!await directory.exists()) {
-          await directory.create(recursive: true);
-        }
-        
-        await file.writeAsString(htmlContent, encoding: utf8);
-        print('HTML exported to: $filePath');
-      }
-    } catch (e) {
-      throw Exception('Failed to export HTML: $e');
-    }
-  }
 
-  /// Export document as PDF
-  Future<void> exportToPdf(Document document, String filePath) async {
-    try {
-      if (kIsWeb) {
-        // Use jsPDF to generate real PDF in Web environment
-        await _generatePdfInBrowser(document, filePath);
-        print('PDF exported: $filePath');
-      } else {
-        // Use real PDF generation in non-Web environment
-        final exportService = ExportServiceImpl();
-        final settings = ExportSettings(
-          format: ExportFormat.pdf,
-          outputPath: path.dirname(filePath),
-          fileName: path.basenameWithoutExtension(filePath),
-          pdfSettings: const PdfExportSettings(
-            pageSize: 'A4',
-            fontSize: 12.0,
-            lineHeight: 1.6,
-            marginTop: 2.0,
-            marginBottom: 2.0,
-            marginLeft: 2.0,
-            marginRight: 2.0,
-            includePageNumbers: true,
-          ),
-          htmlSettings: const HtmlExportSettings(
-            enableMathJax: true,
-            enableMermaid: false,
-            responsiveDesign: false,
-            includeTableOfContents: false,
-          ),
-        );
-        
-        final result = await exportService.exportDocument(document, settings);
-        if (!result.success) {
-          throw Exception(result.errorMessage ?? 'PDF export failed');
-        }
-        
-        print('PDF exported to: $filePath');
-      }
-    } catch (e) {
-      throw Exception('Failed to export PDF: $e');
-    }
-  }
+
+
 
   /// Select save file path
   Future<String?> selectSaveFilePath({
@@ -234,54 +167,7 @@ class FileService {
     }
   }
 
-  /// Export document (according to settings)
-  Future<void> exportDocument(Document document, ExportSettings settings, {String? targetPath}) async {
-    try {
-      // Select file extension based on format
-      final extension = _getExtensionForFormat(settings.format);
-      // Use user input filename, if none use document title
-      final fileName = settings.fileName.isNotEmpty ? settings.fileName : document.title;
-      final fullFileName = '$fileName$extension';
-      
-      String? filePath = targetPath;
-      
-      if (filePath == null) {
-        if (kIsWeb) {
-          // In Web environment, use filename directly
-          filePath = fullFileName;
-        } else {
-          // In non-Web environment, select save path
-          filePath = await selectSaveFilePath(
-            dialogTitle: 'Export ${_getFormatDisplayName(settings.format)}',
-            fileName: fullFileName,
-            allowedExtensions: [extension.substring(1)], // Remove dot
-          );
-          
-          if (filePath == null) return; // User cancelled selection
-        }
-      }
-      
-      // Export according to format
-      switch (settings.format) {
-        case ExportFormat.html:
-          await exportToHtml(document, filePath);
-          break;
-        case ExportFormat.pdf:
-          await exportToPdf(document, filePath);
-          break;
-        case ExportFormat.docx:
-          // Temporarily export as Markdown format
-          await saveDocumentToFile(document, filePath);
-          break;
-        case ExportFormat.png:
-        case ExportFormat.jpeg:
-          // Image export not yet implemented
-          throw Exception('Image export feature not yet implemented');
-      }
-    } catch (e) {
-      throw Exception('Failed to export document: $e');
-    }
-  }
+
 
   /// Generate printable HTML content (for PDF export)
   String _generatePrintableHtmlContent(Document document) {

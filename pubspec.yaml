@@ -91,6 +91,9 @@ dependencies:
   
   # Web PDF生成
   js: ^0.6.7
+  
+  # 进程调用（用于pandoc）
+  process: ^5.0.2
 
 dev_dependencies:
   flutter_test:

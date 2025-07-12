@@ -22,8 +22,8 @@ import '../../../math/presentation/widgets/math_formula_widget.dart';
 import '../../../syntax_highlighting/presentation/widgets/code_block_widget.dart';
 
 
-import '../../../export/presentation/widgets/export_dialog.dart';
-import '../../../export/domain/entities/export_settings.dart';
+
+
 import '../../../document/presentation/providers/document_providers.dart';
 import '../../../settings/presentation/providers/settings_providers.dart';
 
@@ -745,17 +745,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
             ),
           ),
           const Spacer(),
-          // Export buttons
-          _buildToolbarButton(
-            icon: Icons.picture_as_pdf,
-            tooltip: AppLocalizations.of(context)!.exportAsPdf,
-            onPressed: () => _exportToPdf(),
-          ),
-          _buildToolbarButton(
-            icon: Icons.html,
-            tooltip: AppLocalizations.of(context)!.exportAsHtml,
-            onPressed: () => _exportToHtml(),
-          ),
+          // Refresh button
           _buildToolbarButton(
             icon: Icons.refresh,
             tooltip: AppLocalizations.of(context)!.refreshPreview,
@@ -965,32 +955,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     }
   }
 
-  /// Export as PDF
-  void _exportToPdf() {
-    _showExportDialog(ExportFormat.pdf);
-  }
 
-  /// Export as HTML
-  void _exportToHtml() {
-    _showExportDialog(ExportFormat.html);
-  }
-
-  /// Show export dialog with specified format
-  void _showExportDialog(ExportFormat format) {
-    // Get current document or create temporary document
-    final currentDoc = ref.read(currentDocumentProvider);
-    final l10n = AppLocalizations.of(context)!;
-    final documentToExport = currentDoc ?? Document(
-      id: 'temp_export',
-      title: l10n.untitledDocument,
-      content: widget.content,
-      type: DocumentType.markdown,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    showExportDialog(context, documentToExport, initialFormat: format);
-  }
 
   /// Refresh preview
   void _refreshPreview() {
