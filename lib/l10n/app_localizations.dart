@@ -113,8 +113,14 @@ abstract class AppLocalizations {
   /// Welcome message description
   ///
   /// In en, this message translates to:
-  /// **'A powerful Markdown editor that supports:'**
+  /// **'A lightweight and elegant Markdown editor.'**
   String get welcomeDescription;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
 
   /// Core features section title
   ///

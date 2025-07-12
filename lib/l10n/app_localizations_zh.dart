@@ -15,7 +15,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get welcomeTitle => '欢迎使用 Markora';
 
   @override
-  String get welcomeDescription => '这是一个功能强大的 Markdown 编辑器，支持：';
+  String get welcomeDescription => '一款轻量、优雅的 Markdown 编辑器。';
+
+  @override
+  String get ok => '确定';
 
   @override
   String get coreFeatures => '核心功能';

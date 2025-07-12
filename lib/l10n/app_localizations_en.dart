@@ -15,7 +15,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeTitle => 'Welcome to Markora';
 
   @override
-  String get welcomeDescription => 'A powerful Markdown editor that supports:';
+  String get welcomeDescription => 'A lightweight and elegant Markdown editor.';
+
+  @override
+  String get ok => 'OK';
 
   @override
   String get coreFeatures => 'Core Features';
