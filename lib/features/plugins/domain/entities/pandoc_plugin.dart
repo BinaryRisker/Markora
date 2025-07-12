@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../types/plugin.dart';
 import '../plugin_interface.dart';
 import '../services/pandoc_service.dart';
+import '../services/pandoc_asset_manager.dart';
 import '../../presentation/widgets/pandoc_export_dialog.dart';
 import '../../presentation/widgets/pandoc_import_dialog.dart';
 import '../plugin_context_service.dart';
@@ -12,6 +13,7 @@ class PandocExportPlugin extends MarkoraPlugin {
   
   bool _isInitialized = false;
   PluginContext? _context;
+  final PandocAssetManager _assetManager = PandocAssetManager();
   
   @override
   PluginMetadata get metadata => const PluginMetadata(
@@ -34,9 +36,14 @@ class PandocExportPlugin extends MarkoraPlugin {
   Future<void> onLoad(PluginContext context) async {
     debugPrint('PandocExportPlugin: Starting onLoad');
     _context = context;
-    _isInitialized = true;
     
     try {
+      // 初始化Pandoc资源管理器
+      debugPrint('PandocExportPlugin: Initializing Pandoc assets...');
+      final assetInitialized = await _assetManager.initialize();
+      debugPrint('PandocExportPlugin: Asset manager initialized: $assetInitialized');
+      
+      _isInitialized = true;
       // 注册导出菜单项
       debugPrint('PandocExportPlugin: Registering menu items');
       context.menuRegistry.registerMenuItem(

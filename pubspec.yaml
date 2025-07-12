@@ -94,6 +94,12 @@ dependencies:
   
   # 进程调用（用于pandoc）
   process: ^5.0.2
+  
+  # HTTP请求（用于下载脚本）
+  http: ^1.2.1
+  
+  # 压缩文件处理（用于下载脚本）
+  archive: ^3.6.1
 
 dev_dependencies:
   flutter_test:
@@ -159,3 +165,6 @@ flutter:
     - assets/icons/
     - assets/fonts/
     - assets/themes/
+    - assets/pandoc/windows/
+    - assets/pandoc/macos/
+    - assets/pandoc/linux/

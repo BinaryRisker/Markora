@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:process/process.dart';
 import 'package:path/path.dart' as path;
+import 'pandoc_asset_manager.dart';
 
 /// Pandoc支持的导出格式
 enum PandocExportFormat {
@@ -82,21 +83,32 @@ class PandocResult {
 /// Pandoc服务
 class PandocService {
   static const ProcessManager _processManager = LocalProcessManager();
+  static final PandocAssetManager _assetManager = PandocAssetManager();
   
-  /// 检查pandoc是否已安装
-  static Future<bool> isPandocInstalled() async {
-    try {
-      // 跨平台检查pandoc是否可用
-      final result = await _processManager.run([
-        'pandoc',
-        '--version'
-      ]);
-      
-      return result.exitCode == 0;
-    } catch (e) {
-      debugPrint('Pandoc availability check failed: $e');
-      return false;
+  /// 获取可用的Pandoc路径（优先使用内置版本）
+  static Future<String?> _getPandocPath() async {
+    // 首先尝试内置版本
+    if (await _assetManager.isAvailable()) {
+      return _assetManager.pandocPath;
     }
+    
+    // 如果内置版本不可用，尝试系统安装的版本
+    try {
+      final result = await _processManager.run(['pandoc', '--version']);
+      if (result.exitCode == 0) {
+        return 'pandoc'; // 使用系统PATH中的pandoc
+      }
+    } catch (e) {
+      debugPrint('System pandoc not available: $e');
+    }
+    
+    return null;
+  }
+  
+  /// 检查pandoc是否已安装（包括内置版本）
+  static Future<bool> isPandocInstalled() async {
+    final pandocPath = await _getPandocPath();
+    return pandocPath != null;
   }
   
   /// 检查平台是否支持pandoc
@@ -107,18 +119,24 @@ class PandocService {
   
   /// 获取pandoc版本信息
   static Future<String?> getPandocVersion() async {
+    // 首先尝试内置版本
+    if (await _assetManager.isAvailable()) {
+      final version = await _assetManager.getPandocVersion();
+      if (version != null) {
+        return 'pandoc $version (built-in)';
+      }
+    }
+    
+    // 尝试系统版本
     try {
-      final result = await _processManager.run([
-        'pandoc',
-        '--version'
-      ]);
+      final result = await _processManager.run(['pandoc', '--version']);
       
       if (result.exitCode == 0) {
         final output = result.stdout.toString();
         // 提取版本号 (通常在第一行)
         final lines = output.split('\n');
         if (lines.isNotEmpty) {
-          return lines.first.trim();
+          return '${lines.first.trim()} (system)';
         }
       }
     } catch (e) {
@@ -148,9 +166,15 @@ class PandocService {
       final tempMdFile = File(path.join(tempDir.path, 'temp.md'));
       await tempMdFile.writeAsString(markdownContent);
       
+      // 获取pandoc路径
+      final pandocPath = await _getPandocPath();
+      if (pandocPath == null) {
+        return PandocResult.failure('Pandoc not available');
+      }
+      
       // 构建pandoc命令
       final args = [
-        'pandoc',
+        pandocPath,
         tempMdFile.path,
         '-o',
         outputPath,
@@ -205,9 +229,15 @@ class PandocService {
     }
     
     try {
+      // 获取pandoc路径
+      final pandocPath = await _getPandocPath();
+      if (pandocPath == null) {
+        return PandocResult.failure('Pandoc not available');
+      }
+      
       // 构建pandoc命令
       final args = [
-        'pandoc',
+        pandocPath,
         inputPath,
         '--from',
         format.extension,
