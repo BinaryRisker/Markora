@@ -434,6 +434,22 @@ graph TD
   
   @override
   Future<void> onUnload() async {
+    try {
+      // 清理语法注册
+      final contextService = PluginContextService.instance;
+      final currentContext = contextService.context;
+      
+      // 取消注册语法规则
+      currentContext.syntaxRegistry.removeSyntax('mermaid');
+      
+      // 取消注册工具栏操作
+      currentContext.toolbarRegistry.unregisterAction('mermaid');
+      
+      debugPrint('Improved Mermaid plugin: Cleaned up syntax and toolbar registrations');
+    } catch (e) {
+      debugPrint('Improved Mermaid plugin: Error during cleanup: $e');
+    }
+    
     await super.onUnload();
     debugPrint('Improved Mermaid plugin unloaded');
   }
@@ -501,6 +517,22 @@ graph TD
   
   @override
   Future<void> onUnload() async {
+    try {
+      // 清理语法注册
+      final contextService = PluginContextService.instance;
+      final currentContext = contextService.context;
+      
+      // 取消注册语法规则
+      currentContext.syntaxRegistry.removeSyntax('mermaid');
+      
+      // 取消注册工具栏操作
+      currentContext.toolbarRegistry.unregisterAction('mermaid');
+      
+      debugPrint('Mermaid plugin: Cleaned up syntax and toolbar registrations');
+    } catch (e) {
+      debugPrint('Mermaid plugin: Error during cleanup: $e');
+    }
+    
     await super.onUnload();
     debugPrint('Mermaid plugin unloaded');
   }
@@ -1174,6 +1206,22 @@ graph TD
   
   @override
   Future<void> onUnload() async {
+    try {
+      // 清理语法注册
+      final contextService = PluginContextService.instance;
+      final currentContext = contextService.context;
+      
+      // 取消注册语法规则
+      currentContext.syntaxRegistry.removeSyntax('mermaid');
+      
+      // 取消注册工具栏操作
+      currentContext.toolbarRegistry.unregisterAction('mermaid');
+      
+      debugPrint('Web Mermaid plugin: Cleaned up syntax and toolbar registrations');
+    } catch (e) {
+      debugPrint('Web Mermaid plugin: Error during cleanup: $e');
+    }
+    
     await super.onUnload();
     debugPrint('Web Mermaid plugin unloaded');
   }
@@ -1389,6 +1437,22 @@ graph TD
   
   @override
   Future<void> onUnload() async {
+    try {
+      // 清理语法注册
+      final contextService = PluginContextService.instance;
+      final currentContext = contextService.context;
+      
+      // 取消注册语法规则
+      currentContext.syntaxRegistry.removeSyntax('mermaid');
+      
+      // 取消注册工具栏操作
+      currentContext.toolbarRegistry.unregisterAction('mermaid');
+      
+      debugPrint('Working Mermaid plugin: Cleaned up syntax and toolbar registrations');
+    } catch (e) {
+      debugPrint('Working Mermaid plugin: Error during cleanup: $e');
+    }
+    
     await super.onUnload();
     debugPrint('Working Mermaid plugin unloaded');
   }

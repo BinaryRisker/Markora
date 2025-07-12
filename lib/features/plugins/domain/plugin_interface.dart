@@ -35,6 +35,9 @@ abstract class SyntaxRegistry {
   
   /// Register inline syntax
   void registerInlineSyntax(String name, RegExp pattern, Widget Function(String content) builder);
+  
+  /// Remove syntax rule
+  void removeSyntax(String name);
 }
 
 /// Toolbar registry interface
