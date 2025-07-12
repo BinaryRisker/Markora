@@ -10,10 +10,8 @@ import 'types/document.dart';
 import 'features/editor/presentation/widgets/markdown_editor.dart';
 import 'features/preview/presentation/widgets/markdown_preview.dart';
 import 'features/document/presentation/providers/document_providers.dart';
-import 'features/document/presentation/widgets/file_dialog.dart';
 import 'features/document/domain/services/file_service.dart';
 import 'features/document/presentation/widgets/document_tabs.dart';
-import 'features/document/presentation/widgets/save_as_dialog.dart';
 import 'features/settings/presentation/widgets/settings_page.dart';
 
 import 'features/editor/domain/services/global_editor_manager.dart';
@@ -268,11 +266,6 @@ ${l10n.blockFormula}：
             icon: Icon(PhosphorIconsRegular.copySimple),
             tooltip: AppLocalizations.of(context)!.saveAs,
             onPressed: () => _handleSaveAsDocument(),
-          ),
-          _buildToolbarButton(
-            icon: Icon(PhosphorIconsRegular.export),
-            tooltip: AppLocalizations.of(context)!.exportDocument,
-            onPressed: () => _handleExportDocument(),
           ),
           
           const VerticalDivider(),
@@ -723,82 +716,41 @@ ${l10n.blockFormula}：
     }
   }
 
-  /// Handle save as
-  void _handleSaveAsDocument() async {
+  /// Handle "Save As" document
+  Future<void> _handleSaveAsDocument() async {
+    final tabsNotifier = ref.read(documentTabsProvider.notifier);
+    if (tabsNotifier.activeDocument == null) return;
+
+    final fileService = ref.read(fileServiceProvider);
+    final l10n = AppLocalizations.of(context)!;
+    
+    final currentDocument = tabsNotifier.activeDocument!;
+    final initialFileName = '${currentDocument.title}.md';
+
     try {
-      final activeDocument = ref.read(activeDocumentProvider);
-      final l10n = AppLocalizations.of(context)!;
-      final documentToSave = activeDocument ?? Document(
-        id: 'temp_save',
-        title: l10n.newDocument,
-        content: _currentContent,
-        type: DocumentType.markdown,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+      final filePath = await fileService.saveFile(
+        dialogTitle: l10n.saveAs,
+        fileName: initialFileName,
       );
 
-      final result = await showDialog<SaveResult>(
-        context: context,
-        builder: (context) => SaveAsDialog(
-          document: documentToSave,
-          initialFormat: SaveFormat.markdown,
-        ),
-      );
-
-      if (result != null) {
-        // Save file according to selected format
-        await _saveFileWithFormat(documentToSave, result);
-        
+      if (filePath != null) {
+        await tabsNotifier.saveAsActiveTab(newPath: filePath);
         if (mounted) {
-          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${l10n.documentSavedAs}: ${result.fileName}')),
+            SnackBar(content: Text(l10n.documentSavedAs(filePath))),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.saveFailed}: $e')),
-        );
+        _showErrorDialog(l10n.saveAsError, e.toString());
       }
     }
   }
 
-  /// Save file according to format
-  Future<void> _saveFileWithFormat(Document document, SaveResult result) async {
-    // File has already been saved to disk in SaveAsDialog
-    // Here we only need to update document info in Tab
-    final tabsNotifier = ref.read(documentTabsProvider.notifier);
-    
-    // Update document title to filename (without extension)
-    final fileNameWithoutExt = result.fileName.replaceAll(RegExp(r'\.[^.]*$'), '');
-    final updatedDocument = document.copyWith(
-      title: fileNameWithoutExt,
-      updatedAt: DateTime.now(),
-    );
-    
-    // Save to Hive database
-    await ref.read(documentServiceProvider).saveDocument(updatedDocument);
-    
-    // If document is in Tab, update Tab
-    final activeIndex = tabsNotifier.activeTabIndex;
-    if (activeIndex >= 0) {
-      final tabs = ref.read(documentTabsProvider);
-      if (activeIndex < tabs.length && tabs[activeIndex].document.id == document.id) {
-        // Update current Tab's document info
-        tabsNotifier.updateTabContent(activeIndex, updatedDocument.content);
-      }
-    }
-  }
-
-  void _handleExportDocument() {
-    // Export functionality has been moved to plugins
-    // Show notification for now
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export functionality is now available through plugins')),
-    );
+  /// Handle "Export" document
+  Future<void> _handleExportDocument() async {
+    // This feature is now handled by plugins, this button should be removed
   }
 
   void _handleUndo() {

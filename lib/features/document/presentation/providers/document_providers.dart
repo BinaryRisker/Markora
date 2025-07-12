@@ -5,7 +5,6 @@ import '../../domain/repositories/document_repository.dart';
 import '../../domain/services/document_service.dart';
 import '../../domain/services/file_service.dart';
 import '../../infrastructure/repositories/hive_document_repository.dart';
-import '../../../export/domain/entities/export_settings.dart';
 
 /// Document repository provider
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
@@ -187,6 +186,31 @@ class DocumentTabsNotifier extends StateNotifier<List<DocumentTab>> {
     }
   }
 
+  /// Save active tab with a new path
+  Future<void> saveAsActiveTab({String? newPath}) async {
+    if (_activeTabIndex < 0) return;
+
+    try {
+      final tab = state[_activeTabIndex];
+      final newDocument = await _documentService.saveAsDocument(
+        tab.document,
+        newPath: newPath,
+      );
+
+      // Update tab with new document and reset modification state
+      final updatedTab = tab.copyWith(
+        document: newDocument,
+        isModified: false,
+      );
+      
+      final newState = List<DocumentTab>.from(state);
+      newState[_activeTabIndex] = updatedTab;
+      state = newState;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   /// Close all tabs
   void closeAllTabs() {
     state = [];
@@ -307,25 +331,6 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
     }
   }
 
-  /// Export document
-  Future<String> exportDocument(
-    String exportPath, {
-    ExportFormat format = ExportFormat.html,
-  }) async {
-    if (state != null) {
-      try {
-        return await _documentService.exportDocument(
-          state!,
-          exportPath,
-          format: format,
-        );
-      } catch (e) {
-        rethrow;
-      }
-    }
-    throw Exception('No document to export');
-  }
-
   /// Set current document
   void setCurrentDocument(Document document) {
     state = document;
@@ -357,7 +362,7 @@ final documentsListProvider = FutureProvider<List<Document>>((ref) async {
 /// Recent documents provider
 final recentDocumentsProvider = FutureProvider<List<Document>>((ref) async {
   final documentService = ref.read(documentServiceProvider);
-  return await documentService.getRecentDocuments();
+  return documentService.getRecentDocuments();
 });
 
 /// Document search provider

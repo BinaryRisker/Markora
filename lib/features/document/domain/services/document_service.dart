@@ -5,8 +5,6 @@ import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 import '../../../../types/document.dart';
 import '../repositories/document_repository.dart';
-import '../../../export/domain/services/export_service.dart';
-import '../../../export/domain/entities/export_settings.dart';
 
 /// Document service
 class DocumentService {
@@ -63,19 +61,24 @@ class DocumentService {
   }
 
   /// Save as
-  Future<Document> saveAsDocument(Document document, {
-    String? newTitle,
-    String? newPath,
-  }) async {
+  Future<Document> saveAsDocument(Document document, {String? newPath}) async {
+    if (newPath == null || newPath.isEmpty) {
+      throw ArgumentError('New path cannot be null or empty for Save As');
+    }
+
+    // Determine new title from the new path
+    final newTitle = path.basenameWithoutExtension(newPath);
+
+    // Create a new document object with updated path and title
     final newDocument = document.copyWith(
-      id: _uuid.v4(),
-      title: newTitle ?? '${document.title} - Copy',
       filePath: newPath,
-      createdAt: DateTime.now(),
+      title: newTitle,
       updatedAt: DateTime.now(),
     );
 
-    await _repository.saveDocument(newDocument);
+    // Save the document to the new file path AND update the database record
+    await saveDocument(newDocument);
+
     return newDocument;
   }
 
@@ -164,71 +167,6 @@ class DocumentService {
       );
     } catch (e) {
       throw Exception('Failed to import document from content: $e');
-    }
-  }
-
-  /// Export document
-  Future<String> exportDocument(
-    Document document,
-    String exportPath, {
-    ExportFormat format = ExportFormat.html,
-  }) async {
-    try {
-      switch (format) {
-        case ExportFormat.html:
-          final content = _convertToHtml(document.content);
-          final fileName = path.basenameWithoutExtension(exportPath);
-          final finalPath = path.join(
-            path.dirname(exportPath),
-            '$fileName.html',
-          );
-          
-          if (kIsWeb) {
-            // Use export service for Web environment
-            final exportService = ExportServiceImpl();
-            final settings = ExportSettings(
-              format: ExportFormat.html,
-              outputPath: path.dirname(exportPath),
-              fileName: '$fileName.html',
-              pdfSettings: const PdfExportSettings(),
-              htmlSettings: const HtmlExportSettings(),
-            );
-            final result = await exportService.exportDocument(document, settings);
-            if (!result.success) {
-              throw Exception(result.errorMessage ?? 'HTML export failed');
-            }
-            return finalPath;
-          } else {
-            // Use File API for non-Web platforms
-            final file = File(finalPath);
-            await file.writeAsString(content);
-            return finalPath;
-          }
-          
-        case ExportFormat.pdf:
-          // Use export service for PDF generation
-          final exportService = ExportServiceImpl();
-          final settings = ExportSettings(
-            format: ExportFormat.pdf,
-            outputPath: path.dirname(exportPath),
-            fileName: path.basename(exportPath),
-            pdfSettings: const PdfExportSettings(),
-            htmlSettings: const HtmlExportSettings(),
-          );
-          final result = await exportService.exportDocument(document, settings);
-          if (!result.success) {
-            throw Exception(result.errorMessage ?? 'PDF export failed');
-          }
-          return exportPath;
-          
-        case ExportFormat.docx:
-        case ExportFormat.png:
-        case ExportFormat.jpeg:
-        default:
-          throw Exception('${format.displayName} export is not supported yet');
-      }
-    } catch (e) {
-      throw Exception('Failed to export document: $e');
     }
   }
 
