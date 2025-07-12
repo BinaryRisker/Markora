@@ -21,6 +21,9 @@ class PluginManager extends ChangeNotifier {
   final List<PluginEventListener> _listeners = [];
   final PluginLoader _loader = PluginLoader();
   
+  // 临时存储加载的插件状态，用于在插件扫描时应用
+  final Map<String, PluginStatus> _pendingPluginStates = {};
+  
   PluginContext? _context;
   
   /// Get plugin context
@@ -138,9 +141,16 @@ class PluginManager extends ChangeNotifier {
           dependencies: [],
         );
         
+        // 检查是否有待应用的状态
+        final mermaidStatus = _pendingPluginStates['mermaid_plugin'] ?? PluginStatus.enabled;
+        if (_pendingPluginStates.containsKey('mermaid_plugin')) {
+          _pendingPluginStates.remove('mermaid_plugin');
+          debugPrint('Applied pending status for mermaid_plugin: ${mermaidStatus.name}');
+        }
+        
         final mermaidPlugin = Plugin(
           metadata: mermaidMetadata,
-          status: PluginStatus.enabled,  // Auto-enable in web
+          status: mermaidStatus,  // 使用保存的状态或默认启用
           installPath: 'builtin://mermaid_plugin',  // Virtual path
           installDate: DateTime.now(),
           lastUpdated: DateTime.now(),
@@ -167,9 +177,16 @@ class PluginManager extends ChangeNotifier {
           dependencies: [],
         );
         
+        // 检查是否有待应用的状态
+        final pandocStatus = _pendingPluginStates['pandoc_export_plugin'] ?? PluginStatus.enabled;
+        if (_pendingPluginStates.containsKey('pandoc_export_plugin')) {
+          _pendingPluginStates.remove('pandoc_export_plugin');
+          debugPrint('Applied pending status for pandoc_export_plugin: ${pandocStatus.name}');
+        }
+        
         final pandocPlugin = Plugin(
           metadata: pandocMetadata,
-          status: PluginStatus.enabled,  // Auto-enable in web
+          status: pandocStatus,  // 使用保存的状态或默认启用
           installPath: 'builtin://pandoc_export_plugin',  // Virtual path
           installDate: DateTime.now(),
           lastUpdated: DateTime.now(),
@@ -182,13 +199,8 @@ class PluginManager extends ChangeNotifier {
         final mermaidPluginDir = Directory('plugins/mermaid_plugin');
         await _scanPluginDirectory(mermaidPluginDir);
         
-        // 检查Mermaid插件是否需要自动启用（仅在首次加载时）
-        final mermaidPlugin = _plugins['mermaid_plugin'];
-        if (mermaidPlugin != null && mermaidPlugin.status == PluginStatus.installed) {
-          // 只有在状态为installed时才自动启用（首次加载）
-          _plugins['mermaid_plugin'] = mermaidPlugin.copyWith(status: PluginStatus.enabled);
-          debugPrint('Mermaid plugin automatically enabled (first time)');
-        }
+        // 不再自动修改Mermaid插件状态，完全依赖保存的配置
+        debugPrint('Mermaid plugin status preserved from saved configuration');
         
         // Create and enable pandoc export plugin for non-web platforms
         debugPrint('Non-web environment: Creating built-in pandoc export plugin');
@@ -210,7 +222,13 @@ class PluginManager extends ChangeNotifier {
         
         // 检查是否已有保存的状态
         final existingPandocPlugin = _plugins['pandoc_export_plugin'];
-        final pandocStatus = existingPandocPlugin?.status ?? PluginStatus.enabled; // 默认启用
+        final pandocStatus = _pendingPluginStates['pandoc_export_plugin'] ?? existingPandocPlugin?.status ?? PluginStatus.enabled;
+        
+        // 如果使用了待应用的状态，从待应用列表中移除
+        if (_pendingPluginStates.containsKey('pandoc_export_plugin')) {
+          _pendingPluginStates.remove('pandoc_export_plugin');
+          debugPrint('Applied pending status for pandoc_export_plugin: ${pandocStatus.name}');
+        }
         
         final pandocPlugin = Plugin(
           metadata: pandocMetadata,
@@ -252,7 +270,14 @@ class PluginManager extends ChangeNotifier {
       debugPrint('Successfully loaded plugin metadata: ${metadata.id} - ${metadata.name}');
       
       final existingPlugin = _plugins[metadata.id];
-      final status = existingPlugin?.status ?? PluginStatus.installed;
+      // 首先检查是否有待应用的状态，然后检查现有插件状态，最后默认为installed
+      final status = _pendingPluginStates[metadata.id] ?? existingPlugin?.status ?? PluginStatus.installed;
+      
+      // 如果使用了待应用的状态，从待应用列表中移除
+      if (_pendingPluginStates.containsKey(metadata.id)) {
+        _pendingPluginStates.remove(metadata.id);
+        debugPrint('Applied pending status for plugin ${metadata.id}: ${status.name}');
+      }
       
       final plugin = Plugin(
         metadata: metadata,
@@ -565,6 +590,9 @@ class PluginManager extends ChangeNotifier {
         // 如果插件已存在，更新其状态
         if (_plugins.containsKey(pluginId)) {
           _plugins[pluginId] = _plugins[pluginId]!.copyWith(status: status);
+        } else {
+          // 如果插件还不存在，暂存状态，等待插件扫描时应用
+          _pendingPluginStates[pluginId] = status;
         }
       }
       
