@@ -260,9 +260,19 @@
     "description": "Save failed error message"
   },
   
-  "documentSavedAs": "Document saved as",
+  "documentSavedAs": "Document saved as {path}",
   "@documentSavedAs": {
-    "description": "Document saved as success message"
+    "description": "Document saved as success message",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "saveAsError": "Save As Error",
+  "@saveAsError": {
+    "description": "Save as error message"
   },
   
   "untitledDocument": "Untitled Document",
@@ -1222,5 +1232,6 @@
   "cancel": "Cancel",
   "@cancel": {
     "description": "Cancel button text"
-  }
+  },
+  "linkCopied": "Link copied to clipboard"
 }

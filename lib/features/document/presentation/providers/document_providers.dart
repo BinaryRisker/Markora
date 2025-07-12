@@ -304,14 +304,12 @@ class CurrentDocumentNotifier extends StateNotifier<Document?> {
 
   /// Save as
   Future<void> saveAsDocument({
-    String? newTitle,
     String? newPath,
   }) async {
     if (state != null) {
       try {
         final newDocument = await _documentService.saveAsDocument(
           state!,
-          newTitle: newTitle,
           newPath: newPath,
         );
         state = newDocument;

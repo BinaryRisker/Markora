@@ -109,9 +109,25 @@ class FileService {
     }
   }
 
-
-
-
+  /// Save file using file picker
+  Future<String?> saveFile({
+    String? dialogTitle,
+    String? fileName,
+  }) async {
+    try {
+      if (kIsWeb) {
+        // On web, we just return the file name. The actual download is handled by creating a blob.
+        return fileName ?? 'Untitled.md';
+      }
+      return await FilePicker.platform.saveFile(
+        dialogTitle: dialogTitle,
+        fileName: fileName,
+      );
+    } catch (e) {
+      // Don't throw, just return null if user cancels or an error occurs
+      return null;
+    }
+  }
 
   /// Select save file path
   Future<String?> selectSaveFilePath({

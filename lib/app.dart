@@ -716,6 +716,23 @@ ${l10n.blockFormula}：
     }
   }
 
+  /// Show error dialog
+  void _showErrorDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(AppLocalizations.of(context)!.ok),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Handle "Save As" document
   Future<void> _handleSaveAsDocument() async {
     final tabsNotifier = ref.read(documentTabsProvider.notifier);

@@ -295,9 +295,19 @@
     "description": "文档保存失败消息"
   },
   
-  "documentSavedAs": "文档已保存为",
+  "documentSavedAs": "文档已另存为 {path}",
   "@documentSavedAs": {
-    "description": "文档另存为成功消息"
+    "description": "文档另存为成功消息",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "saveAsError": "另存为失败",
+  "@saveAsError": {
+    "description": "另存为失败消息"
   },
   
   "untitledDocument": "未命名文档",
@@ -1205,5 +1215,7 @@
   "cancel": "取消",
   "@cancel": {
     "description": "取消按钮文本"
-  }
+  },
+
+  "linkCopied": "链接已复制到剪贴板"
 }
