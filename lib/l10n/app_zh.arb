@@ -10,7 +10,7 @@
     "description": "欢迎消息标题"
   },
   
-  "welcomeDescription": "这是一个功能强大的 Markdown 编辑器，支持：",
+  "welcomeDescription": "一款轻量、优雅的 Markdown 编辑器。",
   "@welcomeDescription": {
     "description": "欢迎消息描述"
   },
@@ -1217,5 +1217,6 @@
     "description": "取消按钮文本"
   },
 
-  "linkCopied": "链接已复制到剪贴板"
+  "linkCopied": "链接已复制到剪贴板",
+  "ok": "确定"
 }

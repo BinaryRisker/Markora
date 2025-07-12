@@ -413,8 +413,14 @@ abstract class AppLocalizations {
   /// Document saved as success message
   ///
   /// In en, this message translates to:
-  /// **'Document saved as'**
-  String get documentSavedAs;
+  /// **'Document saved as {path}'**
+  String documentSavedAs(String path);
+
+  /// Save as error message
+  ///
+  /// In en, this message translates to:
+  /// **'Save As Error'**
+  String get saveAsError;
 
   /// Untitled document default name
   ///
@@ -1453,6 +1459,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import'**
   String get import;
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Link copied to clipboard'**
+  String get linkCopied;
 }
 
 class _AppLocalizationsDelegate

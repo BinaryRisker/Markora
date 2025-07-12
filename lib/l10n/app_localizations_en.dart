@@ -166,7 +166,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveFailed => 'Save failed';
 
   @override
-  String get documentSavedAs => 'Document saved as';
+  String documentSavedAs(String path) {
+    return 'Document saved as $path';
+  }
+
+  @override
+  String get saveAsError => 'Save As Error';
 
   @override
   String get untitledDocument => 'Untitled Document';
@@ -697,4 +702,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get import => 'Import';
+
+  @override
+  String get linkCopied => 'Link copied to clipboard';
 }

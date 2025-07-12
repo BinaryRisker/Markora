@@ -165,7 +165,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saveFailed => '保存失败';
 
   @override
-  String get documentSavedAs => '文档已保存为';
+  String documentSavedAs(String path) {
+    return '文档已另存为 $path';
+  }
+
+  @override
+  String get saveAsError => '另存为失败';
 
   @override
   String get untitledDocument => '未命名文档';
@@ -688,4 +693,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get import => '导入';
+
+  @override
+  String get linkCopied => '链接已复制到剪贴板';
 }

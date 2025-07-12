@@ -10,10 +10,11 @@
     "description": "Welcome message title"
   },
   
-  "welcomeDescription": "A powerful Markdown editor that supports:",
+  "welcomeDescription": "A lightweight and elegant Markdown editor.",
   "@welcomeDescription": {
     "description": "Welcome message description"
   },
+  "ok": "OK",
   
   "coreFeatures": "Core Features",
   "@coreFeatures": {
