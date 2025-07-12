@@ -1190,6 +1190,12 @@ abstract class AppLocalizations {
   /// **'Loading'**
   String get loadingStatus;
 
+  /// Unsupported plugin status
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported'**
+  String get unsupportedStatus;
+
   /// All status filter option
   ///
   /// In en, this message translates to:

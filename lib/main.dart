@@ -17,6 +17,11 @@ import 'features/plugins/domain/plugin_context_service.dart';
 
 import 'types/document.dart';
 
+// Import the plugin implementations
+import 'plugins/mermaid_plugin/main.dart';
+import 'plugins/pandoc_plugin/main.dart';
+import 'core/utils/plugin_registry.dart';
+
 
 // Global document repository instance
 late HiveDocumentRepository globalDocumentRepository;
@@ -25,6 +30,10 @@ late HiveDocumentRepository globalDocumentRepository;
 void main() async {
   // Ensure Flutter widget binding initialization
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Register all built-in plugins
+  PluginRegistry.register('mermaid_plugin', () => MermaidPlugin());
+  PluginRegistry.register('pandoc_plugin', () => PandocPlugin());
 
   // Initialize Hive local storage
   if (kIsWeb) {

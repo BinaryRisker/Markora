@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:markora/features/plugins/domain/plugin_interface.dart';
-import 'package:markora/types/plugin.dart';
+import '../../../features/plugins/domain/plugin_interface.dart';
+import '../../../types/plugin.dart';
 
 /// Mermaid chart plugin
 class MermaidPlugin extends MarkoraPlugin {
@@ -249,7 +249,7 @@ ${widget.code}
   }
 }
 
-/// Mermaid plugin configuration component
+/// Configuration widget for Mermaid plugin
 class MermaidConfigWidget extends StatefulWidget {
   const MermaidConfigWidget({
     super.key,
@@ -258,118 +258,63 @@ class MermaidConfigWidget extends StatefulWidget {
   });
 
   final Map<String, dynamic> config;
-  final Function(Map<String, dynamic>) onConfigChanged;
+  final ValueChanged<Map<String, dynamic>> onConfigChanged;
 
   @override
   State<MermaidConfigWidget> createState() => _MermaidConfigWidgetState();
 }
 
 class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
-  late Map<String, dynamic> _config;
+  late Map<String, dynamic> _currentConfig;
 
   @override
   void initState() {
     super.initState();
-    _config = Map.from(widget.config);
+    _currentConfig = Map<String, dynamic>.from(widget.config);
   }
 
-  void _updateConfig(String key, dynamic value) {
+  void _updateConfig<T>(String key, T value) {
     setState(() {
-      _config[key] = value;
+      _currentConfig[key] = value;
     });
-    widget.onConfigChanged(_config);
+    widget.onConfigChanged(_currentConfig);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Mermaid Plugin Configuration',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 24),
-          
-          // Theme selection
-          Text(
-            'Theme',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            value: _config['theme'] ?? 'default',
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Select theme',
-            ),
-            items: const [
-              DropdownMenuItem(value: 'default', child: Text('Default')),
-              DropdownMenuItem(value: 'dark', child: Text('Dark')),
-              DropdownMenuItem(value: 'forest', child: Text('Forest')),
-              DropdownMenuItem(value: 'neutral', child: Text('Neutral')),
-            ],
-            onChanged: (value) => _updateConfig('theme', value),
-          ),
-          const SizedBox(height: 16),
-          
-          // Enable interaction
-          SwitchListTile(
-            title: const Text('Enable Interaction'),
-            subtitle: const Text('Allow users to interact with charts'),
-            value: _config['enableInteraction'] ?? true,
-            onChanged: (value) => _updateConfig('enableInteraction', value),
-          ),
-          const SizedBox(height: 16),
-          
-          // Default width
-          Text(
-            'Default Width',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            initialValue: (_config['defaultWidth'] ?? 800).toString(),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Enter default width (pixels)',
-              suffixText: 'px',
-            ),
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              final width = int.tryParse(value);
-              if (width != null) {
-                _updateConfig('defaultWidth', width);
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          
-          // Default height
-          Text(
-            'Default Height',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            initialValue: (_config['defaultHeight'] ?? 600).toString(),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Enter default height (pixels)',
-              suffixText: 'px',
-            ),
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              final height = int.tryParse(value);
-              if (height != null) {
-                _updateConfig('defaultHeight', height);
-              }
-            },
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String>(
+          value: _currentConfig['theme'] ?? 'default',
+          decoration: const InputDecoration(labelText: 'Chart Theme'),
+          items: ['default', 'dark', 'forest', 'neutral']
+              .map((theme) => DropdownMenuItem(
+                    value: theme,
+                    child: Text(theme),
+                  ))
+              .toList(),
+          onChanged: (value) => _updateConfig('theme', value),
+        ),
+        const SizedBox(height: 16),
+        TextFormField(
+          initialValue: (_currentConfig['defaultHeight'] ?? 600).toString(),
+          decoration: const InputDecoration(labelText: 'Default Chart Height'),
+          keyboardType: TextInputType.number,
+          onChanged: (value) {
+            final height = double.tryParse(value);
+            if (height != null) {
+              _updateConfig('defaultHeight', height);
+            }
+          },
+        ),
+        const SizedBox(height: 16),
+        SwitchListTile(
+          title: const Text('Enable Interaction'),
+          value: _currentConfig['enableInteraction'] ?? true,
+          onChanged: (value) => _updateConfig('enableInteraction', value),
+        ),
+      ],
     );
   }
-}
+} 

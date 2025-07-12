@@ -260,6 +260,8 @@ class _StatusFilterDropdown extends StatelessWidget {
         return Icons.error;
       case PluginStatus.loading:
         return Icons.hourglass_empty;
+      case PluginStatus.unsupported:
+        return Icons.block;
     }
   }
 }

@@ -11,7 +11,8 @@
   "category": "converter",
   "tags": ["export", "import", "pandoc", "converter", "pdf", "html", "docx"],
   "minVersion": "1.0.0",
-  "dependencies": ["process"],
+  "dependencies": [],
+  "supportedPlatforms": ["windows", "macos", "linux"],
   "platforms": ["desktop"],
   "permissions": [
     "file_system",

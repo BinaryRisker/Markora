@@ -9,35 +9,8 @@
   "license": "MIT",
   "type": "syntax",
   "category": "visualization",
-  "tags": ["图表", "mermaid", "可视化", "流程图"],
+  "tags": ["chart", "mermaid", "visualization", "flowchart"],
   "minVersion": "1.0.0",
   "dependencies": [],
-  "platforms": ["web", "desktop", "mobile"],
-  "permissions": [
-    "internet",
-    "webview"
-  ],
-  "config": {
-    "theme": {
-      "type": "string",
-      "default": "default",
-      "options": ["default", "dark", "forest", "neutral"]
-    },
-    "enableInteraction": {
-      "type": "boolean",
-      "default": true
-    },
-    "defaultWidth": {
-      "type": "number",
-      "default": 800
-    },
-    "defaultHeight": {
-      "type": "number",
-      "default": 600
-    }
-  },
-  "entryPoint": "lib/main.dart",
-  "assets": [
-    "assets/mermaid_template.html"
-  ]
+  "supportedPlatforms": ["windows", "macos", "linux", "web", "android", "ios"]
 }

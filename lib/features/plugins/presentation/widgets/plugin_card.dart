@@ -190,6 +190,11 @@ class PluginCard extends ConsumerWidget {
         textColor = theme.colorScheme.onSurfaceVariant;
         icon = Icons.hourglass_empty;
         break;
+      case PluginStatus.unsupported:
+        backgroundColor = theme.colorScheme.outline;
+        textColor = theme.colorScheme.onSurfaceVariant;
+        icon = Icons.block;
+        break;
     }
     
     return Container(

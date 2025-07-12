@@ -566,6 +566,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingStatus => 'Loading';
 
   @override
+  String get unsupportedStatus => 'Unsupported';
+
+  @override
   String get allStatus => 'All Status';
 
   @override

@@ -985,6 +985,11 @@
     "description": "Loading plugin status"
   },
 
+  "unsupportedStatus": "Unsupported",
+  "@unsupportedStatus": {
+    "description": "Unsupported plugin status"
+  },
+
   "allStatus": "All Status",
   "@allStatus": {
     "description": "All status filter option"

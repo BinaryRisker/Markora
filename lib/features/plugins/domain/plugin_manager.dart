@@ -7,6 +7,7 @@ import '../../../types/plugin.dart';
 import 'plugin_interface.dart';
 import 'plugin_loader.dart';
 import 'plugin_context_service.dart';
+import 'plugin_package_service.dart';
 
 /// Plugin Manager
 class PluginManager extends ChangeNotifier {
@@ -178,6 +179,33 @@ class PluginManager extends ChangeNotifier {
     }
   }
   
+  /// Get current platform
+  String _getCurrentPlatform() {
+    if (kIsWeb) {
+      return 'web';
+    } else if (Platform.isWindows) {
+      return 'windows';
+    } else if (Platform.isMacOS) {
+      return 'macos';
+    } else if (Platform.isLinux) {
+      return 'linux';
+    } else if (Platform.isAndroid) {
+      return 'android';
+    } else if (Platform.isIOS) {
+      return 'ios';
+    }
+    return 'unknown';
+  }
+
+  /// Check if the plugin supports the current platform
+  bool _checkPlatformSupport(PluginMetadata metadata) {
+    if (metadata.supportedPlatforms.isEmpty) {
+      return true; // If not specified, supports all platforms
+    }
+    final currentPlatform = _getCurrentPlatform();
+    return metadata.supportedPlatforms.contains(currentPlatform);
+  }
+
   /// Scan single plugin directory
   Future<void> _scanPluginDirectory(Directory pluginDir) async {
     try {
@@ -198,6 +226,19 @@ class PluginManager extends ChangeNotifier {
       }
       
       debugPrint('Successfully loaded plugin metadata: ${metadata.id} - ${metadata.name}');
+
+      // Check for platform support
+      if (!_checkPlatformSupport(metadata)) {
+        debugPrint('Plugin ${metadata.id} does not support the current platform');
+        _plugins[metadata.id] = Plugin(
+          metadata: metadata,
+          status: PluginStatus.unsupported,
+          installPath: pluginDir.path,
+          installDate: _plugins[metadata.id]?.installDate ?? DateTime.now(),
+          lastUpdated: DateTime.now(),
+        );
+        return;
+      }
       
       final existingPlugin = _plugins[metadata.id];
       // 首先检查是否有待应用的状态，然后检查现有插件状态，最后默认为installed
@@ -237,6 +278,12 @@ class PluginManager extends ChangeNotifier {
   Future<bool> loadPlugin(String pluginId) async {
     final plugin = _plugins[pluginId];
     if (plugin == null) return false;
+
+    // Do not load unsupported plugins
+    if (plugin.status == PluginStatus.unsupported) {
+      debugPrint('Cannot load plugin ${plugin.metadata.id} on an unsupported platform.');
+      return false;
+    }
     
     if (_loadedPlugins.containsKey(pluginId)) {
       return true; // Already loaded
@@ -348,16 +395,34 @@ class PluginManager extends ChangeNotifier {
     return success;
   }
   
-  /// Install plugin
-  Future<bool> installPlugin(String pluginPath) async {
+  /// Install plugin from a .mxt file
+  Future<bool> installPlugin(String mxtPath) async {
     try {
-      final pluginFile = File(pluginPath);
-      if (!await pluginFile.exists()) return false;
+      final pluginFile = File(mxtPath);
+      if (!await pluginFile.exists()) {
+        debugPrint('Plugin package file not found: $mxtPath');
+        return false;
+      }
       
-      // TODO: Implement plugin installation logic (extract, validate, copy, etc.)
-      // Need to handle different plugin formats (zip, tar.gz, etc.)
+      // Get the installation directory for plugins
+      final pluginsDir = await _getPluginsDirectory();
       
-      await _scanPlugins();
+      // Install the package
+      final installPath = await PluginPackageService.installPackage(
+        packagePath: mxtPath,
+        installDir: pluginsDir.path,
+      );
+      
+      // Scan the newly installed plugin directory
+      await _scanPluginDirectory(Directory(installPath));
+      
+      // Persist the new plugin's state
+      await _savePluginConfigs();
+
+      // Notify listeners about the change
+      notifyListeners();
+      
+      debugPrint('Plugin from $mxtPath installed successfully to $installPath');
       return true;
     } catch (e) {
       debugPrint('Plugin installation failed: $e');

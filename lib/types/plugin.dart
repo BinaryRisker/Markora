@@ -80,6 +80,7 @@ enum PluginStatus {
   installed, // Installed but not enabled
   error,     // Error status
   loading,   // Loading
+  unsupported, // Unsupported on current platform
 }
 
 /// Plugin status extension
@@ -96,6 +97,8 @@ extension PluginStatusExtension on PluginStatus {
         return 'Error';
       case PluginStatus.loading:
         return 'Loading';
+      case PluginStatus.unsupported:
+        return 'Unsupported';
     }
   }
   
@@ -112,6 +115,8 @@ extension PluginStatusExtension on PluginStatus {
         return localizations.errorStatus;
       case PluginStatus.loading:
         return localizations.loadingStatus;
+      case PluginStatus.unsupported:
+        return localizations.unsupportedStatus;
     }
   }
 }
@@ -132,6 +137,7 @@ class PluginMetadata extends Equatable {
     this.license = 'MIT',
     this.tags = const [],
     this.dependencies = const [],
+    this.supportedPlatforms = const [],
   });
 
   /// Plugin unique identifier
@@ -173,6 +179,9 @@ class PluginMetadata extends Equatable {
   /// Dependency plugin list
   final List<String> dependencies;
 
+  /// Supported platforms
+  final List<String> supportedPlatforms;
+
   @override
   List<Object?> get props => [
         id,
@@ -188,6 +197,7 @@ class PluginMetadata extends Equatable {
         license,
         tags,
         dependencies,
+        supportedPlatforms,
       ];
 }
 

@@ -559,6 +559,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadingStatus => '加载中';
 
   @override
+  String get unsupportedStatus => '不支持';
+
+  @override
   String get allStatus => '全部状态';
 
   @override

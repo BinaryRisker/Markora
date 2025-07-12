@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../types/plugin.dart';
+import '../../../../core/utils/plugin_registry.dart';
 import 'plugin_interface.dart';
 import 'plugin_implementations.dart';
 import 'plugin_context_service.dart';
@@ -36,6 +37,7 @@ class PluginLoader {
         license: json['license'] as String? ?? 'MIT',
         tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
         dependencies: (json['dependencies'] as List<dynamic>?)?.cast<String>() ?? [],
+        supportedPlatforms: (json['supportedPlatforms'] as List<dynamic>?)?.cast<String>() ?? [],
       );
     } catch (e) {
       debugPrint('Failed to load plugin metadata: $e');
@@ -43,45 +45,21 @@ class PluginLoader {
     }
   }
   
-  /// Load plugin instance
+  /// Load plugin instance using the PluginRegistry
   Future<MarkoraPlugin?> loadPlugin(Plugin plugin) async {
     try {
-      debugPrint('Loading plugin: ${plugin.metadata.id} with installPath: ${plugin.installPath}');
+      debugPrint('Loading plugin: ${plugin.metadata.id}');
       
-      // Skip directory checks for built-in plugins in web environment
-      if (plugin.installPath == null) {
-        throw Exception('Plugin install path is empty');
-      }
+      final factory = PluginRegistry.getFactory(plugin.metadata.id);
       
-      // Check if it's a built-in plugin (virtual path)
-      final isBuiltInPlugin = plugin.installPath!.startsWith('builtin://');
-      
-      if (!isBuiltInPlugin) {
-        final pluginDir = Directory(plugin.installPath!);
-        if (!await pluginDir.exists()) {
-          throw Exception('Plugin directory does not exist: ${plugin.installPath}');
-        }
+      if (factory != null) {
+        final pluginInstance = factory();
+        debugPrint('Successfully created plugin instance for ${plugin.metadata.id} from registry.');
+        return pluginInstance;
       } else {
-        debugPrint('Built-in plugin detected, skipping directory checks');
-      }
-      
-      // Load different plugin implementations based on plugin type
-      switch (plugin.metadata.type) {
-        case PluginType.syntax:
-          return await _loadSyntaxPlugin(plugin);
-        case PluginType.renderer:
-          return await _loadRendererPlugin(plugin);
-        case PluginType.theme:
-          return await _loadThemePlugin(plugin);
-        case PluginType.export:
-        case PluginType.exporter:
-          return await _loadExporterPlugin(plugin);
-        case PluginType.tool:
-          return await _loadToolPlugin(plugin);
-        case PluginType.integration:
-          return await _loadIntegrationPlugin(plugin);
-        default:
-          throw Exception('Unsupported plugin type: ${plugin.metadata.type}');
+        debugPrint('No factory registered for plugin ${plugin.metadata.id}. Using a generic plugin instance.');
+        // Return a generic implementation or null if no factory is found
+        return UnimplementedPlugin(plugin.metadata);
       }
     } catch (e, stackTrace) {
       debugPrint('Failed to load plugin ${plugin.metadata.id}: $e');
@@ -89,193 +67,16 @@ class PluginLoader {
       return null;
     }
   }
-  
-  /// Load syntax extension plugin
-  Future<MarkoraPlugin?> _loadSyntaxPlugin(Plugin plugin) async {
-    try {
-      // Check if it's a Mermaid plugin
-      if (plugin.metadata.id == 'mermaid_plugin') {
-        // Use the working MermaidPlugin implementation
-        return _createMermaidPlugin(plugin.metadata);
-      }
-      
-      // Default syntax plugin implementation
-      return SyntaxPluginImpl(plugin.metadata);
-    } catch (e) {
-      debugPrint('Failed to load syntax plugin: $e');
-      return null;
-    }
-  }
-  
-  /// Load renderer plugin
-  Future<MarkoraPlugin?> _loadRendererPlugin(Plugin plugin) async {
-    try {
-      // Check if it's a Mermaid plugin
-      if (plugin.metadata.id == 'mermaid_plugin') {
-        // For built-in plugins, skip file system checks
-        final isBuiltInPlugin = plugin.installPath!.startsWith('builtin://');
-        
-        if (isBuiltInPlugin) {
-          debugPrint('Built-in mermaid plugin detected');
-          return _createMermaidPlugin(plugin.metadata);
-        } else {
-          // Dynamically import Mermaid plugin
-          final pluginMainFile = File(path.join(plugin.installPath!, 'lib', 'main.dart'));
-          if (await pluginMainFile.exists()) {
-            // Here we directly instantiate MermaidPlugin
-            // In actual projects, might need to use dart:mirrors or other dynamic loading mechanisms
-            return _createMermaidPlugin(plugin.metadata);
-          }
-        }
-      }
-      
-      // Default renderer plugin implementation
-      return RendererPluginImpl(plugin.metadata);
-    } catch (e, stackTrace) {
-      debugPrint('Failed to load renderer plugin: $e');
-      debugPrint('Stack trace: $stackTrace');
-      return null;
-    }
-  }
-  
-  /// Create Mermaid plugin instance
-  MarkoraPlugin _createMermaidPlugin(PluginMetadata metadata) {
-    // Import the actual MermaidPlugin
-    try {
-      debugPrint('_createMermaidPlugin called with metadata: ${metadata.id}');
-      debugPrint('kIsWeb: $kIsWeb');
-      
-      // For web environment, use the most simplified version
-      if (kIsWeb) {
-        debugPrint('Web environment: Creating minimal mermaid plugin');
-        final plugin = _MinimalWebMermaidPlugin(metadata);
-        debugPrint('Minimal mermaid plugin created successfully: ${plugin.runtimeType}');
-        return plugin;
-      }
-      
-      // Use the improved MermaidPlugin with proper WebView implementation
-      debugPrint('Desktop environment: Creating working mermaid plugin');
-      final plugin = _WorkingMermaidPlugin(metadata);
-      debugPrint('Working mermaid plugin created successfully: ${plugin.runtimeType}');
-      return plugin;
-    } catch (e, stackTrace) {
-      debugPrint('Failed to create MermaidPlugin: $e');
-      debugPrint('Stack trace: $stackTrace');
-      return _ImprovedMermaidPluginProxy(metadata);
-    }
-  }
-  
-  /// Load external Pandoc plugin
-  Future<MarkoraPlugin?> _loadExternalPandocPlugin(Plugin plugin) async {
-    try {
-      debugPrint('Loading external Pandoc plugin from: ${plugin.installPath}');
-      
-      // Check if plugin directory exists
-      if (plugin.installPath == null) {
-        throw Exception('Plugin install path is null');
-      }
-      
-      final pluginDir = Directory(plugin.installPath!);
-      if (!await pluginDir.exists()) {
-        throw Exception('Plugin directory does not exist: ${plugin.installPath}');
-      }
-      
-      // Check if main.dart exists
-      final mainFile = File(path.join(plugin.installPath!, 'lib', 'main.dart'));
-      if (!await mainFile.exists()) {
-        throw Exception('Plugin main.dart not found: ${mainFile.path}');
-      }
-      
-      // Create a dynamic plugin loader for the external Pandoc plugin
-      // Since we can't directly import the external plugin, we'll create a proxy
-      return _ExternalPandocPluginLoader(plugin.metadata, plugin.installPath!);
-    } catch (e, stackTrace) {
-      debugPrint('Failed to load external Pandoc plugin: $e');
-      debugPrint('Stack trace: $stackTrace');
-      return null;
-    }
-  }
-  
-  /// Create Pandoc export plugin instance
-  MarkoraPlugin _createPandocExportPlugin(PluginMetadata metadata) {
-    try {
-      debugPrint('_createPandocExportPlugin called with metadata: ${metadata.id}');
-      
-      // Load from external plugin directory
-      // This will be handled by the standard plugin loading mechanism
-      return ExporterPluginImpl(metadata);
-    } catch (e, stackTrace) {
-      debugPrint('Failed to create PandocExportPlugin: $e');
-      debugPrint('Stack trace: $stackTrace');
-      
-      // Fallback to default implementation
-      return ExporterPluginImpl(metadata);
-    }
-  }
-  
-  /// Load theme plugin
-  Future<MarkoraPlugin?> _loadThemePlugin(Plugin plugin) async {
-    // TODO: Implement theme plugin loading logic
-    return ThemePluginImpl(plugin.metadata);
-  }
-  
-  /// Load export plugin
-  Future<MarkoraPlugin?> _loadExporterPlugin(Plugin plugin) async {
-    try {
-      // Check if it's a Pandoc plugin from external directory
-      if (plugin.metadata.id == 'pandoc_plugin') {
-        return await _loadExternalPandocPlugin(plugin);
-      }
-      
-      // Check if it's a legacy Pandoc export plugin
-      if (plugin.metadata.id == 'pandoc_export_plugin') {
-        // Import the actual PandocExportPlugin
-        return _createPandocExportPlugin(plugin.metadata);
-      }
-      
-      // Default export plugin implementation
-      return ExporterPluginImpl(plugin.metadata);
-    } catch (e) {
-      debugPrint('Failed to load export plugin: $e');
-      return ExporterPluginImpl(plugin.metadata);
-    }
-  }
-  
-  /// Load tool plugin
-  Future<MarkoraPlugin?> _loadToolPlugin(Plugin plugin) async {
-    // TODO: Implement tool plugin loading logic
-    return ToolPluginImpl(plugin.metadata);
-  }
-  
-  /// Load integration plugin
-  Future<MarkoraPlugin?> _loadIntegrationPlugin(Plugin plugin) async {
-    // TODO: Implement integration plugin loading logic
-    return IntegrationPluginImpl(plugin.metadata);
-  }
-  
+
   /// Parse plugin type
   PluginType _parsePluginType(String typeString) {
-    switch (typeString.toLowerCase()) {
-      case 'syntax':
-        return PluginType.syntax;
-      case 'renderer':
-        return PluginType.renderer;
-      case 'theme':
-        return PluginType.theme;
-      case 'export':
-        return PluginType.export;
-      case 'exporter':
-        return PluginType.exporter;
-      case 'tool':
-        return PluginType.tool;
-      case 'integration':
-        return PluginType.integration;
-      default:
-        throw Exception('Unknown plugin type: $typeString');
-    }
+    return PluginType.values.firstWhere(
+      (e) => e.name.toLowerCase() == typeString.toLowerCase(),
+      orElse: () => PluginType.other,
+    );
   }
   
-  /// Validate plugin
+  /// Validate a plugin
   Future<bool> validatePlugin(Plugin plugin) async {
     try {
       if (plugin.installPath == null) return false;
@@ -298,6 +99,25 @@ class PluginLoader {
       debugPrint('Failed to validate plugin: $e');
       return false;
     }
+  }
+}
+
+/// Unimplemented plugin fallback
+class UnimplementedPlugin extends BasePlugin {
+  UnimplementedPlugin(super.metadata);
+  
+  @override
+  Future<void> onLoad(PluginContext context) async {
+    await super.onLoad(context);
+    debugPrint('Warning: Plugin ${metadata.id} is not implemented and will not function properly.');
+  }
+  
+  @override
+  Map<String, dynamic> getStatus() {
+    final status = super.getStatus();
+    status['implemented'] = false;
+    status['warning'] = 'This plugin is not implemented';
+    return status;
   }
 }
 
