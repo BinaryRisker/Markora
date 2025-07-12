@@ -379,3 +379,135 @@ class PluginStats {
   
   int get inactive => disabled + installed;
 }
+
+/// Plugin package information for .mxt files
+class PluginPackage {
+  const PluginPackage({
+    required this.metadata,
+    required this.packagePath,
+    required this.extractedPath,
+    required this.installDate,
+    this.packageSize,
+    this.checksum,
+  });
+
+  /// Plugin metadata
+  final PluginMetadata metadata;
+  
+  /// Package file path (.mxt file)
+  final String packagePath;
+  
+  /// Extracted plugin path
+  final String extractedPath;
+  
+  /// Installation date
+  final DateTime installDate;
+  
+  /// Package size in bytes
+  final int? packageSize;
+  
+  /// Package checksum for integrity verification
+  final String? checksum;
+
+  PluginPackage copyWith({
+    PluginMetadata? metadata,
+    String? packagePath,
+    String? extractedPath,
+    DateTime? installDate,
+    int? packageSize,
+    String? checksum,
+  }) {
+    return PluginPackage(
+      metadata: metadata ?? this.metadata,
+      packagePath: packagePath ?? this.packagePath,
+      extractedPath: extractedPath ?? this.extractedPath,
+      installDate: installDate ?? this.installDate,
+      packageSize: packageSize ?? this.packageSize,
+      checksum: checksum ?? this.checksum,
+    );
+  }
+}
+
+/// Plugin package manifest for .mxt files
+class PluginPackageManifest {
+  const PluginPackageManifest({
+    required this.metadata,
+    required this.files,
+    required this.packageVersion,
+    this.dependencies = const [],
+    this.assets = const [],
+    this.permissions = const [],
+  });
+
+  /// Plugin metadata
+  final PluginMetadata metadata;
+  
+  /// List of files in the package
+  final List<String> files;
+  
+  /// Package format version
+  final String packageVersion;
+  
+  /// Package dependencies
+  final List<String> dependencies;
+  
+  /// Asset files
+  final List<String> assets;
+  
+  /// Required permissions
+  final List<String> permissions;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'metadata': {
+        'id': metadata.id,
+        'name': metadata.name,
+        'version': metadata.version,
+        'description': metadata.description,
+        'author': metadata.author,
+        'homepage': metadata.homepage,
+        'repository': metadata.repository,
+        'license': metadata.license,
+        'type': metadata.type.name,
+        'tags': metadata.tags,
+        'minVersion': metadata.minVersion,
+        'maxVersion': metadata.maxVersion,
+        'dependencies': metadata.dependencies,
+      },
+      'files': files,
+      'packageVersion': packageVersion,
+      'dependencies': dependencies,
+      'assets': assets,
+      'permissions': permissions,
+    };
+  }
+
+  factory PluginPackageManifest.fromJson(Map<String, dynamic> json) {
+    final metadataJson = json['metadata'] as Map<String, dynamic>;
+    return PluginPackageManifest(
+      metadata: PluginMetadata(
+        id: metadataJson['id'] as String,
+        name: metadataJson['name'] as String,
+        version: metadataJson['version'] as String,
+        description: metadataJson['description'] as String,
+        author: metadataJson['author'] as String,
+        homepage: metadataJson['homepage'] as String?,
+        repository: metadataJson['repository'] as String?,
+        license: metadataJson['license'] as String,
+        type: PluginType.values.firstWhere(
+          (e) => e.name == metadataJson['type'],
+          orElse: () => PluginType.tool,
+        ),
+        tags: (metadataJson['tags'] as List<dynamic>?)?.cast<String>() ?? [],
+        minVersion: metadataJson['minVersion'] as String,
+        maxVersion: metadataJson['maxVersion'] as String?,
+        dependencies: (metadataJson['dependencies'] as List<dynamic>?)?.cast<String>() ?? [],
+      ),
+      files: (json['files'] as List<dynamic>).cast<String>(),
+      packageVersion: json['packageVersion'] as String,
+      dependencies: (json['dependencies'] as List<dynamic>?)?.cast<String>() ?? [],
+      assets: (json['assets'] as List<dynamic>?)?.cast<String>() ?? [],
+      permissions: (json['permissions'] as List<dynamic>?)?.cast<String>() ?? [],
+    );
+  }
+}

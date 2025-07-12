@@ -61,6 +61,13 @@ class PluginContextService {
     );
   }
   
+  /// Get current document name (simplified approach)
+  String getCurrentDocumentName() {
+    // This is a simplified implementation
+    // In a real implementation, you'd access the document provider
+    return 'document'; // Default name for now
+  }
+  
   /// Get toolbar registry
   ToolbarRegistryImpl get toolbarRegistry {
     _ensureInitialized();
@@ -84,6 +91,9 @@ class PluginContextService {
 class _DummyEditorController implements EditorController {
   @override
   String get content => '';
+  
+  @override
+  String getCurrentContent() => '';
   
   @override
   void setContent(String content) {

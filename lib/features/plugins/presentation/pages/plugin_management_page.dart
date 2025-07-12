@@ -1,12 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:file_picker/file_picker.dart';
+
 import '../../../../l10n/app_localizations.dart';
+import '../../../../types/plugin.dart';
 import '../providers/plugin_providers.dart';
 import '../widgets/plugin_card.dart';
 import '../widgets/plugin_compact_header.dart';
-import '../../../../types/plugin.dart';
-import '../../domain/plugin_interface.dart';
 import '../../domain/plugin_context_service.dart';
+import '../../domain/plugin_package_service.dart';
 
 /// Plugin management page
 class PluginManagementPage extends ConsumerStatefulWidget {
@@ -255,6 +259,15 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
+              leading: const Icon(PhosphorIconsRegular.package),
+              title: const Text('Install MXT Package'),
+              subtitle: const Text('Install plugin from .mxt package file'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _installFromMxtPackage();
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.file_upload),
               title: Text(AppLocalizations.of(context)!.installFromFile),
               subtitle: Text(AppLocalizations.of(context)!.selectPluginFile),
@@ -292,7 +305,142 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
       ),
     );
   }
-  
+
+  /// Install plugin from MXT package
+  Future<void> _installFromMxtPackage() async {
+    try {
+      // Select .mxt file
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['mxt'],
+        dialogTitle: 'Select MXT Plugin Package',
+      );
+
+      if (result == null || result.files.isEmpty) {
+        return; // User cancelled
+      }
+
+      final packagePath = result.files.first.path;
+      if (packagePath == null) {
+        throw Exception('Invalid file path');
+      }
+
+      // Show loading dialog
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const AlertDialog(
+            content: Row(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16),
+                Text('Installing plugin package...'),
+              ],
+            ),
+          ),
+        );
+      }
+
+      // Validate package first
+      final manifest = await PluginPackageService.validatePackage(packagePath);
+      
+      // Show package information and confirmation
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Install Plugin Package'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Plugin: ${manifest.metadata.name}'),
+                Text('Version: ${manifest.metadata.version}'),
+                Text('Author: ${manifest.metadata.author}'),
+                Text('Description: ${manifest.metadata.description}'),
+                const SizedBox(height: 16),
+                Text('Files: ${manifest.files.length}'),
+                if (manifest.permissions.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  const Text('Required permissions:'),
+                  ...manifest.permissions.map((p) => Text('• $p')),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Install'),
+              ),
+            ],
+          ),
+        );
+
+        if (confirmed != true) return;
+      }
+
+      // Show installation progress
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const AlertDialog(
+            content: Row(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(width: 16),
+                Text('Installing plugin...'),
+              ],
+            ),
+          ),
+        );
+      }
+
+      // Install the package
+      final pluginManager = ref.read(pluginManagerProvider);
+      final installDir = await _getPluginsDirectory();
+      
+      final installedPath = await PluginPackageService.installPackage(
+        packagePath: packagePath,
+        installDir: installDir.path,
+      );
+
+      // Refresh plugin manager to load the new plugin
+      await pluginManager.scanPlugins();
+
+      if (mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Plugin "${manifest.metadata.name}" installed successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+
+    } catch (e) {
+      if (mounted) {
+        // Close any open dialogs
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to install plugin: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   /// Install plugin from file
   void _installFromFile() async {
     try {
@@ -415,6 +563,19 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
       context: context,
       builder: (context) => _PluginDetailsDialog(plugin: plugin),
     );
+  }
+
+  /// Get plugins directory
+  Future<Directory> _getPluginsDirectory() async {
+    // This should match the plugin manager's plugin directory logic
+    final currentDir = Directory.current.path;
+    final pluginsDir = Directory('$currentDir/plugins');
+    
+    if (!await pluginsDir.exists()) {
+      await pluginsDir.create(recursive: true);
+    }
+    
+    return pluginsDir;
   }
 }
 

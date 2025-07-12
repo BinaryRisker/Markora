@@ -6,6 +6,9 @@ abstract class EditorController {
   /// Get current document content
   String get content;
   
+  /// Get current document content (method version for plugin compatibility)
+  String getCurrentContent();
+  
   /// Set document content
   void setContent(String content);
   

@@ -8,9 +8,101 @@ import 'package:process/process.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-// Import from main app
-import 'package:markora/features/plugins/domain/plugin_interface.dart';
-import 'package:markora/types/plugin.dart';
+// Plugin interfaces - these should be defined locally for plugin independence
+// In a real implementation, these would be provided by the plugin system
+
+/// Plugin metadata
+class PluginMetadata {
+  final String id;
+  final String name;
+  final String version;
+  final String description;
+  final String author;
+  final String? homepage;
+  final String? repository;
+  final String license;
+  final PluginType type;
+  final List<String> tags;
+  final String minVersion;
+  final String? maxVersion;
+  final List<String> dependencies;
+  
+  const PluginMetadata({
+    required this.id,
+    required this.name,
+    required this.version,
+    required this.description,
+    required this.author,
+    this.homepage,
+    this.repository,
+    required this.license,
+    required this.type,
+    required this.tags,
+    required this.minVersion,
+    this.maxVersion,
+    this.dependencies = const [],
+  });
+}
+
+/// Plugin types
+enum PluginType {
+  syntax,
+  renderer,
+  theme,
+  export,
+  exporter,
+  tool,
+  integration,
+}
+
+/// Plugin action
+class PluginAction {
+  final String id;
+  final String title;
+  final String description;
+  final String icon;
+  
+  const PluginAction({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.icon,
+  });
+}
+
+/// Plugin context
+abstract class PluginContext {
+  BuildContext get context;
+  EditorController get editorController;
+  ToolbarRegistry get toolbarRegistry;
+}
+
+/// Editor controller
+abstract class EditorController {
+  String get content;
+  String getCurrentContent();
+  void setContent(String content);
+}
+
+/// Toolbar registry
+abstract class ToolbarRegistry {
+  void registerAction(PluginAction action, VoidCallback callback);
+  void unregisterAction(String actionId);
+}
+
+/// Base plugin class
+abstract class MarkoraPlugin {
+  PluginMetadata get metadata;
+  bool get isInitialized;
+  
+  Future<void> onLoad(PluginContext context);
+  Future<void> onUnload();
+  Future<void> onActivate();
+  Future<void> onDeactivate();
+  void onConfigChanged(Map<String, dynamic> config);
+  Widget? getConfigWidget();
+  Map<String, dynamic> getStatus();
+}
 
 /// Pandoc Export Plugin
 class PandocPlugin extends MarkoraPlugin {
@@ -39,12 +131,17 @@ class PandocPlugin extends MarkoraPlugin {
 
   @override
   Future<void> onLoad(PluginContext context) async {
+    debugPrint('Pandoc Plugin: onLoad called');
     _context = context;
+    debugPrint('Pandoc Plugin: Context set, BuildContext type: ${context.context?.runtimeType}');
     
     // Initialize asset manager
+    debugPrint('Pandoc Plugin: Initializing asset manager...');
     await _assetManager.initialize();
+    debugPrint('Pandoc Plugin: Asset manager initialized');
     
     // Register toolbar actions
+    debugPrint('Pandoc Plugin: Registering toolbar actions...');
     _context.toolbarRegistry.registerAction(
       const PluginAction(
         id: 'pandoc_export',
@@ -52,7 +149,10 @@ class PandocPlugin extends MarkoraPlugin {
         description: 'Export document using Pandoc',
         icon: 'export',
       ),
-      () => _showExportDialog(),
+      () {
+        debugPrint('Pandoc Plugin: Export action callback called');
+        _showExportDialog();
+      },
     );
     
     _context.toolbarRegistry.registerAction(
@@ -62,10 +162,14 @@ class PandocPlugin extends MarkoraPlugin {
         description: 'Import document using Pandoc',
         icon: 'import',
       ),
-      () => _showImportDialog(),
+      () {
+        debugPrint('Pandoc Plugin: Import action callback called');
+        _showImportDialog();
+      },
     );
     
     _isInitialized = true;
+    debugPrint('Pandoc Plugin: onLoad completed successfully');
   }
 
   @override
@@ -109,28 +213,65 @@ class PandocPlugin extends MarkoraPlugin {
   }
 
   void _showExportDialog() {
+    debugPrint('Pandoc Plugin: _showExportDialog called');
+    
     // Get current content from context
     final content = _context.editorController.getCurrentContent();
+    debugPrint('Pandoc Plugin: Got content with length: ${content.length}');
     
-    showDialog(
-      context: _context.context,
-      builder: (context) => PandocExportDialog(
-        markdownContent: content,
-        assetManager: _assetManager,
-      ),
-    );
+    // Check if context is available
+    if (_context.context == null) {
+      debugPrint('Pandoc Plugin: No BuildContext available for export dialog');
+      return;
+    }
+    
+    debugPrint('Pandoc Plugin: BuildContext is available: ${_context.context.runtimeType}');
+    debugPrint('Pandoc Plugin: About to show export dialog');
+    
+    try {
+      // Show the actual Pandoc export dialog
+      debugPrint('Pandoc Plugin: Calling showDialog...');
+      showDialog(
+        context: _context.context!,
+        builder: (context) {
+          debugPrint('Pandoc Plugin: Dialog builder called');
+          return PandocExportDialog(
+            markdownContent: content,
+            assetManager: _assetManager,
+          );
+        },
+      );
+      debugPrint('Pandoc Plugin: showDialog call completed');
+    } catch (e) {
+      debugPrint('Pandoc Plugin: Error showing export dialog: $e');
+      debugPrint('Pandoc Plugin: Error stack trace: ${e.toString()}');
+    }
   }
 
   void _showImportDialog() {
-    showDialog(
-      context: _context.context,
-      builder: (context) => PandocImportDialog(
-        assetManager: _assetManager,
-        onImportComplete: (content) {
-          _context.editorController.setContent(content);
-        },
-      ),
-    );
+    debugPrint('Pandoc Plugin: _showImportDialog called');
+    
+    // Check if context is available
+    if (_context.context == null) {
+      debugPrint('Pandoc Plugin: No BuildContext available for import dialog');
+      return;
+    }
+    
+    debugPrint('Pandoc Plugin: Showing import dialog');
+    
+    try {
+      showDialog(
+        context: _context.context!,
+        builder: (context) => PandocImportDialog(
+          assetManager: _assetManager,
+          onImportComplete: (content) {
+            _context.editorController.setContent(content);
+          },
+        ),
+      );
+    } catch (e) {
+      debugPrint('Pandoc Plugin: Error showing import dialog: $e');
+    }
   }
 }
 
@@ -412,10 +553,11 @@ class PandocService {
       
       // Special handling for PDF
       if (format == PandocExportFormat.pdf) {
-        final pdfEngine = await _detectPdfEngine(assetManager);
-        if (pdfEngine != null) {
-          args.addAll(['--pdf-engine', pdfEngine]);
-        }
+        // Add standalone option for PDF
+        args.add('--standalone');
+        // Don't specify PDF engine - let Pandoc use its default
+        // This allows Pandoc to automatically choose the best available engine
+        debugPrint('PandocService: Using Pandoc default PDF engine for conversion');
       }
       
       // Execute pandoc
@@ -479,21 +621,9 @@ class PandocService {
   }
   
   static Future<String?> _detectPdfEngine(PandocAssetManager assetManager) async {
-    final engines = ['wkhtmltopdf', 'weasyprint', 'prince', 'pdflatex', 'xelatex', 'lualatex'];
-    
-    for (final engine in engines) {
-      try {
-        final result = await _processManager.run([engine, '--version']);
-        if (result.exitCode == 0) {
-          debugPrint('PandocService: Found PDF engine: $engine');
-          return engine;
-        }
-      } catch (e) {
-        // Engine not found, continue
-      }
-    }
-    
-    debugPrint('PandocService: No PDF engine found');
+    // Always return null to use Pandoc's default PDF engine
+    // This avoids the need to install external PDF engines
+    debugPrint('PandocService: Using Pandoc default PDF engine');
     return null;
   }
   
@@ -594,12 +724,20 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Export failed: ${result.error}'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          // Check if it's a PDF engine error
+          if (result.error != null && 
+              (result.error!.contains('pdflatex') || result.error!.contains('pdf-engine') || result.error!.contains('not found')) &&
+              _selectedFormat == PandocExportFormat.pdf) {
+            // Show simplified dialog for PDF errors
+            _showSimplePdfErrorDialog(result.error!);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Export failed: ${result.error}'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         }
       }
     } catch (e) {
@@ -728,6 +866,52 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
               : const Text('Export'),
         ),
       ],
+    );
+  }
+
+  void _showSimplePdfErrorDialog(String error) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.error, color: Colors.red),
+            SizedBox(width: 8),
+            Text('PDF Export Failed'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('PDF export failed. Pandoc cannot find a suitable PDF engine.'),
+            const SizedBox(height: 16),
+            const Text('Suggested solutions:'),
+            const Text('1. Export as HTML format (recommended)'),
+            const Text('2. Manually install LaTeX or wkhtmltopdf'),
+            const SizedBox(height: 16),
+            const Text('Would you like to export as HTML instead?'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Change format to HTML and retry
+              setState(() {
+                _selectedFormat = PandocExportFormat.html;
+              });
+              // Auto-retry with HTML format
+              _exportDocument();
+            },
+            child: const Text('Export as HTML'),
+          ),
+        ],
+      ),
     );
   }
 }

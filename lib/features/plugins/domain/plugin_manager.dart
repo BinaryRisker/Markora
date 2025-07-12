@@ -622,4 +622,11 @@ class PluginManager extends ChangeNotifier {
     _listeners.clear();
     super.dispose();
   }
+
+  /// Refresh and scan plugins
+  Future<void> scanPlugins() async {
+    debugPrint('Manual plugin scan requested');
+    await _scanPlugins();
+    notifyListeners();
+  }
 }

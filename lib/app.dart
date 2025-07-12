@@ -374,6 +374,10 @@ ${l10n.blockFormula}：
             onPressed: () {
               debugPrint('Execute plugin action: ${action.title}');
               try {
+                // Ensure plugin context has current BuildContext
+                final contextService = ref.read(pluginContextServiceProvider);
+                contextService.setBuildContext(context);
+                
                 actionItem.callback();
               } catch (e) {
                 debugPrint('Plugin action failed: $e');

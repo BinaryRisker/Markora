@@ -434,8 +434,12 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           // Execute plugin action
           debugPrint('Execute plugin action: ${action.title}');
           
-          // Ensure we have the latest editor controller
+          // Ensure we have the latest editor controller and context
           _registerToPluginSystem();
+          
+          // Also ensure the current BuildContext is set
+          final contextService = ref.read(pluginContextServiceProvider);
+          contextService.setBuildContext(context);
           
           // Execute the callback
           actionItem.callback();

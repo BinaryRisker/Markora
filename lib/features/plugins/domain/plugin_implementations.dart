@@ -12,6 +12,9 @@ class EditorControllerImpl implements EditorController {
   String get content => _textController.text;
   
   @override
+  String getCurrentContent() => _textController.text;
+  
+  @override
   void setContent(String content) {
     _textController.text = content;
   }
