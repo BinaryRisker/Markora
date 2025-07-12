@@ -9,6 +9,7 @@ import '../../../types/plugin.dart';
 import 'plugin_interface.dart';
 import 'plugin_implementations.dart';
 import 'plugin_context_service.dart';
+import 'entities/pandoc_plugin.dart';
 
 /// Plugin loader
 class PluginLoader {
@@ -69,6 +70,7 @@ class PluginLoader {
           return await _loadRendererPlugin(plugin);
         case PluginType.theme:
           return await _loadThemePlugin(plugin);
+        case PluginType.export:
         case PluginType.exporter:
           return await _loadExporterPlugin(plugin);
         case PluginType.tool:
@@ -160,6 +162,24 @@ class PluginLoader {
     }
   }
   
+  /// Create Pandoc export plugin instance
+  MarkoraPlugin _createPandocExportPlugin(PluginMetadata metadata) {
+    try {
+      debugPrint('_createPandocExportPlugin called with metadata: ${metadata.id}');
+      
+      // Create PandocExportPlugin instance
+      final plugin = PandocExportPlugin();
+      debugPrint('Pandoc export plugin created successfully: ${plugin.runtimeType}');
+      return plugin;
+    } catch (e, stackTrace) {
+      debugPrint('Failed to create PandocExportPlugin: $e');
+      debugPrint('Stack trace: $stackTrace');
+      
+      // Fallback to default implementation
+      return ExporterPluginImpl(metadata);
+    }
+  }
+  
   /// Load theme plugin
   Future<MarkoraPlugin?> _loadThemePlugin(Plugin plugin) async {
     // TODO: Implement theme plugin loading logic
@@ -168,8 +188,19 @@ class PluginLoader {
   
   /// Load export plugin
   Future<MarkoraPlugin?> _loadExporterPlugin(Plugin plugin) async {
-    // TODO: Implement export plugin loading logic
-    return ExporterPluginImpl(plugin.metadata);
+    try {
+      // Check if it's a Pandoc export plugin
+      if (plugin.metadata.id == 'pandoc_export_plugin') {
+        // Import the actual PandocExportPlugin
+        return _createPandocExportPlugin(plugin.metadata);
+      }
+      
+      // Default export plugin implementation
+      return ExporterPluginImpl(plugin.metadata);
+    } catch (e) {
+      debugPrint('Failed to load export plugin: $e');
+      return ExporterPluginImpl(plugin.metadata);
+    }
   }
   
   /// Load tool plugin
@@ -193,6 +224,8 @@ class PluginLoader {
         return PluginType.renderer;
       case 'theme':
         return PluginType.theme;
+      case 'export':
+        return PluginType.export;
       case 'exporter':
         return PluginType.exporter;
       case 'tool':

@@ -141,6 +141,35 @@ class PluginManager extends ChangeNotifier {
         
         _plugins['mermaid_plugin'] = mermaidPlugin;
         debugPrint('Built-in mermaid plugin created and enabled');
+        
+        // Create built-in pandoc export plugin
+        debugPrint('Web environment: Creating built-in pandoc export plugin');
+        
+        final pandocMetadata = PluginMetadata(
+          id: 'pandoc_export_plugin',
+          name: 'Pandoc Export',
+          version: '1.0.0',
+          description: 'Universal document converter using Pandoc',
+          author: 'Markora Team',
+          type: PluginType.export,
+          minVersion: '1.0.0',
+          homepage: null,
+          repository: null,
+          license: 'MIT',
+          tags: ['export', 'import', 'pandoc', 'converter'],
+          dependencies: [],
+        );
+        
+        final pandocPlugin = Plugin(
+          metadata: pandocMetadata,
+          status: PluginStatus.enabled,  // Auto-enable in web
+          installPath: 'builtin://pandoc_export_plugin',  // Virtual path
+          installDate: DateTime.now(),
+          lastUpdated: DateTime.now(),
+        );
+        
+        _plugins['pandoc_export_plugin'] = pandocPlugin;
+        debugPrint('Built-in pandoc export plugin created and enabled');
       } else {
         // For non-web platforms, scan the actual plugin directory
         final mermaidPluginDir = Directory('plugins/mermaid_plugin');
@@ -152,6 +181,35 @@ class PluginManager extends ChangeNotifier {
           _plugins['mermaid_plugin'] = mermaidPlugin.copyWith(status: PluginStatus.enabled);
           debugPrint('Mermaid plugin automatically enabled');
         }
+        
+        // Create and enable pandoc export plugin for non-web platforms
+        debugPrint('Non-web environment: Creating built-in pandoc export plugin');
+        
+        final pandocMetadata = PluginMetadata(
+          id: 'pandoc_export_plugin',
+          name: 'Pandoc Export',
+          version: '1.0.0',
+          description: 'Universal document converter using Pandoc',
+          author: 'Markora Team',
+          type: PluginType.export,
+          minVersion: '1.0.0',
+          homepage: null,
+          repository: null,
+          license: 'MIT',
+          tags: ['export', 'import', 'pandoc', 'converter'],
+          dependencies: [],
+        );
+        
+        final pandocPlugin = Plugin(
+          metadata: pandocMetadata,
+          status: PluginStatus.enabled,  // Auto-enable
+          installPath: 'builtin://pandoc_export_plugin',  // Virtual path
+          installDate: DateTime.now(),
+          lastUpdated: DateTime.now(),
+        );
+        
+        _plugins['pandoc_export_plugin'] = pandocPlugin;
+        debugPrint('Built-in pandoc export plugin created and enabled');
       }
       
       debugPrint('Known plugins scanning completed');
@@ -183,7 +241,8 @@ class PluginManager extends ChangeNotifier {
       
       final existingPlugin = _plugins[metadata.id];
       final status = existingPlugin?.status ?? 
-          (metadata.id == 'mermaid_plugin' ? PluginStatus.enabled : PluginStatus.installed);
+          (metadata.id == 'mermaid_plugin' || metadata.id == 'pandoc_export_plugin' 
+           ? PluginStatus.enabled : PluginStatus.installed);
       
       final plugin = Plugin(
         metadata: metadata,
