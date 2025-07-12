@@ -6,7 +6,7 @@ import 'package:path/path.dart' as path;
 
 import '../../../../types/document.dart';
 import '../providers/document_providers.dart';
-import '../../../export/domain/entities/export_settings.dart';
+
 
 /// File save format
 enum SaveFormat {
@@ -22,18 +22,16 @@ enum SaveFormat {
   final String extension;
   final String description;
   
-  /// Convert to ExportFormat (if applicable)
-  ExportFormat? toExportFormat() {
+  /// Check if format requires export (now moved to plugins)
+  bool get requiresExport {
     switch (this) {
       case SaveFormat.html:
-        return ExportFormat.html;
       case SaveFormat.pdf:
-        return ExportFormat.pdf;
       case SaveFormat.docx:
-        return ExportFormat.docx;
+        return true;
       case SaveFormat.markdown:
       case SaveFormat.txt:
-        return null; // These formats are saved directly, no export needed
+        return false;
     }
   }
 }
@@ -202,16 +200,10 @@ class _SaveAsDialogState extends ConsumerState<SaveAsDialog> {
 
       // Choose save method based on format
       final fileService = ref.read(fileServiceProvider);
-      final exportFormat = _selectedFormat.toExportFormat();
       
-      if (exportFormat != null) {
-        // Formats that need export (HTML, PDF, DOCX)
-        final settings = ExportSettings(
-          format: exportFormat,
-          outputPath: '',
-          fileName: fileName,
-        );
-        await fileService.exportDocument(widget.document, settings, targetPath: filePath);
+      if (_selectedFormat.requiresExport) {
+        // Export functionality has been moved to plugins
+        throw Exception('Export functionality for ${_selectedFormat.displayName} has been moved to plugins. Please use the Pandoc export plugin.');
       } else {
         // Formats that save directly (Markdown, plain text)
         await fileService.saveDocumentToFile(widget.document, filePath);

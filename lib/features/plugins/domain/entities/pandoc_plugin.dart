@@ -55,8 +55,8 @@ class PandocExportPlugin extends MarkoraPlugin {
       PluginAction(
         id: 'pandoc_export',
         title: 'Export',
+        description: 'Export document using Pandoc',
         icon: 'export',
-        tooltip: 'Export document using Pandoc',
       ),
       () => _showExportDialog(),
     );

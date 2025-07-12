@@ -705,8 +705,8 @@ class _ExportDialogState extends ConsumerState<ExportDialog> {
         );
       });
 
-      // Use FileService to export document
-      await fileService.exportDocument(widget.document, settings);
+      // Export functionality has been moved to plugins
+      throw Exception('Export functionality has been moved to plugins. Please use the Pandoc export plugin.');
 
       setState(() {
         _currentProgress = const ExportProgress(

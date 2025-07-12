@@ -473,37 +473,7 @@ class FileService {
     }
   }
 
-  /// Get file extension based on export format
-  String _getExtensionForFormat(ExportFormat format) {
-    switch (format) {
-      case ExportFormat.html:
-        return '.html';
-      case ExportFormat.pdf:
-        return '.pdf';
-      case ExportFormat.docx:
-        return '.docx';
-      case ExportFormat.png:
-        return '.png';
-      case ExportFormat.jpeg:
-        return '.jpg';
-    }
-  }
 
-  /// Get format display name
-  String _getFormatDisplayName(ExportFormat format) {
-    switch (format) {
-      case ExportFormat.html:
-        return 'HTML';
-      case ExportFormat.pdf:
-        return 'PDF';
-      case ExportFormat.docx:
-        return 'Word Document';
-      case ExportFormat.png:
-        return 'PNG Image';
-      case ExportFormat.jpeg:
-        return 'JPEG Image';
-    }
-  }
 
   /// Download file in Web environment
   Future<void> _downloadFileInBrowser(String content, String fileName, String mimeType) async {
