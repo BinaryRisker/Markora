@@ -10,17 +10,28 @@ class PluginContextService {
   
   PluginContextService._();
   
-  late ToolbarRegistryImpl _toolbarRegistry;
-  late SyntaxRegistryImpl _syntaxRegistry;
-  late MenuRegistryImpl _menuRegistry;
+  ToolbarRegistryImpl? _toolbarRegistry;
+  SyntaxRegistryImpl? _syntaxRegistry;
+  MenuRegistryImpl? _menuRegistry;
   EditorController? _editorController;
+  bool _isInitialized = false;
   
   /// Initialize the plugin context service
   void initialize() {
+    if (_isInitialized) return;
+    
     _toolbarRegistry = ToolbarRegistryImpl();
     _syntaxRegistry = SyntaxRegistryImpl();
     _menuRegistry = MenuRegistryImpl();
+    _isInitialized = true;
     debugPrint('PluginContextService initialized successfully');
+  }
+  
+  /// Ensure initialization before accessing registries
+  void _ensureInitialized() {
+    if (!_isInitialized) {
+      initialize();
+    }
   }
   
   /// Set the current editor controller
@@ -31,24 +42,34 @@ class PluginContextService {
   
   /// Get the plugin context
   PluginContext get context {
+    _ensureInitialized();
     final controller = _editorController ?? _DummyEditorController();
     debugPrint('Plugin context requested: using ${controller.runtimeType}');
     return PluginContext(
       editorController: controller,
-      syntaxRegistry: _syntaxRegistry,
-      toolbarRegistry: _toolbarRegistry,
-      menuRegistry: _menuRegistry,
+      syntaxRegistry: _syntaxRegistry!,
+      toolbarRegistry: _toolbarRegistry!,
+      menuRegistry: _menuRegistry!,
     );
   }
   
   /// Get toolbar registry
-  ToolbarRegistryImpl get toolbarRegistry => _toolbarRegistry;
+  ToolbarRegistryImpl get toolbarRegistry {
+    _ensureInitialized();
+    return _toolbarRegistry!;
+  }
   
   /// Get syntax registry
-  SyntaxRegistryImpl get syntaxRegistry => _syntaxRegistry;
+  SyntaxRegistryImpl get syntaxRegistry {
+    _ensureInitialized();
+    return _syntaxRegistry!;
+  }
   
   /// Get menu registry
-  MenuRegistryImpl get menuRegistry => _menuRegistry;
+  MenuRegistryImpl get menuRegistry {
+    _ensureInitialized();
+    return _menuRegistry!;
+  }
 }
 
 /// Dummy editor controller for fallback
@@ -86,4 +107,4 @@ class _DummyEditorController implements EditorController {
 /// Provider for plugin context service
 final pluginContextServiceProvider = Provider<PluginContextService>((ref) {
   return PluginContextService.instance;
-}); 
+});
