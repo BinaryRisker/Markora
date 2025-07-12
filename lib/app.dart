@@ -20,6 +20,7 @@ import 'features/editor/domain/services/global_editor_manager.dart';
 import 'features/plugins/presentation/pages/plugin_management_page.dart';
 import 'features/plugins/domain/plugin_context_service.dart';
 import 'features/plugins/domain/plugin_manager.dart';
+import 'features/plugins/domain/entities/pandoc_plugin.dart';
 import 'core/utils/markdown_block_cache.dart';
 
 /// Application shell - main interface container

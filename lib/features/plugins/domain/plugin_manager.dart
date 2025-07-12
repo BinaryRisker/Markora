@@ -88,21 +88,27 @@ class PluginManager extends ChangeNotifier {
       if (!await pluginsDir.exists()) {
         debugPrint('Plugin directory does not exist, creating: ${pluginsDir.path}');
         await pluginsDir.create(recursive: true);
-        return;
       }
       
       debugPrint('Start scanning plugin directory: ${pluginsDir.path}');
       var pluginCount = 0;
       
-      await for (final entity in pluginsDir.list()) {
-        debugPrint('Found entity: ${entity.path}, type: ${entity.runtimeType}');
-        if (entity is Directory) {
-          pluginCount++;
-          await _scanPluginDirectory(entity);
+      if (await pluginsDir.exists()) {
+        await for (final entity in pluginsDir.list()) {
+          debugPrint('Found entity: ${entity.path}, type: ${entity.runtimeType}');
+          if (entity is Directory) {
+            pluginCount++;
+            await _scanPluginDirectory(entity);
+          }
         }
       }
       
       debugPrint('Scanning completed, found $pluginCount plugin directories');
+      
+      // Also scan known plugins for non-web environments
+      debugPrint('Scanning known plugins for non-web environment');
+      await _scanKnownPlugins();
+      
       debugPrint('Currently loaded plugins: ${_plugins.keys.toList()}');
     } catch (e) {
       debugPrint('Failed to scan plugin directory: $e');

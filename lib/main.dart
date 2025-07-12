@@ -14,6 +14,7 @@ import 'features/document/infrastructure/repositories/hive_document_repository.d
 import 'features/document/presentation/providers/document_providers.dart';
 import 'features/plugins/domain/plugin_manager.dart';
 import 'features/plugins/domain/plugin_context_service.dart';
+import 'features/plugins/domain/entities/pandoc_plugin.dart';
 import 'types/document.dart';
 
 
@@ -190,6 +191,9 @@ class MarkoraApp extends ConsumerWidget {
       // Application basic information
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
+
+      // Global navigator key for plugin dialogs
+      navigatorKey: NavigatorService.navigatorKey,
 
       // Internationalization configuration
       localizationsDelegates: const [

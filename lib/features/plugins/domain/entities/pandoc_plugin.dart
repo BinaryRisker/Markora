@@ -4,6 +4,7 @@ import '../plugin_interface.dart';
 import '../services/pandoc_service.dart';
 import '../../presentation/widgets/pandoc_export_dialog.dart';
 import '../../presentation/widgets/pandoc_import_dialog.dart';
+import '../plugin_context_service.dart';
 
 /// Pandoc导出插件
 class PandocExportPlugin extends MarkoraPlugin {
@@ -31,58 +32,77 @@ class PandocExportPlugin extends MarkoraPlugin {
   
   @override
   Future<void> onLoad(PluginContext context) async {
+    debugPrint('PandocExportPlugin: Starting onLoad');
     _context = context;
     _isInitialized = true;
     
-    // 注册导出菜单项
-    context.menuRegistry.registerMenuItem(
-      'export_pandoc',
-      'Export with Pandoc',
-      () => _showExportDialog(),
-      icon: 'export',
-    );
-    
-    // 注册导入菜单项
-    context.menuRegistry.registerMenuItem(
-      'import_pandoc',
-      'Import with Pandoc',
-      () => _showImportDialog(),
-      icon: 'import',
-    );
-    
-    // 注册工具栏按钮
-    context.toolbarRegistry.registerAction(
-      PluginAction(
-        id: 'pandoc_export',
-        title: 'Export',
-        description: 'Export document using Pandoc',
+    try {
+      // 注册导出菜单项
+      debugPrint('PandocExportPlugin: Registering menu items');
+      context.menuRegistry.registerMenuItem(
+        'export_pandoc',
+        'Export with Pandoc',
+        () => _showExportDialog(),
         icon: 'export',
-      ),
-      () => _showExportDialog(),
-    );
+      );
+      
+      // 注册导入菜单项
+      context.menuRegistry.registerMenuItem(
+        'import_pandoc',
+        'Import with Pandoc',
+        () => _showImportDialog(),
+        icon: 'import',
+      );
+      
+      // 注册工具栏按钮
+      debugPrint('PandocExportPlugin: Registering toolbar action');
+      context.toolbarRegistry.registerAction(
+        const PluginAction(
+          id: 'pandoc_export',
+          title: 'Export',
+          description: 'Export document using Pandoc',
+          icon: 'export',
+        ),
+        () {
+          debugPrint('PandocExportPlugin: Toolbar button clicked');
+          _showExportDialog();
+        },
+      );
+      
+      debugPrint('PandocExportPlugin: onLoad completed successfully');
+    } catch (e, stackTrace) {
+      debugPrint('PandocExportPlugin: onLoad error: $e');
+      debugPrint('PandocExportPlugin: Stack trace: $stackTrace');
+      rethrow;
+    }
   }
   
   @override
   Future<void> onUnload() async {
+    debugPrint('PandocExportPlugin: Starting onUnload');
     _context?.menuRegistry.unregisterMenuItem('export_pandoc');
     _context?.menuRegistry.unregisterMenuItem('import_pandoc');
     _context?.toolbarRegistry.unregisterAction('pandoc_export');
     _isInitialized = false;
     _context = null;
+    debugPrint('PandocExportPlugin: onUnload completed');
   }
   
   @override
   Future<void> onActivate() async {
+    debugPrint('PandocExportPlugin: onActivate called');
     // 激活插件时的逻辑
   }
   
   @override
   Future<void> onDeactivate() async {
+    debugPrint('PandocExportPlugin: onDeactivate called');
     // 停用插件时的逻辑
   }
   
   @override
   void onConfigChanged(Map<String, dynamic> config) {
+    debugPrint('PandocExportPlugin: Configuration changed: $config');
     // 配置更改时的逻辑
   }
   
@@ -101,46 +121,77 @@ class PandocExportPlugin extends MarkoraPlugin {
   
   /// 显示导出对话框
   void _showExportDialog() {
-    if (_context?.editorController == null) return;
+    debugPrint('PandocExportPlugin: _showExportDialog called');
+    if (_context?.editorController == null) {
+      debugPrint('PandocExportPlugin: Editor controller is null');
+      return;
+    }
     
     // 获取当前编辑器内容
     final content = _context!.editorController.content;
+    debugPrint('PandocExportPlugin: Editor content length: ${content.length}');
     
     // 查找当前上下文中的Navigator
     final navigator = _findNavigator();
     if (navigator != null) {
+      debugPrint('PandocExportPlugin: Showing export dialog');
       showDialog(
         context: navigator.context,
         builder: (context) => PandocExportDialog(
           markdownContent: content,
         ),
       );
+    } else {
+      debugPrint('PandocExportPlugin: Navigator not found');
     }
   }
   
   /// 显示导入对话框
   void _showImportDialog() {
-    if (_context?.editorController == null) return;
+    debugPrint('PandocExportPlugin: _showImportDialog called');
+    if (_context?.editorController == null) {
+      debugPrint('PandocExportPlugin: Editor controller is null');
+      return;
+    }
     
     // 查找当前上下文中的Navigator
     final navigator = _findNavigator();
     if (navigator != null) {
+      debugPrint('PandocExportPlugin: Showing import dialog');
       showDialog(
         context: navigator.context,
         builder: (context) => PandocImportDialog(
           onImportComplete: (markdownContent) {
+            debugPrint('PandocExportPlugin: Import completed, content length: ${markdownContent.length}');
             // 将导入的内容设置到编辑器
             _context!.editorController.setContent(markdownContent);
           },
         ),
       );
+    } else {
+      debugPrint('PandocExportPlugin: Navigator not found');
     }
   }
   
-  /// 查找Navigator (临时解决方案)
+  /// 查找Navigator
   NavigatorState? _findNavigator() {
-    // 这里需要根据实际的应用结构来获取Navigator
-    // 这是一个简化的实现
-    return null; // 待实现
+    try {
+      // 尝试从全局导航器获取当前上下文
+      final context = NavigatorService.navigatorKey.currentContext;
+      if (context != null) {
+        return Navigator.of(context);
+      }
+      
+      debugPrint('PandocExportPlugin: Navigator context not found');
+      return null;
+    } catch (e) {
+      debugPrint('PandocExportPlugin: Error finding navigator: $e');
+      return null;
+    }
   }
+}
+
+/// 全局导航器服务
+class NavigatorService {
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 } 
