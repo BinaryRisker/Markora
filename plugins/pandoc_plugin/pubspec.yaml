@@ -1,0 +1,39 @@
+name: pandoc_plugin
+description: Universal document converter using Pandoc for Markora editor
+version: 1.0.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+  flutter: ">=3.32.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Process execution
+  process: ^5.0.2
+  
+  # Path utilities
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  
+  # File operations
+  file_picker: ^8.1.2
+  
+  # UI components
+  phosphor_flutter: ^2.1.0
+  
+  # Main app dependency (for types and interfaces)
+  markora:
+    path: ../../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/pandoc/ 

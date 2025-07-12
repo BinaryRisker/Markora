@@ -9,7 +9,8 @@ import '../../../types/plugin.dart';
 import 'plugin_interface.dart';
 import 'plugin_implementations.dart';
 import 'plugin_context_service.dart';
-import 'entities/pandoc_plugin.dart';
+
+import 'external_pandoc_plugin_proxy.dart';
 
 /// Plugin loader
 class PluginLoader {
@@ -162,15 +163,45 @@ class PluginLoader {
     }
   }
   
+  /// Load external Pandoc plugin
+  Future<MarkoraPlugin?> _loadExternalPandocPlugin(Plugin plugin) async {
+    try {
+      debugPrint('Loading external Pandoc plugin from: ${plugin.installPath}');
+      
+      // Check if plugin directory exists
+      if (plugin.installPath == null) {
+        throw Exception('Plugin install path is null');
+      }
+      
+      final pluginDir = Directory(plugin.installPath!);
+      if (!await pluginDir.exists()) {
+        throw Exception('Plugin directory does not exist: ${plugin.installPath}');
+      }
+      
+      // Check if main.dart exists
+      final mainFile = File(path.join(plugin.installPath!, 'lib', 'main.dart'));
+      if (!await mainFile.exists()) {
+        throw Exception('Plugin main.dart not found: ${mainFile.path}');
+      }
+      
+      // For now, we'll use a proxy that dynamically loads the plugin
+      // In a real implementation, you might use dart:mirrors or isolates
+      return ExternalPandocPluginProxy(plugin.metadata, plugin.installPath!);
+    } catch (e, stackTrace) {
+      debugPrint('Failed to load external Pandoc plugin: $e');
+      debugPrint('Stack trace: $stackTrace');
+      return null;
+    }
+  }
+  
   /// Create Pandoc export plugin instance
   MarkoraPlugin _createPandocExportPlugin(PluginMetadata metadata) {
     try {
       debugPrint('_createPandocExportPlugin called with metadata: ${metadata.id}');
       
-      // Create PandocExportPlugin instance
-      final plugin = PandocExportPlugin();
-      debugPrint('Pandoc export plugin created successfully: ${plugin.runtimeType}');
-      return plugin;
+      // Load from external plugin directory
+      // This will be handled by the standard plugin loading mechanism
+      return ExporterPluginImpl(metadata);
     } catch (e, stackTrace) {
       debugPrint('Failed to create PandocExportPlugin: $e');
       debugPrint('Stack trace: $stackTrace');
@@ -189,7 +220,12 @@ class PluginLoader {
   /// Load export plugin
   Future<MarkoraPlugin?> _loadExporterPlugin(Plugin plugin) async {
     try {
-      // Check if it's a Pandoc export plugin
+      // Check if it's a Pandoc plugin from external directory
+      if (plugin.metadata.id == 'pandoc_plugin') {
+        return await _loadExternalPandocPlugin(plugin);
+      }
+      
+      // Check if it's a legacy Pandoc export plugin
       if (plugin.metadata.id == 'pandoc_export_plugin') {
         // Import the actual PandocExportPlugin
         return _createPandocExportPlugin(plugin.metadata);

@@ -159,87 +159,17 @@ class PluginManager extends ChangeNotifier {
         _plugins['mermaid_plugin'] = mermaidPlugin;
         debugPrint('Built-in mermaid plugin created and enabled');
         
-        // Create built-in pandoc export plugin
-        debugPrint('Web environment: Creating built-in pandoc export plugin');
-        
-        final pandocMetadata = PluginMetadata(
-          id: 'pandoc_export_plugin',
-          name: 'Pandoc Export',
-          version: '1.0.0',
-          description: 'Universal document converter using Pandoc',
-          author: 'Markora Team',
-          type: PluginType.export,
-          minVersion: '1.0.0',
-          homepage: null,
-          repository: null,
-          license: 'MIT',
-          tags: ['export', 'import', 'pandoc', 'converter'],
-          dependencies: [],
-        );
-        
-        // 检查是否有待应用的状态
-        final pandocStatus = _pendingPluginStates['pandoc_export_plugin'] ?? PluginStatus.enabled;
-        if (_pendingPluginStates.containsKey('pandoc_export_plugin')) {
-          _pendingPluginStates.remove('pandoc_export_plugin');
-          debugPrint('Applied pending status for pandoc_export_plugin: ${pandocStatus.name}');
-        }
-        
-        final pandocPlugin = Plugin(
-          metadata: pandocMetadata,
-          status: pandocStatus,  // 使用保存的状态或默认启用
-          installPath: 'builtin://pandoc_export_plugin',  // Virtual path
-          installDate: DateTime.now(),
-          lastUpdated: DateTime.now(),
-        );
-        
-        _plugins['pandoc_export_plugin'] = pandocPlugin;
-        debugPrint('Built-in pandoc export plugin created and enabled');
+        // Pandoc plugin is not supported in web environment
+        debugPrint('Web environment: Pandoc plugin not supported');
       } else {
-        // For non-web platforms, scan the actual plugin directory
+        // For non-web platforms, scan the actual plugin directories
         final mermaidPluginDir = Directory('plugins/mermaid_plugin');
         await _scanPluginDirectory(mermaidPluginDir);
         
-        // 不再自动修改Mermaid插件状态，完全依赖保存的配置
-        debugPrint('Mermaid plugin status preserved from saved configuration');
+        final pandocPluginDir = Directory('plugins/pandoc_plugin');
+        await _scanPluginDirectory(pandocPluginDir);
         
-        // Create and enable pandoc export plugin for non-web platforms
-        debugPrint('Non-web environment: Creating built-in pandoc export plugin');
-        
-        final pandocMetadata = PluginMetadata(
-          id: 'pandoc_export_plugin',
-          name: 'Pandoc Export',
-          version: '1.0.0',
-          description: 'Universal document converter using Pandoc',
-          author: 'Markora Team',
-          type: PluginType.export,
-          minVersion: '1.0.0',
-          homepage: null,
-          repository: null,
-          license: 'MIT',
-          tags: ['export', 'import', 'pandoc', 'converter'],
-          dependencies: [],
-        );
-        
-        // 检查是否已有保存的状态
-        final existingPandocPlugin = _plugins['pandoc_export_plugin'];
-        final pandocStatus = _pendingPluginStates['pandoc_export_plugin'] ?? existingPandocPlugin?.status ?? PluginStatus.enabled;
-        
-        // 如果使用了待应用的状态，从待应用列表中移除
-        if (_pendingPluginStates.containsKey('pandoc_export_plugin')) {
-          _pendingPluginStates.remove('pandoc_export_plugin');
-          debugPrint('Applied pending status for pandoc_export_plugin: ${pandocStatus.name}');
-        }
-        
-        final pandocPlugin = Plugin(
-          metadata: pandocMetadata,
-          status: pandocStatus,  // 使用保存的状态或默认启用
-          installPath: 'builtin://pandoc_export_plugin',  // Virtual path
-          installDate: existingPandocPlugin?.installDate ?? DateTime.now(),
-          lastUpdated: DateTime.now(),
-        );
-        
-        _plugins['pandoc_export_plugin'] = pandocPlugin;
-        debugPrint('Built-in pandoc export plugin created and enabled');
+        debugPrint('Plugin directories scanned, status preserved from saved configuration');
       }
       
       debugPrint('Known plugins scanning completed');

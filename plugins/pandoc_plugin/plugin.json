@@ -1,0 +1,44 @@
+{
+  "id": "pandoc_plugin",
+  "name": "Pandoc Export Plugin",
+  "version": "1.0.0",
+  "description": "Universal document converter using Pandoc - support export to PDF, HTML, DOCX, ODT and many other formats",
+  "author": "Markora Team",
+  "homepage": "https://github.com/markora/pandoc-plugin",
+  "repository": "https://github.com/markora/pandoc-plugin.git",
+  "license": "MIT",
+  "type": "export",
+  "category": "converter",
+  "tags": ["export", "import", "pandoc", "converter", "pdf", "html", "docx"],
+  "minVersion": "1.0.0",
+  "dependencies": ["process"],
+  "platforms": ["desktop"],
+  "permissions": [
+    "file_system",
+    "process"
+  ],
+  "config": {
+    "defaultExportFormat": {
+      "type": "string",
+      "default": "pdf",
+      "options": ["pdf", "html", "docx", "odt", "latex", "rtf", "epub"]
+    },
+    "enableBundledPandoc": {
+      "type": "boolean",
+      "default": true
+    },
+    "customPandocPath": {
+      "type": "string",
+      "default": ""
+    },
+    "defaultPdfEngine": {
+      "type": "string",
+      "default": "auto",
+      "options": ["auto", "wkhtmltopdf", "weasyprint", "pdflatex", "xelatex", "lualatex"]
+    }
+  },
+  "entryPoint": "lib/main.dart",
+  "assets": [
+    "assets/pandoc/"
+  ]
+} 
