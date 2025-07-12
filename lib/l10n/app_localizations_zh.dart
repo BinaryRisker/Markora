@@ -624,4 +624,68 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get name => '名称';
+
+  @override
+  String get pandocExport => 'Pandoc导出';
+
+  @override
+  String get pandocImport => 'Pandoc导入';
+
+  @override
+  String get exportWithPandoc => '使用Pandoc导出';
+
+  @override
+  String get importWithPandoc => '使用Pandoc导入';
+
+  @override
+  String get exportFormat => '导出格式';
+
+  @override
+  String get importFormat => '导入格式';
+
+  @override
+  String get outputPath => '输出路径';
+
+  @override
+  String get inputFile => '输入文件';
+
+  @override
+  String get selectOutputFile => '选择输出文件';
+
+  @override
+  String get selectFileToImport => '选择要导入的文件';
+
+  @override
+  String get pandocNotInstalled => '未安装Pandoc';
+
+  @override
+  String get pandocRequired =>
+      '此功能需要安装Pandoc。请从 https://pandoc.org/installing.html 安装Pandoc';
+
+  @override
+  String get pandocAvailable => 'Pandoc可用';
+
+  @override
+  String get platformNotSupported => '此功能仅在桌面平台（Windows、macOS、Linux）上可用';
+
+  @override
+  String get exportSuccessful => '导出成功';
+
+  @override
+  String get exportFailed => '导出失败';
+
+  @override
+  String get importSuccessful => '导入成功';
+
+  @override
+  String get importFailed => '导入失败';
+
+  @override
+  String get browse => '浏览';
+
+  @override
+  String get export => '导出';
+
+  @override
+  String get import => '导入';
 }

@@ -632,4 +632,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get name => 'Name';
+
+  @override
+  String get pandocExport => 'Pandoc Export';
+
+  @override
+  String get pandocImport => 'Pandoc Import';
+
+  @override
+  String get exportWithPandoc => 'Export with Pandoc';
+
+  @override
+  String get importWithPandoc => 'Import with Pandoc';
+
+  @override
+  String get exportFormat => 'Export Format';
+
+  @override
+  String get importFormat => 'Import Format';
+
+  @override
+  String get outputPath => 'Output Path';
+
+  @override
+  String get inputFile => 'Input File';
+
+  @override
+  String get selectOutputFile => 'Select output file';
+
+  @override
+  String get selectFileToImport => 'Select file to import';
+
+  @override
+  String get pandocNotInstalled => 'Pandoc not installed';
+
+  @override
+  String get pandocRequired =>
+      'Pandoc is required for this feature. Please install Pandoc from https://pandoc.org/installing.html';
+
+  @override
+  String get pandocAvailable => 'Pandoc available';
+
+  @override
+  String get platformNotSupported =>
+      'This feature is only available on desktop platforms (Windows, macOS, Linux)';
+
+  @override
+  String get exportSuccessful => 'Export successful';
+
+  @override
+  String get exportFailed => 'Export failed';
+
+  @override
+  String get importSuccessful => 'Import successful';
+
+  @override
+  String get importFailed => 'Import failed';
+
+  @override
+  String get browse => 'Browse';
+
+  @override
+  String get export => 'Export';
+
+  @override
+  String get import => 'Import';
 }

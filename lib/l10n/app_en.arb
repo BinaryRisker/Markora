@@ -1112,5 +1112,115 @@
   "name": "Name",
   "@name": {
     "description": "Name label"
+  },
+
+  "pandocExport": "Pandoc Export",
+  "@pandocExport": {
+    "description": "Pandoc export feature name"
+  },
+
+  "pandocImport": "Pandoc Import",
+  "@pandocImport": {
+    "description": "Pandoc import feature name"
+  },
+
+  "exportWithPandoc": "Export with Pandoc",
+  "@exportWithPandoc": {
+    "description": "Pandoc export dialog title"
+  },
+
+  "importWithPandoc": "Import with Pandoc",
+  "@importWithPandoc": {
+    "description": "Pandoc import dialog title"
+  },
+
+  "exportFormat": "Export Format",
+  "@exportFormat": {
+    "description": "Export format selection label"
+  },
+
+  "importFormat": "Import Format",
+  "@importFormat": {
+    "description": "Import format selection label"
+  },
+
+  "outputPath": "Output Path",
+  "@outputPath": {
+    "description": "Output path selection label"
+  },
+
+  "inputFile": "Input File",
+  "@inputFile": {
+    "description": "Input file selection label"
+  },
+
+  "selectOutputFile": "Select output file",
+  "@selectOutputFile": {
+    "description": "Select output file prompt"
+  },
+
+  "selectFileToImport": "Select file to import",
+  "@selectFileToImport": {
+    "description": "Select import file prompt"
+  },
+
+  "pandocNotInstalled": "Pandoc not installed",
+  "@pandocNotInstalled": {
+    "description": "Pandoc not installed error title"
+  },
+
+  "pandocRequired": "Pandoc is required for this feature. Please install Pandoc from https://pandoc.org/installing.html",
+  "@pandocRequired": {
+    "description": "Pandoc installation requirement description"
+  },
+
+  "pandocAvailable": "Pandoc available",
+  "@pandocAvailable": {
+    "description": "Pandoc available status"
+  },
+
+  "platformNotSupported": "This feature is only available on desktop platforms (Windows, macOS, Linux)",
+  "@platformNotSupported": {
+    "description": "Platform not supported prompt"
+  },
+
+  "exportSuccessful": "Export successful",
+  "@exportSuccessful": {
+    "description": "Export successful message"
+  },
+
+  "exportFailed": "Export failed",
+  "@exportFailed": {
+    "description": "Export failed message"
+  },
+
+  "importSuccessful": "Import successful",
+  "@importSuccessful": {
+    "description": "Import successful message"
+  },
+
+  "importFailed": "Import failed",
+  "@importFailed": {
+    "description": "Import failed message"
+  },
+
+  "browse": "Browse",
+  "@browse": {
+    "description": "Browse button text"
+  },
+
+  "export": "Export",
+  "@export": {
+    "description": "Export button text"
+  },
+
+  "import": "Import",
+  "@import": {
+    "description": "Import button text"
+  },
+
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
   }
 }

@@ -686,7 +686,7 @@ abstract class AppLocalizations {
   /// **'Browse plugin store'**
   String get browsePluginStore;
 
-  /// Cancel button
+  /// Cancel button text
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
@@ -1327,6 +1327,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Name'**
   String get name;
+
+  /// Pandoc export feature name
+  ///
+  /// In en, this message translates to:
+  /// **'Pandoc Export'**
+  String get pandocExport;
+
+  /// Pandoc import feature name
+  ///
+  /// In en, this message translates to:
+  /// **'Pandoc Import'**
+  String get pandocImport;
+
+  /// Pandoc export dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Export with Pandoc'**
+  String get exportWithPandoc;
+
+  /// Pandoc import dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Import with Pandoc'**
+  String get importWithPandoc;
+
+  /// Export format selection label
+  ///
+  /// In en, this message translates to:
+  /// **'Export Format'**
+  String get exportFormat;
+
+  /// Import format selection label
+  ///
+  /// In en, this message translates to:
+  /// **'Import Format'**
+  String get importFormat;
+
+  /// Output path selection label
+  ///
+  /// In en, this message translates to:
+  /// **'Output Path'**
+  String get outputPath;
+
+  /// Input file selection label
+  ///
+  /// In en, this message translates to:
+  /// **'Input File'**
+  String get inputFile;
+
+  /// Select output file prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Select output file'**
+  String get selectOutputFile;
+
+  /// Select import file prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Select file to import'**
+  String get selectFileToImport;
+
+  /// Pandoc not installed error title
+  ///
+  /// In en, this message translates to:
+  /// **'Pandoc not installed'**
+  String get pandocNotInstalled;
+
+  /// Pandoc installation requirement description
+  ///
+  /// In en, this message translates to:
+  /// **'Pandoc is required for this feature. Please install Pandoc from https://pandoc.org/installing.html'**
+  String get pandocRequired;
+
+  /// Pandoc available status
+  ///
+  /// In en, this message translates to:
+  /// **'Pandoc available'**
+  String get pandocAvailable;
+
+  /// Platform not supported prompt
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is only available on desktop platforms (Windows, macOS, Linux)'**
+  String get platformNotSupported;
+
+  /// Export successful message
+  ///
+  /// In en, this message translates to:
+  /// **'Export successful'**
+  String get exportSuccessful;
+
+  /// Export failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed'**
+  String get exportFailed;
+
+  /// Import successful message
+  ///
+  /// In en, this message translates to:
+  /// **'Import successful'**
+  String get importSuccessful;
+
+  /// Import failed message
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed'**
+  String get importFailed;
+
+  /// Browse button text
+  ///
+  /// In en, this message translates to:
+  /// **'Browse'**
+  String get browse;
+
+  /// Export button text
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get export;
+
+  /// Import button text
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get import;
 }
 
 class _AppLocalizationsDelegate

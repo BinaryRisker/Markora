@@ -1095,5 +1095,115 @@
   "name": "名称",
   "@name": {
     "description": "名称标签"
+  },
+
+  "pandocExport": "Pandoc导出",
+  "@pandocExport": {
+    "description": "Pandoc导出功能名称"
+  },
+
+  "pandocImport": "Pandoc导入",
+  "@pandocImport": {
+    "description": "Pandoc导入功能名称"
+  },
+
+  "exportWithPandoc": "使用Pandoc导出",
+  "@exportWithPandoc": {
+    "description": "Pandoc导出对话框标题"
+  },
+
+  "importWithPandoc": "使用Pandoc导入",
+  "@importWithPandoc": {
+    "description": "Pandoc导入对话框标题"
+  },
+
+  "exportFormat": "导出格式",
+  "@exportFormat": {
+    "description": "导出格式选择标签"
+  },
+
+  "importFormat": "导入格式",
+  "@importFormat": {
+    "description": "导入格式选择标签"
+  },
+
+  "outputPath": "输出路径",
+  "@outputPath": {
+    "description": "输出路径选择标签"
+  },
+
+  "inputFile": "输入文件",
+  "@inputFile": {
+    "description": "输入文件选择标签"
+  },
+
+  "selectOutputFile": "选择输出文件",
+  "@selectOutputFile": {
+    "description": "选择输出文件提示"
+  },
+
+  "selectFileToImport": "选择要导入的文件",
+  "@selectFileToImport": {
+    "description": "选择导入文件提示"
+  },
+
+  "pandocNotInstalled": "未安装Pandoc",
+  "@pandocNotInstalled": {
+    "description": "Pandoc未安装错误标题"
+  },
+
+  "pandocRequired": "此功能需要安装Pandoc。请从 https://pandoc.org/installing.html 安装Pandoc",
+  "@pandocRequired": {
+    "description": "Pandoc安装要求说明"
+  },
+
+  "pandocAvailable": "Pandoc可用",
+  "@pandocAvailable": {
+    "description": "Pandoc可用状态"
+  },
+
+  "platformNotSupported": "此功能仅在桌面平台（Windows、macOS、Linux）上可用",
+  "@platformNotSupported": {
+    "description": "平台不支持提示"
+  },
+
+  "exportSuccessful": "导出成功",
+  "@exportSuccessful": {
+    "description": "导出成功消息"
+  },
+
+  "exportFailed": "导出失败",
+  "@exportFailed": {
+    "description": "导出失败消息"
+  },
+
+  "importSuccessful": "导入成功",
+  "@importSuccessful": {
+    "description": "导入成功消息"
+  },
+
+  "importFailed": "导入失败",
+  "@importFailed": {
+    "description": "导入失败消息"
+  },
+
+  "browse": "浏览",
+  "@browse": {
+    "description": "浏览按钮文本"
+  },
+
+  "export": "导出",
+  "@export": {
+    "description": "导出按钮文本"
+  },
+
+  "import": "导入",
+  "@import": {
+    "description": "导入按钮文本"
+  },
+
+  "cancel": "取消",
+  "@cancel": {
+    "description": "取消按钮文本"
   }
 }

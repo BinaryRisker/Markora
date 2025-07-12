@@ -91,7 +91,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Export successful: ${result.filePath}'),
+              content: Text('${AppLocalizations.of(context)!.exportSuccessful}: ${result.filePath}'),
               backgroundColor: Colors.green,
             ),
           );
@@ -101,7 +101,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Export failed: ${result.error}'),
+              content: Text('${AppLocalizations.of(context)!.exportFailed}: ${result.error}'),
               backgroundColor: Colors.red,
             ),
           );
@@ -111,7 +111,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Export failed: $e'),
+            content: Text('${AppLocalizations.of(context)!.exportFailed}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -143,7 +143,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'This feature is only available on desktop platforms (Windows, macOS, Linux).',
+              AppLocalizations.of(context)!.platformNotSupported,
               style: TextStyle(
                 color: Colors.orange.shade700,
                 fontSize: 14,
@@ -175,7 +175,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
               ),
               const SizedBox(width: 8),
               Text(
-                'Pandoc not installed',
+                AppLocalizations.of(context)!.pandocNotInstalled,
                 style: TextStyle(
                   color: Colors.red.shade700,
                   fontSize: 16,
@@ -186,7 +186,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Pandoc is required for this feature. Please install Pandoc from https://pandoc.org/installing.html',
+            AppLocalizations.of(context)!.pandocRequired,
             style: TextStyle(
               color: Colors.red.shade700,
               fontSize: 14,
@@ -202,7 +202,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Export Format',
+          AppLocalizations.of(context)!.exportFormat,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
@@ -236,7 +236,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Output Path',
+          AppLocalizations.of(context)!.outputPath,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
@@ -246,10 +246,10 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
               child: TextFormField(
                 readOnly: true,
                 controller: TextEditingController(text: _outputPath ?? ''),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Select output file...',
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: AppLocalizations.of(context)!.selectOutputFile,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               ),
             ),
@@ -257,7 +257,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
             ElevatedButton.icon(
               onPressed: _selectOutputPath,
               icon: const Icon(PhosphorIconsRegular.folder),
-              label: const Text('Browse'),
+              label: Text(AppLocalizations.of(context)!.browse),
             ),
           ],
         ),
@@ -268,7 +268,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Export with Pandoc'),
+      title: Text(AppLocalizations.of(context)!.exportWithPandoc),
       content: SizedBox(
         width: 500,
         child: SingleChildScrollView(
@@ -307,7 +307,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Pandoc available: $_pandocVersion',
+                          '${AppLocalizations.of(context)!.pandocAvailable}: $_pandocVersion',
                           style: TextStyle(
                             color: Colors.green.shade700,
                             fontSize: 14,
@@ -335,7 +335,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         if (_pandocAvailable)
           ElevatedButton(
@@ -346,7 +346,7 @@ class _PandocExportDialogState extends State<PandocExportDialog> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Export'),
+                : Text(AppLocalizations.of(context)!.export),
           ),
       ],
     );

@@ -79,8 +79,8 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
       if (result.success && result.output != null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Import successful'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.importSuccessful),
               backgroundColor: Colors.green,
             ),
           );
@@ -93,7 +93,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Import failed: ${result.error}'),
+              content: Text('${AppLocalizations.of(context)!.importFailed}: ${result.error}'),
               backgroundColor: Colors.red,
             ),
           );
@@ -103,7 +103,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Import failed: $e'),
+            content: Text('${AppLocalizations.of(context)!.importFailed}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -135,7 +135,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'This feature is only available on desktop platforms (Windows, macOS, Linux).',
+              AppLocalizations.of(context)!.platformNotSupported,
               style: TextStyle(
                 color: Colors.orange.shade700,
                 fontSize: 14,
@@ -167,7 +167,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
               ),
               const SizedBox(width: 8),
               Text(
-                'Pandoc not installed',
+                AppLocalizations.of(context)!.pandocNotInstalled,
                 style: TextStyle(
                   color: Colors.red.shade700,
                   fontSize: 16,
@@ -178,7 +178,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Pandoc is required for this feature. Please install Pandoc from https://pandoc.org/installing.html',
+            AppLocalizations.of(context)!.pandocRequired,
             style: TextStyle(
               color: Colors.red.shade700,
               fontSize: 14,
@@ -194,7 +194,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Import Format',
+          AppLocalizations.of(context)!.importFormat,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
@@ -228,7 +228,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Input File',
+          AppLocalizations.of(context)!.inputFile,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
@@ -238,10 +238,10 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
               child: TextFormField(
                 readOnly: true,
                 controller: TextEditingController(text: _inputPath ?? ''),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Select file to import...',
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: AppLocalizations.of(context)!.selectFileToImport,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               ),
             ),
@@ -249,7 +249,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
             ElevatedButton.icon(
               onPressed: _selectInputFile,
               icon: const Icon(PhosphorIconsRegular.folder),
-              label: const Text('Browse'),
+              label: Text(AppLocalizations.of(context)!.browse),
             ),
           ],
         ),
@@ -260,7 +260,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Import with Pandoc'),
+      title: Text(AppLocalizations.of(context)!.importWithPandoc),
       content: SizedBox(
         width: 500,
         child: SingleChildScrollView(
@@ -299,7 +299,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Pandoc available: $_pandocVersion',
+                          '${AppLocalizations.of(context)!.pandocAvailable}: $_pandocVersion',
                           style: TextStyle(
                             color: Colors.green.shade700,
                             fontSize: 14,
@@ -327,7 +327,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(AppLocalizations.of(context)!.cancel),
         ),
         if (_pandocAvailable)
           ElevatedButton(
@@ -338,7 +338,7 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Import'),
+                : Text(AppLocalizations.of(context)!.import),
           ),
       ],
     );
