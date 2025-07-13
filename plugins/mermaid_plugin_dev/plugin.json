@@ -1,16 +1,53 @@
 {
   "id": "mermaid_plugin",
-  "name": "Mermaid 图表插件",
-  "version": "1.0.0",
-  "description": "支持在Markdown中渲染Mermaid图表，包括流程图、序列图、甘特图等多种图表类型",
+  "name": "Mermaid Diagrams",
+  "version": "2.0.0",
+  "description": "Render Mermaid diagrams, including flowcharts, sequence diagrams, and Gantt charts, directly in Markdown.",
   "author": "Markora Team",
-  "homepage": "https://github.com/markora/mermaid-plugin",
-  "repository": "https://github.com/markora/mermaid-plugin.git",
   "license": "MIT",
-  "type": "syntax",
+  "type": "renderer",
   "category": "visualization",
-  "tags": ["chart", "mermaid", "visualization", "flowchart"],
-  "minVersion": "1.0.0",
-  "dependencies": [],
-  "supportedPlatforms": ["windows", "macos", "linux", "web", "android", "ios"]
+  "minVersion": "2.0.0",
+  "platforms": ["all"],
+  "entryPoint": {
+    "type": "internal"
+  },
+  "activationEvents": [
+    "onCommand:mermaid.insertBlock"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "mermaid.insertBlock",
+        "title": "Insert Mermaid Diagram"
+      }
+    ],
+    "toolbar": [
+      {
+        "command": "mermaid.insertBlock",
+        "title": "Insert Mermaid Block",
+        "description": "Insert a Mermaid diagram code block",
+        "icon": "project-diagram",
+        "phosphorIcon": "flower",
+        "group": "editor"
+      }
+    ],
+    "markdown.renderers": [
+      {
+        "language": "mermaid",
+        "renderer": "mermaid.renderer"
+      }
+    ]
+  },
+  "config": {
+    "theme": {
+      "type": "string",
+      "default": "default",
+      "options": ["default", "dark", "forest", "neutral"]
+    },
+    "enableInteraction": {
+      "type": "boolean",
+      "default": true
+    }
+  }
 }

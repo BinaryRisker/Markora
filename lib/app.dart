@@ -1,25 +1,23 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'l10n/app_localizations.dart';
 
 import 'core/constants/app_constants.dart';
-import 'types/editor.dart';
-import 'types/document.dart';
-import 'features/editor/presentation/widgets/markdown_editor.dart';
-import 'features/preview/presentation/widgets/markdown_preview.dart';
-import 'features/document/presentation/providers/document_providers.dart';
+import 'core/utils/markdown_block_cache.dart';
 import 'features/document/domain/services/file_service.dart';
+import 'features/document/presentation/providers/document_providers.dart';
 import 'features/document/presentation/widgets/document_tabs.dart';
-import 'features/settings/presentation/widgets/settings_page.dart';
-
 import 'features/editor/domain/services/global_editor_manager.dart';
-import 'features/plugins/presentation/pages/plugin_management_page.dart';
+import 'features/editor/presentation/widgets/markdown_editor.dart';
 import 'features/plugins/domain/plugin_context_service.dart';
 import 'features/plugins/domain/plugin_manager.dart';
-
-import 'core/utils/markdown_block_cache.dart';
+import 'features/plugins/presentation/pages/plugin_management_page.dart';
+import 'features/preview/presentation/widgets/markdown_preview.dart';
+import 'features/settings/presentation/widgets/settings_page.dart';
+import 'l10n/app_localizations.dart';
+import 'types/document.dart';
+import 'types/editor.dart';
 
 /// Application shell - main interface container
 class AppShell extends ConsumerStatefulWidget {
@@ -344,33 +342,29 @@ ${l10n.blockFormula}：
       final contextService = PluginContextService.instance;
       final toolbarRegistry = contextService.toolbarRegistry;
       final actions = toolbarRegistry.actions;
-      
-      debugPrint('Building plugin buttons - refresh key: $_pluginToolbarRefreshKey');
-       debugPrint('Number of toolbar actions available: ${actions.length}');
-       for (final entry in actions.entries) {
-         debugPrint('  - Action ID: ${entry.key}, Title: ${entry.value.action.title}');
-       }
-      
+
       if (actions.isEmpty) {
-        debugPrint('No plugin actions available, returning empty list');
         return [];
       }
-      
+
       final buttons = <Widget>[];
-      
-      for (final actionItem in actions.values) {
+
+      // Main toolbar should only show 'file' group actions
+      final fileActions =
+          actions.values.where((item) => item.action.group == 'file');
+
+      for (final actionItem in fileActions) {
         final action = actionItem.action;
+
         buttons.add(
           _buildToolbarButton(
-            icon: _getIconFromString(action.icon ?? 'default'),
+            icon: action.icon ?? Icon(PhosphorIconsRegular.plugs, size: 20),
             tooltip: action.description,
             onPressed: () {
               debugPrint('Execute plugin action: ${action.title}');
               try {
-                // Ensure plugin context has current BuildContext
                 final contextService = PluginContextService.instance;
                 contextService.setBuildContext(context);
-                
                 actionItem.callback();
               } catch (e) {
                 debugPrint('Plugin action failed: $e');
@@ -387,32 +381,10 @@ ${l10n.blockFormula}：
           ),
         );
       }
-      
-      debugPrint('Generated ${buttons.length} plugin buttons');
       return buttons;
     } catch (e) {
       debugPrint('Failed to build plugin buttons: $e');
       return [];
-    }
-  }
-
-  /// Get icon from string
-  Widget _getIconFromString(String iconName) {
-    switch (iconName) {
-      case 'account_tree':
-        return Icon(PhosphorIconsRegular.tree);
-      case 'code':
-        return Icon(PhosphorIconsRegular.code);
-      case 'insert_chart':
-        return Icon(PhosphorIconsRegular.chartBar);
-      case 'functions':
-        return Icon(PhosphorIconsRegular.function);
-      case 'export':
-        return Icon(PhosphorIconsRegular.export);
-      case 'import':
-        return Icon(PhosphorIconsRegular.download);
-      default:
-        return Icon(PhosphorIconsRegular.plugs);
     }
   }
 

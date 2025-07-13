@@ -31,7 +31,7 @@ class MermaidPlugin extends BasePlugin {
           id: 'mermaid',
           title: 'Mermaid Chart',
           description: 'Insert Mermaid chart code block',
-          icon: 'account_tree',
+          icon: Icon(Icons.account_tree),
         ),
         () {
           final template = '''```mermaid
@@ -377,6 +377,28 @@ class _MermaidConfigWidgetState extends State<MermaidConfigWidget> {
           },
         ),
       ],
+    );
+  }
+}
+
+// Remove the duplicate MermaidPlugin class and main function
+// Keep only the original MermaidPlugin class that extends BasePlugin
+
+void main() {
+  runApp(const MermaidPluginApp());
+}
+
+class MermaidPluginApp extends StatelessWidget {
+  const MermaidPluginApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Mermaid Plugin Loaded'),
+        ),
+      ),
     );
   }
 }

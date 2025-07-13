@@ -50,10 +50,8 @@ class PluginContextService {
   /// Get the plugin context
   PluginContext get context {
     _ensureInitialized();
-    final controller = _editorController ?? _DummyEditorController();
-    debugPrint('Plugin context requested: using ${controller.runtimeType}');
     return PluginContext(
-      editorController: controller,
+      editorController: _editorController!,
       syntaxRegistry: _syntaxRegistry!,
       toolbarRegistry: _toolbarRegistry!,
       menuRegistry: _menuRegistry!,

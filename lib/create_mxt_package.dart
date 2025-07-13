@@ -50,32 +50,14 @@ class MxtPackageCreator {
       }
     }
     
-    // 创建清单
-    final manifest = {
-      'metadata': {
-        'id': pluginJson['id'],
-        'name': pluginJson['name'],
-        'version': pluginJson['version'],
-        'description': pluginJson['description'],
-        'author': pluginJson['author'],
-        'homepage': pluginJson['homepage'],
-        'repository': pluginJson['repository'],
-        'license': pluginJson['license'] ?? 'MIT',
-        'type': pluginJson['type'],
-        'tags': pluginJson['tags'] ?? [],
-        'minVersion': pluginJson['minVersion'] ?? '1.0.0',
-        'maxVersion': pluginJson['maxVersion'],
-        'dependencies': pluginJson['dependencies'] ?? [],
-      },
-      'files': files,
-      'packageVersion': '1.0.0',
-      'assets': assets,
-      'permissions': pluginJson['permissions'] ?? [],
-      'platforms': pluginJson['platforms'] ?? ['desktop'],
-      'category': pluginJson['category'] ?? 'converter',
-      'config': pluginJson['config'] ?? {},
-      'entryPoint': pluginJson['entryPoint'] ?? 'lib/main.dart',
-    };
+    // 创建清单 (v2.0 format)
+    // 直接使用 plugin.json 的内容作为清单的基础
+    final manifest = Map<String, dynamic>.from(pluginJson);
+    
+    // 添加打包过程中生成的信息
+    manifest['files'] = files;
+    manifest['assets'] = assets;
+    manifest['packageVersion'] = '2.0.0'; // 标记为新的包格式, 以便未来进行迁移或检查
     
     // 创建压缩包
     final archive = Archive();
@@ -152,14 +134,13 @@ Future<void> _packageSinglePlugin(String pluginPath) async {
 
     print('\n📋 验证包内容...');
     final manifest = await MxtPackageCreator.validatePackage(packagePath);
-    final metadata = manifest['metadata'] as Map<String, dynamic>;
 
     print('✅ 验证成功！');
-    print('🏷️  插件ID: ${metadata['id']}');
-    print('📝 插件名称: ${metadata['name']}');
-    print('🔢 版本: ${metadata['version']}');
-    print('👤 作者: ${metadata['author']}');
-    print('📄 描述: ${metadata['description']}');
+    print('🏷️  插件ID: ${manifest['id']}');
+    print('📝 插件名称: ${manifest['name']}');
+    print('🔢 版本: ${manifest['version']}');
+    print('👤 作者: ${manifest['author']}');
+    print('📄 描述: ${manifest['description']}');
 
     print('\n🎉 插件 MXT 包已准备就绪！');
   } catch (e, stackTrace) {

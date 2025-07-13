@@ -1223,5 +1223,7 @@
   },
 
   "linkCopied": "链接已复制到剪贴板",
-  "ok": "确定"
+  "ok": "确定",
+  "pluginInstalled": "插件安装成功",
+  "installPluginFailed": "插件安装失败"
 }

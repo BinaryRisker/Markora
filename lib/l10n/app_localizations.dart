@@ -1477,6 +1477,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Link copied to clipboard'**
   String get linkCopied;
+
+  /// No description provided for @pluginInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin installed successfully'**
+  String get pluginInstalled;
+
+  /// No description provided for @installPluginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to install plugin'**
+  String get installPluginFailed;
 }
 
 class _AppLocalizationsDelegate

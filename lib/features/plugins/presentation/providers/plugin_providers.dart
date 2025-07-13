@@ -14,12 +14,6 @@ final pluginsProvider = Provider<List<Plugin>>((ref) {
   return manager.plugins;
 });
 
-/// Loaded plugins list Provider (automatically updates when PluginManager changes)
-final loadedPluginsProvider = Provider<List<Plugin>>((ref) {
-  final manager = ref.watch(pluginManagerProvider);
-  return manager.loadedPlugins;
-});
-
 /// Enabled plugins list Provider (automatically updates when PluginManager changes)
 final enabledPluginsProvider = Provider<List<Plugin>>((ref) {
   final manager = ref.watch(pluginManagerProvider);
@@ -87,14 +81,14 @@ final filteredPluginsByFiltersProvider = Provider<List<Plugin>>((ref) {
 
 /// Single plugin Provider
 final pluginProvider = Provider.family<Plugin?, String>((ref, pluginId) {
-  final manager = ref.watch(pluginManagerProvider);
-  return manager.getPlugin(pluginId);
-});
-
-/// Plugin configuration Provider
-final pluginConfigProvider = FutureProvider.family<PluginConfig?, String>((ref, pluginId) async {
-  final manager = ref.watch(pluginManagerProvider);
-  return manager.getPluginConfig(pluginId);
+  // Watch the manager so it rebuilds when plugins change
+  final manager = ref.watch(pluginManagerProvider); 
+  final allPlugins = manager.plugins;
+  try {
+    return allPlugins.firstWhere((p) => p.metadata.id == pluginId);
+  } catch (e) {
+    return null; // Not found
+  }
 });
 
 /// Plugin actions Provider
@@ -175,29 +169,9 @@ class PluginActions {
     }
   }
   
-  /// Reload plugin
-  Future<bool> reloadPlugin(String pluginId) async {
-    try {
-      await _manager.reloadPlugin(pluginId);
-      return true;
-    } catch (e) {
-      debugPrint('Failed to reload plugin: $e');
-      return false;
-    }
-  }
-  
-  /// Update plugin configuration
-  Future<void> updateConfig(String pluginId, Map<String, dynamic> config) async {
-    try {
-      await _manager.updatePluginConfig(pluginId, config);
-    } catch (e) {
-      debugPrint('Failed to update plugin configuration: $e');
-      rethrow;
-    }
-  }
+  // reloadPlugin and updateConfig are removed as they are not
+  // compatible with the new architecture.
 }
-
-
 
 /// Plugin sort Provider
 final pluginSortProvider = StateProvider<PluginSortBy>((ref) => PluginSortBy.name);

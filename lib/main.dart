@@ -47,12 +47,6 @@ void main() async {
   await globalDocumentRepository.init();
   await _createSampleDocuments(globalDocumentRepository);
 
-  // Initialize plugin manager
-  final pluginManager = PluginManager.instance;
-  final contextService = PluginContextService.instance;
-  contextService.initialize();
-  await pluginManager.initialize(contextService.context);
-
   // Run application
   runApp(
     // Riverpod state management container

@@ -346,56 +346,56 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
           const SizedBox(width: 8),
           // Undo/Redo buttons
           _buildToolbarButton(
-            icon: Icons.undo,
+            icon: Icon(Icons.undo),
             tooltip: '${AppLocalizations.of(context)!.undo} (Ctrl+Z)',
             onPressed: isEnabled && _undoRedoManager.canUndo ? _undo : null,
           ),
           _buildToolbarButton(
-            icon: Icons.redo,
+            icon: Icon(Icons.redo),
             tooltip: '${AppLocalizations.of(context)!.redo} (Ctrl+Y)',
             onPressed: isEnabled && _undoRedoManager.canRedo ? _redo : null,
           ),
           const VerticalDivider(width: 1),
           _buildToolbarButton(
-            icon: Icons.title,
+            icon: Icon(Icons.title),
             tooltip: AppLocalizations.of(context)!.heading,
             onPressed: isEnabled ? () => _insertHeading() : null,
           ),
           _buildToolbarButton(
-            icon: Icons.link,
+            icon: Icon(Icons.link),
             tooltip: AppLocalizations.of(context)!.link,
             onPressed: isEnabled ? () => _insertLink() : null,
           ),
           _buildToolbarButton(
-            icon: Icons.image,
+            icon: Icon(Icons.image),
             tooltip: AppLocalizations.of(context)!.image,
             onPressed: isEnabled ? () => _insertImage() : null,
           ),
           const VerticalDivider(width: 1),
           _buildToolbarButton(
-            icon: Icons.code,
+            icon: Icon(Icons.code),
             tooltip: AppLocalizations.of(context)!.codeBlock,
             onPressed: isEnabled ? () => _insertCodeBlock() : null,
           ),
           _buildToolbarButton(
-            icon: Icons.functions,
+            icon: Icon(Icons.functions),
             tooltip: AppLocalizations.of(context)!.mathFormula,
             onPressed: isEnabled ? () => _insertMathFormula() : null,
           ),
           // Plugin toolbar buttons
           ..._buildPluginToolbarButtons(isEnabled),
           _buildToolbarButton(
-            icon: Icons.format_quote,
+            icon: Icon(Icons.format_quote),
             tooltip: AppLocalizations.of(context)!.quote,
             onPressed: isEnabled ? () => _insertQuote() : null,
           ),
           _buildToolbarButton(
-            icon: Icons.format_list_bulleted,
+            icon: Icon(Icons.format_list_bulleted),
             tooltip: AppLocalizations.of(context)!.unorderedList,
             onPressed: isEnabled ? () => _insertList(false) : null,
           ),
           _buildToolbarButton(
-            icon: Icons.format_list_numbered,
+            icon: Icon(Icons.format_list_numbered),
             tooltip: AppLocalizations.of(context)!.orderedList,
             onPressed: isEnabled ? () => _insertList(true) : null,
           ),
@@ -417,35 +417,37 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
     try {
       final contextService = ref.read(pluginContextServiceProvider);
       final actions = contextService.toolbarRegistry.actions;
-    final widgets = <Widget>[];
-    
-    // Debug info
-    debugPrint('Number of actions in toolbar registry: ${actions.length}');
-    for (final entry in actions.entries) {
-      debugPrint('Action ID: ${entry.key}, Title: ${entry.value.action.title}');
-    }
-    
-    for (final actionItem in actions.values) {
-      final action = actionItem.action;
-      widgets.add(_buildToolbarButton(
-        icon: _getIconFromString(action.icon),
-        tooltip: action.title,
-        onPressed: isEnabled ? () {
-          // Execute plugin action
-          debugPrint('Execute plugin action: ${action.title}');
-          
-          // Ensure we have the latest editor controller and context
-          _registerToPluginSystem();
-          
-          // Also ensure the current BuildContext is set
-          final contextService = ref.read(pluginContextServiceProvider);
-          contextService.setBuildContext(context);
-          
-          // Execute the callback
-          actionItem.callback();
-        } : null,
-      ));
-    }
+      final widgets = <Widget>[];
+
+      // Filter actions to exclude those intended for the main app shell toolbar
+      final editorActions = actions.values.where((actionItem) {
+        final group = actionItem.action.group;
+        return group == null || group != 'file';
+      });
+
+      for (final actionItem in editorActions) {
+        final action = actionItem.action;
+        widgets.add(_buildToolbarButton(
+          icon: action.icon ?? Icon(Icons.extension), // Directly use the widget
+          tooltip: action.title,
+          onPressed: isEnabled
+              ? () {
+                  // Execute plugin action
+                  debugPrint('Execute plugin action: ${action.title}');
+
+                  // Ensure we have the latest editor controller and context
+                  _registerToPluginSystem();
+
+                  // Also ensure the current BuildContext is set
+                  final contextService = ref.read(pluginContextServiceProvider);
+                  contextService.setBuildContext(context);
+
+                  // Execute the callback
+                  actionItem.callback();
+                }
+              : null,
+        ));
+      }
     
     if (widgets.isNotEmpty) {
       widgets.add(const VerticalDivider(width: 1));
@@ -457,47 +459,17 @@ class _MarkdownEditorState extends ConsumerState<MarkdownEditor> {
       return [];
     }
   }
-  
-  /// Convert string to IconData
-  IconData _getIconFromString(String? iconName) {
-    if (iconName == null) return Icons.extension;
-    
-    switch (iconName) {
-      case 'account_tree':
-        return Icons.account_tree;
-      case 'code':
-        return Icons.code;
-      case 'image':
-        return Icons.image;
-      case 'link':
-        return Icons.link;
-      case 'functions':
-        return Icons.functions;
-      case 'format_quote':
-        return Icons.format_quote;
-      case 'format_list_bulleted':
-        return Icons.format_list_bulleted;
-      case 'format_list_numbered':
-        return Icons.format_list_numbered;
-      case 'export':
-        return Icons.file_upload_outlined;
-      case 'import':
-        return Icons.file_download_outlined;
-      default:
-        return Icons.extension;
-    }
-  }
 
   /// Build toolbar button
   Widget _buildToolbarButton({
-    required IconData icon,
+    required Widget icon,
     required String tooltip,
     required VoidCallback? onPressed,
   }) {
     return Tooltip(
       message: tooltip,
       child: IconButton(
-        icon: Icon(icon, size: 16),
+        icon: icon, // Use the provided widget directly
         onPressed: onPressed,
         iconSize: 16,
         constraints: const BoxConstraints(

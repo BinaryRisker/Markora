@@ -1,23 +1,70 @@
 {
   "id": "pandoc_plugin",
-  "name": "Pandoc Export Plugin",
-  "version": "1.0.0",
-  "description": "Universal document converter using Pandoc - support export to PDF, HTML, DOCX, ODT and many other formats",
+  "name": "Pandoc Universal Converter",
+  "version": "2.0.0",
+  "description": "Universal document converter using Pandoc. Supports exporting and importing various formats like PDF, DOCX, HTML, etc.",
   "author": "Markora Team",
-  "homepage": "https://github.com/markora/pandoc-plugin",
-  "repository": "https://github.com/markora/pandoc-plugin.git",
   "license": "MIT",
-  "type": "export",
+  "type": "tool",
   "category": "converter",
-  "tags": ["export", "import", "pandoc", "converter", "pdf", "html", "docx"],
-  "minVersion": "1.0.0",
-  "dependencies": [],
-  "supportedPlatforms": ["windows", "macos", "linux"],
+  "minVersion": "2.0.0",
   "platforms": ["desktop"],
   "permissions": [
     "file_system",
     "process"
   ],
+  "entryPoint": {
+    "type": "executable",
+    "windows": "assets/pandoc/windows/pandoc.exe"
+  },
+  "activationEvents": [
+    "onCommand:pandoc.export",
+    "onCommand:pandoc.import"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "pandoc.export",
+        "title": "Export via Pandoc"
+      },
+      {
+        "command": "pandoc.import",
+        "title": "Import via Pandoc"
+      }
+    ],
+    "toolbar": [
+      {
+        "command": "pandoc.export",
+        "title": "Export",
+        "description": "Export the current document using Pandoc",
+        "icon": "export",
+        "phosphorIcon": "export",
+        "group": "file"
+      },
+      {
+        "command": "pandoc.import",
+        "title": "Import",
+        "description": "Import a document into a new tab using Pandoc",
+        "icon": "import",
+        "phosphorIcon": "arrowSquareIn",
+        "group": "file"
+      }
+    ],
+    "menus": {
+      "file/export": [
+        {
+          "command": "pandoc.export",
+          "title": "Export with Pandoc..."
+        }
+      ],
+      "file/import": [
+        {
+          "command": "pandoc.import",
+          "title": "Import with Pandoc..."
+        }
+      ]
+    }
+  },
   "config": {
     "defaultExportFormat": {
       "type": "string",
@@ -37,9 +84,5 @@
       "default": "auto",
       "options": ["auto", "wkhtmltopdf", "weasyprint", "pdflatex", "xelatex", "lualatex"]
     }
-  },
-  "entryPoint": "lib/main.dart",
-  "assets": [
-    "assets/pandoc/"
-  ]
-} 
+  }
+}

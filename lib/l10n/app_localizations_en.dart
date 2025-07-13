@@ -711,4 +711,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get linkCopied => 'Link copied to clipboard';
+
+  @override
+  String get pluginInstalled => 'Plugin installed successfully';
+
+  @override
+  String get installPluginFailed => 'Failed to install plugin';
 }

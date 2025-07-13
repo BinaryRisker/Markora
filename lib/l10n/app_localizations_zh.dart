@@ -702,4 +702,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get linkCopied => '链接已复制到剪贴板';
+
+  @override
+  String get pluginInstalled => '插件安装成功';
+
+  @override
+  String get installPluginFailed => '插件安装失败';
 }

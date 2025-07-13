@@ -26,7 +26,7 @@ class PandocPlugin extends BasePlugin {
           id: 'pandoc_export',
           title: 'Export Document',
           description: 'Export document using Pandoc',
-          icon: 'file_download',
+          icon: Icon(Icons.file_download),
         ),
         () => _handleExportAction(context),
       );
@@ -37,7 +37,7 @@ class PandocPlugin extends BasePlugin {
           id: 'pandoc_import',
           title: 'Import Document',
           description: 'Import document using Pandoc',
-          icon: 'file_upload',
+          icon: Icon(Icons.file_upload),
         ),
         () => _handleImportAction(context),
       );
@@ -375,6 +375,28 @@ class _PandocImportDialogState extends State<PandocImportDialog> {
           child: const Text('Import'),
         ),
       ],
+    );
+  }
+}
+
+// 移除所有 PluginAction 相关代码
+// 插件功能通过 plugin.json 配置自动注册
+
+void main() {
+  runApp(const PandocPluginApp());
+}
+
+class PandocPluginApp extends StatelessWidget {
+  const PandocPluginApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Pandoc Plugin Loaded'),
+        ),
+      ),
     );
   }
 }

@@ -132,22 +132,28 @@ class PluginPackageService {
       // Decode archive
       final archive = ZipDecoder().decodeBytes(packageBytes);
       
-      // Extract and read manifest
+      // Extract and read manifest to get the plugin ID
       final manifestFile = archive.findFile(manifestFileName);
       if (manifestFile == null) {
-        throw Exception('Manifest not found in package');
+        throw Exception('Manifest not found in package ($manifestFileName)');
       }
       
       final manifestJson = utf8.decode(manifestFile.content as List<int>);
-      final manifest = PluginPackageManifest.fromJson(jsonDecode(manifestJson));
+      final manifestData = jsonDecode(manifestJson) as Map<String, dynamic>;
       
-      // Validate package version compatibility
-      if (!_isPackageVersionCompatible(manifest.packageVersion)) {
-        throw Exception('Incompatible package version: ${manifest.packageVersion}');
+      final pluginId = manifestData['id'] as String?;
+      if (pluginId == null || pluginId.isEmpty) {
+        throw Exception('Plugin ID not found or is empty in manifest');
+      }
+
+      // Optional: Validate package version compatibility
+      final packageVersion = manifestData['packageVersion'] as String?;
+      if (packageVersion != null && !_isPackageVersionCompatible(packageVersion)) {
+        throw Exception('Incompatible package version: $packageVersion');
       }
       
       // Create plugin installation directory in installed_plugins
-      final pluginInstallDir = path.join(installDir, manifest.metadata.id);
+      final pluginInstallDir = path.join(installDir, pluginId);
       final pluginDirectory = Directory(pluginInstallDir);
       
       if (await pluginDirectory.exists()) {
@@ -248,8 +254,8 @@ class PluginPackageService {
   
   /// Check if package version is compatible
   static bool _isPackageVersionCompatible(String version) {
-    // For now, accept all 1.x.x versions
-    return version.startsWith('1.');
+    // Accept 1.x.x for legacy and 2.x.x for new format
+    return version.startsWith('1.') || version.startsWith('2.');
   }
   
   /// Get required permissions for a plugin

@@ -115,22 +115,22 @@ class PluginCard extends ConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     // Configuration button
-                    if (plugin.status == PluginStatus.enabled)
-                      TextButton.icon(
-                        onPressed: () => _showPluginConfig(context, plugin),
-                        icon: const Icon(Icons.settings, size: 16),
-                        label: Text(AppLocalizations.of(context)!.configure),
-                        style: TextButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ),
+                    // if (plugin.status == PluginStatus.enabled)
+                    //   TextButton.icon(
+                    //     onPressed: () => _showPluginConfig(context, plugin),
+                    //     icon: const Icon(Icons.settings, size: 16),
+                    //     label: Text(AppLocalizations.of(context)!.configure),
+                    //     style: TextButton.styleFrom(
+                    //       visualDensity: VisualDensity.compact,
+                    //     ),
+                    //   ),
                     
                     const SizedBox(width: 8),
                     
                     // Enable/Disable button
                     if (plugin.status == PluginStatus.enabled)
                       FilledButton.icon(
-                        onPressed: () => _disablePlugin(context, actions, plugin),
+                        onPressed: () => _disablePlugin(context, ref, plugin),
                         icon: const Icon(Icons.pause, size: 16),
                         label: Text(AppLocalizations.of(context)!.disable),
                         style: FilledButton.styleFrom(
@@ -141,7 +141,7 @@ class PluginCard extends ConsumerWidget {
                     else if (plugin.status == PluginStatus.installed || 
                              plugin.status == PluginStatus.disabled)
                       FilledButton.icon(
-                        onPressed: () => _enablePlugin(context, actions, plugin),
+                        onPressed: () => _enablePlugin(context, ref, plugin),
                         icon: const Icon(Icons.play_arrow, size: 16),
                         label: Text(AppLocalizations.of(context)!.enable),
                         style: FilledButton.styleFrom(
@@ -276,101 +276,32 @@ class PluginCard extends ConsumerWidget {
   }
   
   /// Enable plugin
-  void _enablePlugin(BuildContext context, PluginActions actions, Plugin plugin) async {
-    final success = await actions.enablePlugin(plugin.metadata.id);
-    if (context.mounted) {
-      final localizations = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success ? localizations.pluginEnabled : localizations.enablePluginFailed),
-          backgroundColor: success ? Colors.green : Colors.red,
-        ),
-      );
-    }
+  void _enablePlugin(BuildContext context, WidgetRef ref, Plugin plugin) async {
+    await ref.read(pluginManagerProvider.notifier).enablePlugin(plugin.metadata.id);
   }
   
   /// Disable plugin
-  void _disablePlugin(BuildContext context, PluginActions actions, Plugin plugin) async {
-    final success = await actions.disablePlugin(plugin.metadata.id);
-    if (context.mounted) {
-      final localizations = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success ? localizations.pluginDisabled : localizations.disablePluginFailed),
-          backgroundColor: success ? Colors.green : Colors.red,
-        ),
-      );
-    }
+  void _disablePlugin(
+      BuildContext context, WidgetRef ref, Plugin plugin) async {
+    await ref.read(pluginManagerProvider.notifier).disablePlugin(plugin.metadata.id);
   }
   
   /// Show plugin configuration
-  void _showPluginConfig(BuildContext context, Plugin plugin) {
-    showDialog(
-      context: context,
-      builder: (context) => _PluginConfigDialog(plugin: plugin),
-    );
-  }
+  // void _showPluginConfig(BuildContext context, Plugin plugin) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => _PluginConfigDialog(plugin: plugin),
+  //   );
+  // }
 }
 
-/// Plugin configuration dialog
-class _PluginConfigDialog extends ConsumerWidget {
-  const _PluginConfigDialog({required this.plugin});
+/// Dialog for plugin configuration
+// class _PluginConfigDialog extends ConsumerWidget {
+//   const _PluginConfigDialog({required this.plugin});
   
-  final Plugin plugin;
+//   final Plugin plugin;
   
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final config = ref.watch(pluginConfigProvider(plugin.metadata.id));
-    
-    return AlertDialog(
-      title: Text('${plugin.metadata.name} ${AppLocalizations.of(context)!.configuration}'),
-      content: SizedBox(
-        width: 400,
-        height: 300,
-        child: config.when(
-          data: (pluginConfig) {
-            if (pluginConfig == null || pluginConfig.settings.isEmpty) {
-              return Center(
-                child: Text(AppLocalizations.of(context)!.noConfigurableOptions),
-              );
-            }
-            
-            return ListView.builder(
-              itemCount: pluginConfig.settings.length,
-              itemBuilder: (context, index) {
-                final setting = pluginConfig.settings.entries.elementAt(index);
-                return ListTile(
-                  title: Text(setting.key),
-                  subtitle: Text(setting.value.toString()),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () {
-                      // TODO: Implement configuration editing
-                    },
-                  ),
-                );
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Text('${AppLocalizations.of(context)!.failedToLoadConfiguration}: $error'),
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(AppLocalizations.of(context)!.close),
-        ),
-        FilledButton(
-          onPressed: () {
-            // TODO: Save configuration
-            Navigator.of(context).pop();
-          },
-          child: Text(AppLocalizations.of(context)!.save),
-        ),
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     final configAsync = ref.watch(pluginConfigProvider(plugin.metadata.id));
+// ... existing code ...

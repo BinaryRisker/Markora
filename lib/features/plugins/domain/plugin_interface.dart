@@ -53,6 +53,12 @@ abstract class ToolbarRegistry {
   
   /// Remove toolbar button
   void unregisterAction(String actionId);
+
+  /// Add a listener for when the registry changes.
+  void addChangeListener(VoidCallback listener);
+
+  /// Remove a previously registered listener.
+  void removeChangeListener(VoidCallback listener);
 }
 
 /// Menu registry interface

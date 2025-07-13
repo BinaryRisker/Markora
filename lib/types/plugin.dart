@@ -2,6 +2,120 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 
+/// Defines a command contributed by a plugin.
+class CommandContribution extends Equatable {
+  const CommandContribution({required this.command, required this.title});
+
+  final String command;
+  final String title;
+
+  factory CommandContribution.fromJson(Map<String, dynamic> json) {
+    return CommandContribution(
+      command: json['command'] as String,
+      title: json['title'] as String,
+    );
+  }
+
+  @override
+  List<Object?> get props => [command, title];
+}
+
+/// Defines a toolbar item contributed by a plugin.
+class ToolbarContribution extends Equatable {
+  const ToolbarContribution({
+    required this.command,
+    required this.title,
+    this.description,
+    this.icon,
+    this.phosphorIcon,
+    this.group,
+  });
+
+  final String command;
+  final String title;
+  final String? description;
+  final String? icon;
+  final String? phosphorIcon;
+  final String? group;
+
+  factory ToolbarContribution.fromJson(Map<String, dynamic> json) {
+    return ToolbarContribution(
+      command: json['command'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String?,
+      icon: json['icon'] as String?,
+      phosphorIcon: json['phosphorIcon'] as String?,
+      group: json['group'] as String?,
+    );
+  }
+
+  @override
+  List<Object?> get props => [command, title, description, icon, phosphorIcon, group];
+}
+
+/// Defines all contributions made by a plugin.
+class PluginContributions extends Equatable {
+  const PluginContributions({
+    this.commands = const [],
+    this.toolbar = const [],
+    this.menus = const {},
+  });
+
+  final List<CommandContribution> commands;
+  final List<ToolbarContribution> toolbar;
+  final Map<String, List<ToolbarContribution>> menus; // Reusing ToolbarContribution for menu items
+
+  factory PluginContributions.fromJson(Map<String, dynamic> json) {
+    return PluginContributions(
+      commands: (json['commands'] as List<dynamic>? ?? [])
+          .map((c) => CommandContribution.fromJson(c as Map<String, dynamic>))
+          .toList(),
+      toolbar: (json['toolbar'] as List<dynamic>? ?? [])
+          .map((t) => ToolbarContribution.fromJson(t as Map<String, dynamic>))
+          .toList(),
+      menus: (json['menus'] as Map<String, dynamic>? ?? {}).map(
+        (key, value) => MapEntry(
+          key,
+          (value as List<dynamic>)
+              .map((v) => ToolbarContribution.fromJson(v as Map<String, dynamic>))
+              .toList(),
+        ),
+      ),
+    );
+  }
+
+  @override
+  List<Object?> get props => [commands, toolbar, menus];
+}
+
+// -- START: New EntryPoint class --
+class EntryPoint extends Equatable {
+  const EntryPoint({required this.type, this.platforms = const {}});
+
+  final String type;
+  final Map<String, String> platforms;
+
+  factory EntryPoint.fromJson(Map<String, dynamic> json) {
+    // The 'path' property is a shortcut for a single-platform executable
+    if (json.containsKey('path')) {
+      return EntryPoint(
+        type: json['type'] as String? ?? 'executable',
+        platforms: {'default': json['path'] as String},
+      );
+    }
+    
+    return EntryPoint(
+      type: json['type'] as String,
+      platforms: (json..remove('type'))
+          .map((key, value) => MapEntry(key, value as String)),
+    );
+  }
+
+  @override
+  List<Object?> get props => [type, platforms];
+}
+// -- END: New EntryPoint class --
+
 /// Plugin type enumeration
 enum PluginType {
   syntax,       // Syntax plugin
@@ -35,6 +149,8 @@ extension PluginTypeExtension on PluginType {
         return 'Import Plugin';
       case PluginType.tool:
         return 'Tool Plugin';
+      case PluginType.widget:
+        return 'Widget Plugin';
       case PluginType.component:
         return 'Component Plugin';
       case PluginType.integration:
@@ -138,6 +254,8 @@ class PluginMetadata extends Equatable {
     this.tags = const [],
     this.dependencies = const [],
     this.supportedPlatforms = const [],
+    this.contributes, // Add contributes field
+    this.entryPoint, // Add entryPoint
   });
 
   /// Plugin unique identifier
@@ -182,6 +300,12 @@ class PluginMetadata extends Equatable {
   /// Supported platforms
   final List<String> supportedPlatforms;
 
+  /// Plugin contributions
+  final PluginContributions? contributes;
+
+  /// Plugin entry point
+  final EntryPoint? entryPoint;
+
   @override
   List<Object?> get props => [
         id,
@@ -198,6 +322,8 @@ class PluginMetadata extends Equatable {
         tags,
         dependencies,
         supportedPlatforms,
+        contributes, // Add to props
+        entryPoint, // Add to props
       ];
 
   /// Create PluginMetadata from JSON
@@ -217,6 +343,12 @@ class PluginMetadata extends Equatable {
       tags: List<String>.from(json['tags'] as List? ?? []),
       dependencies: List<String>.from(json['dependencies'] as List? ?? []),
       supportedPlatforms: List<String>.from(json['supportedPlatforms'] as List? ?? json['platforms'] as List? ?? []),
+      contributes: json['contributes'] != null
+          ? PluginContributions.fromJson(json['contributes'] as Map<String, dynamic>)
+          : null,
+      entryPoint: json['entryPoint'] != null
+          ? EntryPoint.fromJson(json['entryPoint'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -369,50 +501,33 @@ class PluginConfig extends Equatable {
   List<Object> get props => [pluginId, config, isEnabled];
 }
 
-/// Plugin action definition
-class PluginAction extends Equatable {
+/// Represents a customizable action provided by a plugin (e.g., a toolbar button)
+class PluginAction {
   const PluginAction({
     required this.id,
     required this.title,
-    required this.description,
+    this.description = '',
     this.icon,
-    this.shortcut,
-    this.category,
-    this.callback,
+    this.group,
   });
 
-  /// Action ID
+  /// Unique identifier for the action, typically linked to a command
   final String id;
-  
-  /// Action title
-  final String title;
-  
-  /// Action description
-  final String description;
-  
-  /// Icon (string identifier)
-  final String? icon;
-  
-  /// Shortcut key
-  final String? shortcut;
-  
-  /// Category
-  final String? category;
-  
-  /// Callback function
-  final Future<void> Function()? callback;
 
-  @override
-  List<Object?> get props => [
-        id,
-        title,
-        description,
-        icon,
-        shortcut,
-        category,
-        callback,
-      ];
+  /// The text to display for the action
+  final String title;
+
+  /// A longer description, often used for tooltips
+  final String description;
+
+  /// The icon for the action, as a Widget.
+  final Widget? icon;
+
+  /// The group this action belongs to, for placement in specific toolbars
+  final String? group;
 }
+
+/// Abstract definition of a registry for toolbar actions.
 
 /// Plugin sort method
 enum PluginSortBy {

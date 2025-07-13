@@ -2,6 +2,92 @@
 
 ## 概述
 
+为了实现真正的动态化、松耦合和高安全性，Markora的插件系统将演进为下一代架构（v2）。
+
+新的架构核心思想是：**应用是平台，插件是配置和脚本**。插件不再是直接被引用的Dart代码包，而是一组描述文件，它们告诉Markora平台**做什么**以及**如何做**。这种模式完全解耦了主应用和插件，允许插件在不修改主应用代码的情况下被动态添加、移除和更新。
+
+## 新一代插件架构（v2）- 设计原则
+
+新架构将遵循VS Code的插件模式，核心组件包括：
+
+- **贡献点 (Contributions)**: 插件通过 `plugin.json` 文件声明其对UI的贡献，如工具栏按钮、菜单项等。
+- **命令系统 (Command System)**: UI元素不直接调用插件功能，而是触发一个抽象的`command`。
+- **命令服务 (CommandService)**: 一个中央服务，负责将`command`路由到正确的处理器。
+- **插件解释器 (Plugin Interpreter)**: `PluginManager`的角色转变为解释器，它解析插件的`plugin.json`，注册贡献点和命令处理器。
+
+### 1. 重新设计的 `plugin.json` (Manifest v2)
+
+`plugin.json` 是插件的唯一入口，定义了元数据、贡献点和命令。
+
+**核心字段:**
+- **`contributes`**: 定义所有UI贡献点。
+- **`activationEvents`**: 定义插件何时被激活（例如，当某个命令被调用时）。
+- **`entryPoint`**: 定义插件的执行逻辑类型（如外部可执行文件、JS脚本等）。
+
+**示例 `plugin.json`:**
+```json
+{
+  "id": "pandoc_plugin",
+  "name": "Pandoc Export",
+  "entryPoint": {
+    "type": "executable", 
+    "path": "bin/pandoc.exe" 
+  },
+  "activationEvents": [
+    "onCommand:pandoc.export"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "pandoc.export",
+        "title": "Export with Pandoc"
+      }
+    ],
+    "toolbar": [
+      {
+        "command": "pandoc.export",
+        "title": "Export Document",
+        "icon": "file_download",
+        "group": "export"
+      }
+    ],
+    "menus": {
+      "file/export": [ 
+        {
+          "command": "pandoc.export",
+          "title": "Export using Pandoc..."
+        }
+      ]
+    }
+  }
+}
+```
+
+### 2. 中央命令服务 (`CommandService`)
+
+这是实现解耦的核心。它维护一个命令ID到处理器的映射。
+
+```dart
+// lib/core/services/command_service.dart
+typedef CommandHandler = Future<void> Function(Map<String, dynamic>? args);
+
+class CommandService {
+  void registerCommand(String commandId, CommandHandler handler);
+  Future<void> executeCommand(String commandId, {Map<String, dynamic>? args});
+}
+```
+
+### 3. 插件管理器 (`PluginManager`) 作为解释器
+
+`PluginManager` 的新职责：
+1.  **扫描插件**: 找到并读取 `plugin.json`。
+2.  **注册贡献点**: 解析 `contributes` 字段，并调用 `ToolbarRegistry` 和 `MenuRegistry` 注册UI元素。这些UI元素的回调统一为 `commandService.executeCommand(commandId)`。
+3.  **注册命令处理器**: 根据 `activationEvents` 和 `entryPoint` 动态注册命令处理器。当一个命令首次被调用时，插件才会被激活，其对应的处理器（如执行外部进程）才会被注册和执行。
+
+---
+
+## 插件架构（v1）- 当前实现状态
+
 Markora 插件系统是一个灵活、可扩展的架构，支持多种类型的插件来扩展编辑器功能。本文档描述了当前实现状态、架构设计原则以及未来发展规划。
 
 ## 当前实现状态
