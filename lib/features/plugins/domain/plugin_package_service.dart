@@ -146,18 +146,12 @@ class PluginPackageService {
         throw Exception('Incompatible package version: ${manifest.packageVersion}');
       }
       
-      // Create plugin installation directory
+      // Create plugin installation directory in installed_plugins
       final pluginInstallDir = path.join(installDir, manifest.metadata.id);
       final pluginDirectory = Directory(pluginInstallDir);
       
       if (await pluginDirectory.exists()) {
-        // Check if this is a development plugin directory (has lib/main.dart)
-        final devMainFile = File(path.join(pluginInstallDir, 'lib', 'main.dart'));
-        if (await devMainFile.exists()) {
-          throw Exception('Cannot install over development plugin: ${manifest.metadata.id}. '
-              'Development plugins should not be overwritten by package installation.');
-        }
-        // Remove existing installation only if it's not a development directory
+        // Remove existing installation (no need to check for dev plugins here)
         await pluginDirectory.delete(recursive: true);
       }
       
@@ -165,8 +159,6 @@ class PluginPackageService {
       
       // Extract all files
       for (final file in archive) {
-        if (file.name == manifestFileName) continue; // Skip manifest
-        
         final filePath = path.join(pluginInstallDir, file.name);
         final fileDir = Directory(path.dirname(filePath));
         

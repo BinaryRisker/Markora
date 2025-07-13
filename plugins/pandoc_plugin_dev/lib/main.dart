@@ -3,12 +3,8 @@ library pandoc_plugin;
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
-import '../../../lib/types/plugin.dart';
-import '../../../lib/features/plugins/domain/plugin_interface.dart';
-import '../../../lib/features/plugins/domain/plugin_loader.dart';
-
-export '../../../lib/types/plugin.dart';
-export '../../../lib/features/plugins/domain/plugin_interface.dart';
+import 'package:markora/features/plugins/domain/plugin_interface.dart';
+import 'package:markora/types/plugin.dart';
 
 /// Pandoc plugin implementation
 class PandocPlugin extends BasePlugin {

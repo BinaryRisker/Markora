@@ -1,28 +1,26 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../types/plugin.dart';
-import '../../domain/plugin_loader_legacy.dart';
-// 移除未使用的导入
-// import '../../domain/plugin_interface.dart'; // 删除这行
+import 'package:markora/features/plugins/domain/plugin_manager.dart';
+import 'package:markora/types/plugin.dart';
 
-/// Plugin manager Provider
+/// Provides the singleton instance of the plugin manager
 final pluginManagerProvider = ChangeNotifierProvider<PluginManager>((ref) {
   return PluginManager.instance;
 });
 
-/// All plugins list
+/// Provides a list of all plugins (automatically updates when PluginManager changes)
 final pluginsProvider = Provider<List<Plugin>>((ref) {
   final manager = ref.watch(pluginManagerProvider);
   return manager.plugins;
 });
 
-/// Loaded plugins list Provider
+/// Loaded plugins list Provider (automatically updates when PluginManager changes)
 final loadedPluginsProvider = Provider<List<Plugin>>((ref) {
   final manager = ref.watch(pluginManagerProvider);
   return manager.loadedPlugins;
 });
 
-/// Enabled plugins list Provider
+/// Enabled plugins list Provider (automatically updates when PluginManager changes)
 final enabledPluginsProvider = Provider<List<Plugin>>((ref) {
   final manager = ref.watch(pluginManagerProvider);
   return manager.enabledPlugins;

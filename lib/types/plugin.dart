@@ -203,20 +203,20 @@ class PluginMetadata extends Equatable {
   /// Create PluginMetadata from JSON
   factory PluginMetadata.fromJson(Map<String, dynamic> json) {
     return PluginMetadata(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      version: json['version'] as String,
-      description: json['description'] as String,
-      author: json['author'] as String,
+      id: json['id'] as String? ?? 'unknown',
+      name: json['name'] as String? ?? 'Unnamed Plugin',
+      version: json['version'] as String? ?? '0.0.0',
+      description: json['description'] as String? ?? '',
+      author: json['author'] as String? ?? 'Unknown Author',
       type: _parsePluginType(json['type'] as String? ?? json['pluginType'] as String? ?? 'other'),
       minVersion: json['minVersion'] as String? ?? json['minAppVersion'] as String? ?? '1.0.0',
       maxVersion: json['maxVersion'] as String?,
       homepage: json['homepage'] as String?,
       repository: json['repository'] as String?,
       license: json['license'] as String? ?? 'MIT',
-      tags: List<String>.from(json['tags'] ?? []),
-      dependencies: List<String>.from(json['dependencies'] ?? []),
-      supportedPlatforms: List<String>.from(json['supportedPlatforms'] ?? json['platforms'] ?? []),
+      tags: List<String>.from(json['tags'] as List? ?? []),
+      dependencies: List<String>.from(json['dependencies'] as List? ?? []),
+      supportedPlatforms: List<String>.from(json['supportedPlatforms'] as List? ?? json['platforms'] as List? ?? []),
     );
   }
 
@@ -274,8 +274,9 @@ class Plugin extends Equatable {
     required this.metadata,
     required this.status,
     this.installPath,
-    this.installDate,
-    this.lastUpdated,
+    required this.installDate,
+    required this.lastUpdated,
+    this.isDevelopment = false,
     this.errorMessage,
   });
 
@@ -289,13 +290,16 @@ class Plugin extends Equatable {
   final String? installPath;
   
   /// Installation date
-  final DateTime? installDate;
+  final DateTime installDate;
   
   /// Last update time
-  final DateTime? lastUpdated;
+  final DateTime lastUpdated;
   
   /// Error message
   final String? errorMessage;
+
+  /// Whether this plugin is a development plugin
+  final bool isDevelopment;
 
   Plugin copyWith({
     PluginMetadata? metadata,
@@ -304,6 +308,7 @@ class Plugin extends Equatable {
     DateTime? installDate,
     DateTime? lastUpdated,
     String? errorMessage,
+    bool? isDevelopment,
   }) {
     return Plugin(
       metadata: metadata ?? this.metadata,
@@ -312,6 +317,7 @@ class Plugin extends Equatable {
       installDate: installDate ?? this.installDate,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       errorMessage: errorMessage ?? this.errorMessage,
+      isDevelopment: isDevelopment ?? this.isDevelopment,
     );
   }
 
@@ -323,6 +329,7 @@ class Plugin extends Equatable {
         installDate,
         lastUpdated,
         errorMessage,
+        isDevelopment,
       ];
 }
 

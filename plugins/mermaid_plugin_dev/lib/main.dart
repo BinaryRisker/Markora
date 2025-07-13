@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:markora/types/plugin.dart';
 import 'package:markora/features/plugins/domain/plugin_interface.dart';
-import 'package:markora/features/plugins/domain/plugin_loader.dart';
-
-export 'package:markora/types/plugin.dart';
-export 'package:markora/features/plugins/domain/plugin_interface.dart';
 
 /// Mermaid plugin implementation
 class MermaidPlugin extends BasePlugin {

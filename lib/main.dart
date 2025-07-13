@@ -13,7 +13,7 @@ import 'features/settings/presentation/providers/settings_providers.dart';
 import 'features/document/infrastructure/repositories/hive_document_repository.dart';
 import 'features/document/presentation/providers/document_providers.dart';
 import 'features/plugins/domain/plugin_manager.dart';
-import 'features/plugins/domain/plugin_registry_initializer.dart';
+import 'features/plugins/domain/plugin_context_service.dart';
 import 'types/document.dart';
 
 // Global document repository instance
@@ -23,12 +23,6 @@ late HiveDocumentRepository globalDocumentRepository;
 void main() async {
   // Ensure Flutter widget binding initialization
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize built-in plugins
-  PluginRegistryInitializer.initializeBuiltInPlugins();
-
-  // Initialize the plugin manager
-  await PluginManager().initialize();
 
   // Initialize Hive local storage
   if (kIsWeb) {
@@ -53,7 +47,11 @@ void main() async {
   await globalDocumentRepository.init();
   await _createSampleDocuments(globalDocumentRepository);
 
-  // Plugin manager will be initialized in app.dart
+  // Initialize plugin manager
+  final pluginManager = PluginManager.instance;
+  final contextService = PluginContextService.instance;
+  contextService.initialize();
+  await pluginManager.initialize(contextService.context);
 
   // Run application
   runApp(

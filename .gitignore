@@ -8,7 +8,7 @@
 .history
 .cursor/
 .trae/
-
+installed_plugins/
 
 # Flutter repo-specific
 /bin/cache/

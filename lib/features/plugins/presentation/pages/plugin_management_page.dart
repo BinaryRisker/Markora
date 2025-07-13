@@ -397,15 +397,16 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
 
       // Install the package
       final pluginManager = ref.read(pluginManagerProvider);
-      final installDir = await _getPluginsDirectory();
       
-      final installedPath = await PluginPackageService.installPackage(
-        packagePath: packagePath,
-        installDir: installDir.path,
-      );
+      await pluginManager.installPlugin(packagePath);
 
-      // Refresh plugin manager to load the new plugin
+      // Force refresh plugin manager to ensure new plugin is loaded
       await pluginManager.scanPlugins();
+      
+      // Refresh all plugin-related providers
+      ref.invalidate(pluginsProvider);
+      ref.invalidate(pluginsByTypeProvider);
+      ref.invalidate(sortedPluginsProvider);
 
       if (mounted) {
         Navigator.of(context).pop(); // Close loading dialog
@@ -414,8 +415,12 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
           SnackBar(
             content: Text('Plugin "${manifest.metadata.name}" installed successfully!'),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
           ),
         );
+        
+        // Force rebuild of the widget tree
+        setState(() {});
       }
 
     } catch (e) {
@@ -524,19 +529,6 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
       context: context,
       builder: (context) => _PluginDetailsDialog(plugin: plugin),
     );
-  }
-
-  /// Get plugins directory
-  Future<Directory> _getPluginsDirectory() async {
-    // This should match the plugin manager's plugin directory logic
-    final currentDir = Directory.current.path;
-    final pluginsDir = Directory('$currentDir/plugins');
-    
-    if (!await pluginsDir.exists()) {
-      await pluginsDir.create(recursive: true);
-    }
-    
-    return pluginsDir;
   }
 }
 
