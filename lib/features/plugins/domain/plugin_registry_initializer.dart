@@ -2,45 +2,14 @@ import '../../../types/plugin.dart';
 import 'plugin_factory.dart';
 import 'plugin_interface.dart';
 
-/// Plugin registry initializer
+/// Plugin registry initializer - 插件注册框架
+/// 所有具体插件实现已移至 plugins/ 目录
 class PluginRegistryInitializer {
-  /// Initialize all built-in plugin factories
+  /// Initialize plugin system - 具体插件通过插件目录动态加载
   static void initializeBuiltInPlugins() {
-    // Register Mermaid plugin factory
-    PluginFactory.registerFactory(
-      'com.markora.mermaid',
-      () => PluginFactory.createPlugin(
-        PluginMetadata(
-          id: 'com.markora.mermaid',
-          name: 'Mermaid Charts',
-          version: '1.0.0',
-          description: 'Create beautiful diagrams and flowcharts using Mermaid syntax',
-          author: 'Markora Team',
-          type: PluginType.widget,
-          supportedPlatforms: ['windows', 'macos', 'linux', 'web'],
-          minVersion: '1.0.0',
-        ),
-      ),
-    );
-    
-    // Register Pandoc plugin factory
-    PluginFactory.registerFactory(
-      'com.markora.pandoc',
-      () => PluginFactory.createPlugin(
-        PluginMetadata(
-          id: 'com.markora.pandoc',
-          name: 'Pandoc Converter',
-          version: '1.0.0',
-          description: 'Convert documents between various formats using Pandoc',
-          author: 'Markora Team',
-          type: PluginType.exporter,
-          supportedPlatforms: ['windows', 'macos', 'linux'],
-          minVersion: '1.0.0',
-        ),
-      ),
-    );
-    
-    print('Built-in plugins registered: ${PluginFactory.getRegisteredPluginIds()}');
+    // 插件系统初始化完成
+    // 具体插件将通过 PluginManager 从 plugins/ 目录动态加载
+    print('Plugin system initialized - plugins will be loaded from plugins/ directory');
   }
   
   /// Register external plugin factory

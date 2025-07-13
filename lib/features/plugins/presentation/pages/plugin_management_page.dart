@@ -563,7 +563,8 @@ class _PluginDetailsDialog extends ConsumerWidget {
             _buildInfoRow(AppLocalizations.of(context)!.version, plugin.metadata.version),
             _buildInfoRow(AppLocalizations.of(context)!.author, plugin.metadata.author),
             _buildInfoRow(AppLocalizations.of(context)!.type, plugin.metadata.type.getLocalizedDisplayName(context)),
-        _buildInfoRow(AppLocalizations.of(context)!.status, plugin.status.getLocalizedDisplayName(context)),
+        // 第402行：移除未使用的变量或使用它
+        // final installedPath = ...; // 删除这行或使用该变量
             if (plugin.metadata.homepage != null)
               _buildInfoRow(AppLocalizations.of(context)!.homepage, plugin.metadata.homepage!),
             const SizedBox(height: 16),

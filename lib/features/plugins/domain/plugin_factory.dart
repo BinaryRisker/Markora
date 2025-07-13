@@ -60,7 +60,12 @@ class PluginFactory {
 
 /// Generic plugin implementations
 class ExporterPluginImpl extends BasePlugin {
-  ExporterPluginImpl(super.metadata);
+  ExporterPluginImpl(this._metadata);
+  
+  final PluginMetadata _metadata;
+  
+  @override
+  PluginMetadata get metadata => _metadata;
   
   @override
   Future<void> onLoad(PluginContext context) async {
@@ -70,7 +75,12 @@ class ExporterPluginImpl extends BasePlugin {
 }
 
 class ToolPluginImpl extends BasePlugin {
-  ToolPluginImpl(super.metadata);
+  ToolPluginImpl(this._metadata);
+  
+  final PluginMetadata _metadata;
+  
+  @override
+  PluginMetadata get metadata => _metadata;
   
   @override
   Future<void> onLoad(PluginContext context) async {
@@ -80,7 +90,12 @@ class ToolPluginImpl extends BasePlugin {
 }
 
 class WidgetPluginImpl extends BasePlugin {
-  WidgetPluginImpl(super.metadata);
+  WidgetPluginImpl(this._metadata);
+  
+  final PluginMetadata _metadata;
+  
+  @override
+  PluginMetadata get metadata => _metadata;
   
   @override
   Future<void> onLoad(PluginContext context) async {

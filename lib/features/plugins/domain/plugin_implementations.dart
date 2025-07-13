@@ -108,6 +108,8 @@ class SyntaxRegistryImpl implements SyntaxRegistry {
   Map<String, InlineSyntaxRule> get inlineSyntaxRules => Map.unmodifiable(_inlineSyntaxRules);
   
   /// Remove syntax rule
+  // Add @override annotation for removeSyntax method
+  @override
   void removeSyntax(String name) {
     _syntaxRules.remove(name);
     _blockSyntaxRules.remove(name);

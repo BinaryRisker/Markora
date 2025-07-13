@@ -114,7 +114,7 @@ class AppConstants {
   static const String mathInlinePattern = r'\$([^$]+)\$';
   static const String mathBlockPattern = r'\$\$\n([\s\S]+?)\n\$\$';
   
-  /// Mermaid charts
+  /// Special code blocks - 特殊代码块模式（具体实现已移至 plugins/ 目录）
   static const String mermaidBlockPattern = r'```mermaid\n([\s\S]+?)\n```';
   
   /// Export formats

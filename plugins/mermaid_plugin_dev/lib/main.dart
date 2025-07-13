@@ -10,7 +10,12 @@ export 'package:markora/features/plugins/domain/plugin_interface.dart';
 
 /// Mermaid plugin implementation
 class MermaidPlugin extends BasePlugin {
-  MermaidPlugin(super.metadata);
+  MermaidPlugin(this._metadata);
+  
+  final PluginMetadata _metadata;
+  
+  @override
+  PluginMetadata get metadata => _metadata;
   
   Map<String, dynamic> _config = {
     'theme': 'default',

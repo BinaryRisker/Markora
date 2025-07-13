@@ -12,7 +12,12 @@ export '../../../lib/features/plugins/domain/plugin_interface.dart';
 
 /// Pandoc plugin implementation
 class PandocPlugin extends BasePlugin {
-  PandocPlugin(super.metadata);
+  PandocPlugin(this._metadata);
+  
+  final PluginMetadata _metadata;
+  
+  @override
+  PluginMetadata get metadata => _metadata;
   
   @override
   Future<void> onLoad(PluginContext context) async {

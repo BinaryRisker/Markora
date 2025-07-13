@@ -199,6 +199,73 @@ class PluginMetadata extends Equatable {
         dependencies,
         supportedPlatforms,
       ];
+
+  /// Create PluginMetadata from JSON
+  factory PluginMetadata.fromJson(Map<String, dynamic> json) {
+    return PluginMetadata(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      version: json['version'] as String,
+      description: json['description'] as String,
+      author: json['author'] as String,
+      type: _parsePluginType(json['type'] as String? ?? json['pluginType'] as String? ?? 'other'),
+      minVersion: json['minVersion'] as String? ?? json['minAppVersion'] as String? ?? '1.0.0',
+      maxVersion: json['maxVersion'] as String?,
+      homepage: json['homepage'] as String?,
+      repository: json['repository'] as String?,
+      license: json['license'] as String? ?? 'MIT',
+      tags: List<String>.from(json['tags'] ?? []),
+      dependencies: List<String>.from(json['dependencies'] ?? []),
+      supportedPlatforms: List<String>.from(json['supportedPlatforms'] ?? json['platforms'] ?? []),
+    );
+  }
+
+  /// Convert PluginMetadata to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'version': version,
+      'description': description,
+      'author': author,
+      'type': type.name,
+      'minVersion': minVersion,
+      'maxVersion': maxVersion,
+      'homepage': homepage,
+      'repository': repository,
+      'license': license,
+      'tags': tags,
+      'dependencies': dependencies,
+      'supportedPlatforms': supportedPlatforms,
+    };
+  }
+
+  /// Parse plugin type from string
+  static PluginType _parsePluginType(String typeString) {
+    switch (typeString.toLowerCase()) {
+      case 'syntax':
+        return PluginType.syntax;
+      case 'renderer':
+        return PluginType.renderer;
+      case 'theme':
+        return PluginType.theme;
+      case 'export':
+      case 'exporter':
+        return PluginType.exporter;
+      case 'import':
+        return PluginType.import;
+      case 'tool':
+        return PluginType.tool;
+      case 'widget':
+        return PluginType.widget;
+      case 'component':
+        return PluginType.component;
+      case 'integration':
+        return PluginType.integration;
+      default:
+        return PluginType.other;
+    }
+  }
 }
 
 /// Plugin instance
@@ -304,6 +371,7 @@ class PluginAction extends Equatable {
     this.icon,
     this.shortcut,
     this.category,
+    this.callback,
   });
 
   /// Action ID
@@ -315,7 +383,7 @@ class PluginAction extends Equatable {
   /// Action description
   final String description;
   
-  /// Icon
+  /// Icon (string identifier)
   final String? icon;
   
   /// Shortcut key
@@ -323,6 +391,9 @@ class PluginAction extends Equatable {
   
   /// Category
   final String? category;
+  
+  /// Callback function
+  final Future<void> Function()? callback;
 
   @override
   List<Object?> get props => [
@@ -332,6 +403,7 @@ class PluginAction extends Equatable {
         icon,
         shortcut,
         category,
+        callback,
       ];
 }
 

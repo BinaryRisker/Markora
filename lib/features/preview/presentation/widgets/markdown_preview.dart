@@ -1088,7 +1088,8 @@ class CodeElementBuilder extends MarkdownElementBuilder {
   }
 }
 
-/// Custom code element builder that supports Mermaid charts
+/// Custom code element builder - 具体插件实现已移至 plugins/ 目录
+/// 通过插件系统动态加载特殊代码块渲染器
 class MermaidCodeElementBuilder extends MarkdownElementBuilder {
   MermaidCodeElementBuilder(this.ref);
   
@@ -1106,9 +1107,9 @@ class MermaidCodeElementBuilder extends MarkdownElementBuilder {
           final textContent = firstChild.textContent;
           final className = firstChild.attributes['class'] ?? '';
           
-          // Check if this is a mermaid code block
+          // Check for special code block types and delegate to plugins
           if (className.startsWith('language-mermaid')) {
-            return _buildMermaidChart(textContent);
+            return _buildPluginCodeBlock('mermaid', textContent);
           }
         }
       }
@@ -1119,87 +1120,37 @@ class MermaidCodeElementBuilder extends MarkdownElementBuilder {
     return CodeElementBuilder(fontFamily: settings.fontFamily).visitElementAfter(element, preferredStyle);
   }
   
-  /// Build mermaid chart widget
-  Widget _buildMermaidChart(String content) {
-    debugPrint('Building mermaid chart for content: $content');
+  /// Build code block using plugin system
+  Widget _buildPluginCodeBlock(String type, String content) {
     try {
       final contextService = PluginContextService.instance;
       final syntaxRegistry = contextService.syntaxRegistry;
       final blockRules = syntaxRegistry.blockSyntaxRules;
       
-      debugPrint('Available block syntax rules: ${blockRules.keys.toList()}');
-      
-      // Look for mermaid block syntax rule
-      final mermaidRule = blockRules['mermaid'];
-      if (mermaidRule != null) {
-        debugPrint('Found mermaid rule, rendering with plugin');
-        // Use plugin to render mermaid
-        final fullContent = '```mermaid\n$content\n```';
-        return mermaidRule.builder(fullContent);
-      } else {
-        debugPrint('No mermaid rule found in block syntax rules');
+      // Look for plugin-provided block syntax rule
+      final rule = blockRules[type];
+      if (rule != null) {
+        // Use plugin to render the code block
+        final fullContent = '```$type\n$content\n```';
+        return rule.builder(fullContent);
       }
     } catch (e) {
-      debugPrint('Error rendering mermaid with plugin: $e');
+      debugPrint('Error rendering $type code block with plugin: $e');
     }
     
-    // Fallback: show as mermaid placeholder
+    // Fallback: show as generic code block
     final settings = ref.watch(settingsProvider);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
-        border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
-        borderRadius: BorderRadius.circular(8.0),
+    return CodeBlockWidget(
+      codeBlock: CodeBlock(
+        content: content,
+        language: ProgrammingLanguage.fromIdentifier(type),
+        startLine: 1,
+        endLine: content.split('\n').length,
+        showLineNumbers: true,
+        showCopyButton: true,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.account_tree,
-                color: Colors.blue[700],
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Mermaid Chart',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue[700],
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              content,
-              style: TextStyle(
-                fontFamily: settings.fontFamily,
-                fontSize: settings.fontSize * 0.9,
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Loading Mermaid plugin...',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.blue[600],
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
+      config: SyntaxHighlightConfig(
+        fontFamily: settings.fontFamily,
       ),
     );
   }

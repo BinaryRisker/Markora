@@ -9,7 +9,8 @@ import 'plugin_loader.dart';
 import 'plugin_context_service.dart';
 import 'plugin_package_service.dart';
 
-/// Plugin Manager
+/// Plugin Manager - 负责插件的生命周期管理
+/// 所有具体插件实现已移至 plugins/ 目录
 class PluginManager extends ChangeNotifier {
   static PluginManager? _instance;
   static PluginManager get instance => _instance ??= PluginManager._();
@@ -82,14 +83,6 @@ class PluginManager extends ChangeNotifier {
       final pluginsDir = await _getPluginsDirectory();
       debugPrint('Plugins directory path: ${pluginsDir.path}');
       
-      // Skip directory scanning in Web environment
-      if (kIsWeb) {
-        debugPrint('Web environment: Skip plugin directory scanning');
-        // Manually add known plugins in Web environment
-        await _scanKnownPlugins();
-        return;
-      }
-      
       if (!await pluginsDir.exists()) {
         debugPrint('Plugin directory does not exist, creating: ${pluginsDir.path}');
         await pluginsDir.create(recursive: true);
@@ -109,73 +102,9 @@ class PluginManager extends ChangeNotifier {
       }
       
       debugPrint('Scanning completed, found $pluginCount plugin directories');
-      
-      // Also scan known plugins for non-web environments
-      debugPrint('Scanning known plugins for non-web environment');
-      await _scanKnownPlugins();
-      
       debugPrint('Currently loaded plugins: ${_plugins.keys.toList()}');
     } catch (e) {
       debugPrint('Failed to scan plugin directory: $e');
-    }
-  }
-  
-  /// Scan known plugins (Web environment only)
-  Future<void> _scanKnownPlugins() async {
-    try {
-      if (kIsWeb) {
-        // In web environment, directly create built-in plugins without file system access
-        debugPrint('Web environment: Creating built-in mermaid plugin');
-        
-        final mermaidMetadata = PluginMetadata(
-          id: 'mermaid_plugin',
-          name: 'Mermaid Chart',
-          version: '1.0.0',
-          description: 'Plugin for Mermaid chart rendering',
-          author: 'Markora Team',
-          type: PluginType.syntax,
-          minVersion: '1.0.0',
-          homepage: null,
-          repository: null,
-          license: 'MIT',
-          tags: ['chart', 'diagram', 'mermaid'],
-          dependencies: [],
-        );
-        
-        // 检查是否有待应用的状态
-        final mermaidStatus = _pendingPluginStates['mermaid_plugin'] ?? PluginStatus.enabled;
-        if (_pendingPluginStates.containsKey('mermaid_plugin')) {
-          _pendingPluginStates.remove('mermaid_plugin');
-          debugPrint('Applied pending status for mermaid_plugin: ${mermaidStatus.name}');
-        }
-        
-        final mermaidPlugin = Plugin(
-          metadata: mermaidMetadata,
-          status: mermaidStatus,  // 使用保存的状态或默认启用
-          installPath: 'builtin://mermaid_plugin',  // Virtual path
-          installDate: DateTime.now(),
-          lastUpdated: DateTime.now(),
-        );
-        
-        _plugins['mermaid_plugin'] = mermaidPlugin;
-        debugPrint('Built-in mermaid plugin created and enabled');
-        
-        // Pandoc plugin is not supported in web environment
-        debugPrint('Web environment: Pandoc plugin not supported');
-      } else {
-        // For non-web platforms, scan the actual plugin directories
-        final mermaidPluginDir = Directory('plugins/mermaid_plugin');
-        await _scanPluginDirectory(mermaidPluginDir);
-        
-        final pandocPluginDir = Directory('plugins/pandoc_plugin');
-        await _scanPluginDirectory(pandocPluginDir);
-        
-        debugPrint('Plugin directories scanned, status preserved from saved configuration');
-      }
-      
-      debugPrint('Known plugins scanning completed');
-    } catch (e) {
-      debugPrint('Known plugins scanning failed: $e');
     }
   }
   
@@ -209,16 +138,14 @@ class PluginManager extends ChangeNotifier {
   /// Scan single plugin directory
   Future<void> _scanPluginDirectory(Directory pluginDir) async {
     try {
-      debugPrint('Scanning plugin directory: ${pluginDir.path}');
-      final manifestFile = File(path.join(pluginDir.path, 'plugin.json'));
-      debugPrint('Looking for plugin manifest file: ${manifestFile.path}');
-      
+      final manifestFile = File('${pluginDir.path}/manifest.json');
       if (!await manifestFile.exists()) {
-        debugPrint('Plugin manifest file does not exist: ${manifestFile.path}');
+        debugPrint('Plugin manifest not found: ${manifestFile.path}');
         return;
       }
       
       debugPrint('Loading plugin metadata: ${manifestFile.path}');
+      // 修复：传递 File 对象而不是 String
       final metadata = await _loader.loadPluginMetadata(manifestFile);
       if (metadata == null) {
         debugPrint('Plugin metadata loading failed: ${manifestFile.path}');
@@ -247,7 +174,7 @@ class PluginManager extends ChangeNotifier {
       // 如果使用了待应用的状态，从待应用列表中移除
       if (_pendingPluginStates.containsKey(metadata.id)) {
         _pendingPluginStates.remove(metadata.id);
-        debugPrint('Applied pending status for plugin ${metadata.id}: ${status.name}');
+        debugPrint('Applied pending status for ${metadata.id}: ${status.name}');
       }
       
       final plugin = Plugin(
@@ -259,7 +186,7 @@ class PluginManager extends ChangeNotifier {
       );
       
       _plugins[metadata.id] = plugin;
-      debugPrint('Plugin added to manager: ${metadata.id} with status: ${status.name}');
+      debugPrint('Plugin registered: ${metadata.id} with status: ${status.name}');
     } catch (e) {
       debugPrint('Failed to scan plugin directory ${pluginDir.path}: $e');
     }
@@ -277,89 +204,94 @@ class PluginManager extends ChangeNotifier {
   /// Load plugin
   Future<bool> loadPlugin(String pluginId) async {
     final plugin = _plugins[pluginId];
-    if (plugin == null) return false;
-
-    // Do not load unsupported plugins
-    if (plugin.status == PluginStatus.unsupported) {
-      debugPrint('Cannot load plugin ${plugin.metadata.id} on an unsupported platform.');
+    if (plugin == null) {
+      debugPrint('Plugin not found: $pluginId');
       return false;
     }
     
     if (_loadedPlugins.containsKey(pluginId)) {
-      return true; // Already loaded
+      debugPrint('Plugin already loaded: $pluginId');
+      return true;
     }
     
     try {
       _notifyLifecycleEvent(pluginId, PluginLifecycleEvent.loading);
       
-      final pluginInstance = await _loader.loadPlugin(plugin);
-      if (pluginInstance == null) {
-        throw Exception('Plugin loading failed');
+      // Update status to loading
+      final oldStatus = plugin.status;
+      _plugins[pluginId] = plugin.copyWith(status: PluginStatus.loading);
+      _notifyStatusChanged(pluginId, oldStatus, PluginStatus.loading);
+      
+      // Check dependencies
+      if (!_checkDependencies(plugin.metadata)) {
+        throw Exception('Plugin dependencies not met');
       }
       
+      // 修复：传递 Plugin 对象而不是 PluginMetadata 和 String
+      final pluginInstance = await _loader.loadPlugin(plugin);
+      if (pluginInstance == null) {
+        throw Exception('Failed to create plugin instance');
+      }
+      
+      // Initialize plugin
       if (_context != null) {
         await pluginInstance.onLoad(_context!);
-        
-        // Debug: Check toolbar registry after plugin load
-        final contextService = PluginContextService.instance;
-        final toolbarRegistry = contextService.toolbarRegistry;
-        debugPrint('After plugin onLoad - Number of actions in toolbar registry: ${toolbarRegistry.actions.length}');
-        for (final actionId in toolbarRegistry.actions.keys) {
-          debugPrint('  - Action: $actionId');
-        }
-        
-        // Force toolbar refresh by triggering change listeners
-        debugPrint('Manually triggering toolbar registry change notification...');
-        toolbarRegistry.notifyChange();
       }
       
       _loadedPlugins[pluginId] = pluginInstance;
       
-      final oldStatus = plugin.status;
-      final newStatus = PluginStatus.enabled;
-      _plugins[pluginId] = plugin.copyWith(status: newStatus);
-      
+      // Update status to enabled
+      _plugins[pluginId] = plugin.copyWith(status: PluginStatus.enabled);
+      _notifyStatusChanged(pluginId, PluginStatus.loading, PluginStatus.enabled);
       _notifyLifecycleEvent(pluginId, PluginLifecycleEvent.loaded);
-      _notifyStatusChanged(pluginId, oldStatus, newStatus);
       
+      // 移除不存在的 updateToolbarRegistration 调用
+      
+      debugPrint('Plugin loaded successfully: $pluginId');
       return true;
     } catch (e) {
+      debugPrint('Plugin loading failed: $pluginId - $e');
+      
+      // Update status to error
+      _plugins[pluginId] = plugin.copyWith(status: PluginStatus.error);
+      _notifyStatusChanged(pluginId, PluginStatus.loading, PluginStatus.error);
       _notifyLifecycleEvent(pluginId, PluginLifecycleEvent.error, error: e.toString());
       
-      final oldStatus = plugin.status;
-      final newStatus = PluginStatus.error;
-      _plugins[pluginId] = plugin.copyWith(
-        status: newStatus,
-        errorMessage: e.toString(),
-      );
-      
-      _notifyStatusChanged(pluginId, oldStatus, newStatus);
       return false;
     }
   }
   
   /// Unload plugin
   Future<bool> unloadPlugin(String pluginId) async {
-    final plugin = _plugins[pluginId];
     final pluginInstance = _loadedPlugins[pluginId];
-    
-    if (plugin == null || pluginInstance == null) return false;
+    if (pluginInstance == null) {
+      debugPrint('Plugin not loaded: $pluginId');
+      return false;
+    }
     
     try {
       _notifyLifecycleEvent(pluginId, PluginLifecycleEvent.unloading);
       
+      // Unload plugin
       await pluginInstance.onUnload();
       _loadedPlugins.remove(pluginId);
       
-      final oldStatus = plugin.status;
-      final newStatus = PluginStatus.installed;
-      _plugins[pluginId] = plugin.copyWith(status: newStatus);
+      // Update status
+      final plugin = _plugins[pluginId];
+      if (plugin != null) {
+        _plugins[pluginId] = plugin.copyWith(status: PluginStatus.installed);
+        _notifyStatusChanged(pluginId, PluginStatus.enabled, PluginStatus.installed);
+      }
       
       _notifyLifecycleEvent(pluginId, PluginLifecycleEvent.unloaded);
-      _notifyStatusChanged(pluginId, oldStatus, newStatus);
       
+      // Remove the problematic updateToolbarRegistration call
+      // The toolbar will be updated automatically through the plugin system
+      
+      debugPrint('Plugin unloaded successfully: $pluginId');
       return true;
     } catch (e) {
+      debugPrint('Plugin unloading failed: $pluginId - $e');
       _notifyLifecycleEvent(pluginId, PluginLifecycleEvent.error, error: e.toString());
       return false;
     }
@@ -370,11 +302,12 @@ class PluginManager extends ChangeNotifier {
     final plugin = _plugins[pluginId];
     if (plugin == null) return false;
     
-    if (plugin.status == PluginStatus.enabled) return true;
+    if (plugin.status == PluginStatus.enabled) {
+      return true; // Already enabled
+    }
     
     final success = await loadPlugin(pluginId);
     if (success) {
-      // 保存插件状态
       await _savePluginConfigs();
     }
     return success;
@@ -385,17 +318,21 @@ class PluginManager extends ChangeNotifier {
     final plugin = _plugins[pluginId];
     if (plugin == null) return false;
     
-    if (plugin.status != PluginStatus.enabled) return true;
+    if (plugin.status != PluginStatus.enabled) {
+      return true; // Already disabled
+    }
     
     final success = await unloadPlugin(pluginId);
     if (success) {
-      // 保存插件状态
+      // Update status to disabled
+      _plugins[pluginId] = plugin.copyWith(status: PluginStatus.disabled);
+      _notifyStatusChanged(pluginId, PluginStatus.installed, PluginStatus.disabled);
       await _savePluginConfigs();
     }
     return success;
   }
   
-  /// Install plugin from a .mxt file
+  /// Install plugin from .mxt package
   Future<bool> installPlugin(String mxtPath) async {
     try {
       final pluginFile = File(mxtPath);
@@ -520,13 +457,10 @@ class PluginManager extends ChangeNotifier {
   
   /// Get plugins directory
   Future<Directory> _getPluginsDirectory() async {
-    // Use relative path in Flutter Web
-    // Use application data directory on other platforms
     try {
       // Check if it's Web environment
       if (kIsWeb) {
         debugPrint('Web environment: Using relative path');
-        // Use relative path directly in Web environment, don't access Directory.current
         final pluginsDir = Directory('plugins');
         debugPrint('Plugin directory path: plugins');
         return pluginsDir;
@@ -674,16 +608,9 @@ class PluginManager extends ChangeNotifier {
   }
   
   /// Clean up resources
+  @override
   void dispose() {
-    for (final pluginInstance in _loadedPlugins.values) {
-      pluginInstance.onUnload().catchError((e) {
-        debugPrint('Plugin unload failed: $e');
-      });
-    }
-    _loadedPlugins.clear();
-    _plugins.clear();
-    _configs.clear();
-    _listeners.clear();
+    // Cleanup logic here
     super.dispose();
   }
 

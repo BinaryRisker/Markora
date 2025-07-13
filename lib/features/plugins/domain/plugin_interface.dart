@@ -138,3 +138,60 @@ abstract class PluginEventListener {
   /// Plugin status change events
   void onPluginStatusChanged(String pluginId, PluginStatus oldStatus, PluginStatus newStatus);
 }
+
+/// Base plugin implementation
+abstract class BasePlugin implements MarkoraPlugin {
+  late PluginContext _context;
+  bool _isInitialized = false;
+  
+  @override
+  bool get isInitialized => _isInitialized;
+  
+  /// Plugin metadata - must be implemented by subclasses
+  @override
+  PluginMetadata get metadata;
+  
+  /// Get plugin context
+  PluginContext get context => _context;
+  
+  @override
+  Future<void> onLoad(PluginContext context) async {
+    _context = context;
+    _isInitialized = true;
+  }
+  
+  @override
+  Future<void> onUnload() async {
+    _isInitialized = false;
+  }
+  
+  @override
+  Future<void> onActivate() async {
+    // Default implementation - can be overridden
+  }
+  
+  @override
+  Future<void> onDeactivate() async {
+    // Default implementation - can be overridden
+  }
+  
+  @override
+  void onConfigChanged(Map<String, dynamic> config) {
+    // Default implementation - can be overridden
+  }
+  
+  @override
+  Widget? getConfigWidget() {
+    // Default implementation - can be overridden
+    return null;
+  }
+  
+  @override
+  Map<String, dynamic> getStatus() {
+    return {
+      'initialized': _isInitialized,
+      'pluginId': metadata.id,
+      'version': metadata.version,
+    };
+  }
+}
