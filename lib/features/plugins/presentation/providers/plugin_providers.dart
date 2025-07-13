@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../types/plugin.dart';
-import '../../domain/plugin_manager.dart';
+import '../../domain/plugin_loader_legacy.dart';
 import '../../domain/plugin_interface.dart';
 
 /// Plugin manager Provider

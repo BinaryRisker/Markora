@@ -145,7 +145,6 @@ class PluginBlockProcessor {
     return content.contains('{{') || 
            content.contains('[[') || 
            content.startsWith(':::') ||
-           content.contains('```mermaid') ||
            content.contains('```chart');
   }
 
@@ -259,4 +258,4 @@ class PluginElement {
   String toString() {
     return 'PluginElement(name: $name, range: $startIndex-$endIndex, isBlock: $isBlock)';
   }
-} 
+}

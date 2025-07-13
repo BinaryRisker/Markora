@@ -267,15 +267,7 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
                 _installFromMxtPackage();
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.file_upload),
-              title: Text(AppLocalizations.of(context)!.installFromFile),
-              subtitle: Text(AppLocalizations.of(context)!.selectPluginFile),
-              onTap: () {
-                Navigator.of(context).pop();
-                _installFromFile();
-              },
-            ),
+
             ListTile(
               leading: const Icon(Icons.link),
               title: Text(AppLocalizations.of(context)!.installFromUrl),
@@ -441,38 +433,7 @@ class _PluginManagementPageState extends ConsumerState<PluginManagementPage>
     }
   }
 
-  /// Install plugin from file
-  void _installFromFile() async {
-    try {
-      // TODO: Implement file picker
-      // Use mock path for now
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseSelectPluginFile)),
-      );
-      
-      // final result = await FilePicker.platform.pickFiles(
-      //   type: FileType.custom,
-      //   allowedExtensions: ['zip'],
-      // );
-      // 
-      // if (result != null && result.files.single.path != null) {
-      //   final actions = ref.read(pluginActionsProvider);
-      //   final success = await actions.installPlugin(result.files.single.path!);
-      //   
-      //   if (mounted) {
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       SnackBar(content: Text(success ? 'Plugin installed successfully' : 'Plugin installation failed')),
-      //     );
-      //   }
-      // }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${AppLocalizations.of(context)!.installFailed}: $e')),
-        );
-      }
-    }
-  }
+
   
   /// Install plugin from URL
   void _installFromUrl() async {

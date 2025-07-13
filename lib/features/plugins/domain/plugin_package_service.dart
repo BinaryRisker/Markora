@@ -151,7 +151,13 @@ class PluginPackageService {
       final pluginDirectory = Directory(pluginInstallDir);
       
       if (await pluginDirectory.exists()) {
-        // Remove existing installation
+        // Check if this is a development plugin directory (has lib/main.dart)
+        final devMainFile = File(path.join(pluginInstallDir, 'lib', 'main.dart'));
+        if (await devMainFile.exists()) {
+          throw Exception('Cannot install over development plugin: ${manifest.metadata.id}. '
+              'Development plugins should not be overwritten by package installation.');
+        }
+        // Remove existing installation only if it's not a development directory
         await pluginDirectory.delete(recursive: true);
       }
       
@@ -272,4 +278,4 @@ class PluginPackageService {
     
     return permissions;
   }
-} 
+}

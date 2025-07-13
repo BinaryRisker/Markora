@@ -384,14 +384,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
       }
     }
 
-    // Check if this is a mermaid code block
-    if (language.toLowerCase() == 'mermaid') {
-      debugPrint('Detected mermaid code block, using mermaid renderer');
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: _buildMermaidChart(codeContent),
-      );
-    }
+
 
     // Regular code block
     return Padding(
@@ -1033,90 +1026,7 @@ class _MarkdownPreviewState extends ConsumerState<MarkdownPreview> {
     );
   }
 
-  /// Build mermaid chart widget
-  Widget _buildMermaidChart(String content) {
-    debugPrint('Building mermaid chart for content: $content');
-    try {
-      final contextService = PluginContextService.instance;
-      final syntaxRegistry = contextService.syntaxRegistry;
-      final blockRules = syntaxRegistry.blockSyntaxRules;
-      
-      debugPrint('Available block syntax rules: ${blockRules.keys.toList()}');
-      
-      // Look for mermaid block syntax rule
-      final mermaidRule = blockRules['mermaid'];
-      if (mermaidRule != null) {
-        debugPrint('Found mermaid rule, rendering with plugin');
-        // Use plugin to render mermaid
-        final fullContent = '```mermaid\n$content\n```';
-        return mermaidRule.builder(fullContent);
-      } else {
-        debugPrint('No mermaid rule found in block syntax rules');
-      }
-    } catch (e) {
-      debugPrint('Error rendering mermaid with plugin: $e');
-    }
-    
-    // Fallback: show as mermaid placeholder
-    final settings = ref.watch(settingsProvider);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
-        border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.account_tree,
-                color: Colors.blue[700],
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Mermaid Chart',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue[700],
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              content,
-              style: TextStyle(
-                fontFamily: settings.fontFamily,
-                fontSize: settings.fontSize * 0.9,
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Loading Mermaid plugin...',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.blue[600],
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
 
 /// Math formula builder

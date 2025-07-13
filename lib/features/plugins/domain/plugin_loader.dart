@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../types/plugin.dart';
-import '../../../../core/utils/plugin_registry.dart';
 import 'plugin_interface.dart';
 import 'plugin_implementations.dart';
 import 'plugin_context_service.dart';
+import 'plugin_factory.dart';
 import 'package:file_picker/file_picker.dart';
 
 // External Pandoc plugin is now in plugins/pandoc_plugin/lib/pandoc_plugin.dart
@@ -24,12 +24,12 @@ class PluginLoader {
       final json = jsonDecode(content) as Map<String, dynamic>;
       
       return PluginMetadata(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        version: json['version'] as String,
-        description: json['description'] as String,
-        author: json['author'] as String,
-        type: _parsePluginType(json['type'] as String),
+        id: (json['id'] as String?) ?? '',
+        name: (json['name'] as String?) ?? '',
+        version: (json['version'] as String?) ?? '1.0.0',
+        description: (json['description'] as String?) ?? '',
+        author: (json['author'] as String?) ?? '',
+        type: _parsePluginType((json['type'] as String?) ?? 'other'),
         minVersion: json['minVersion'] as String? ?? '1.0.0',
         maxVersion: json['maxVersion'] as String?,
         homepage: json['homepage'] as String?,
@@ -45,26 +45,19 @@ class PluginLoader {
     }
   }
   
-  /// Load plugin instance using the PluginRegistry
+  /// Load plugin instance using the PluginFactory
   Future<MarkoraPlugin?> loadPlugin(Plugin plugin) async {
     try {
       debugPrint('Loading plugin: ${plugin.metadata.id}');
       
-      final factory = PluginRegistry.getFactory(plugin.metadata.id);
-      
-      if (factory != null) {
-        final pluginInstance = factory();
-        debugPrint('Successfully created plugin instance for ${plugin.metadata.id} from registry.');
-        return pluginInstance;
-      } else {
-        debugPrint('No factory registered for plugin ${plugin.metadata.id}. Using a generic plugin instance.');
-        // Return a generic implementation or null if no factory is found
-        return UnimplementedPlugin(plugin.metadata);
-      }
+      // Import PluginFactory here to avoid circular dependencies
+      final pluginInstance = PluginFactory.createPlugin(plugin.metadata);
+      debugPrint('Successfully created plugin instance for ${plugin.metadata.id}');
+      return pluginInstance;
     } catch (e, stackTrace) {
       debugPrint('Failed to load plugin ${plugin.metadata.id}: $e');
       debugPrint('Stack trace: $stackTrace');
-      return null;
+      return UnimplementedPlugin(plugin.metadata);
     }
   }
 
@@ -241,165 +234,63 @@ class IntegrationPluginImpl extends BasePlugin {
   }
 }
 
-/// Improved Mermaid plugin proxy implementation
-class _ImprovedMermaidPluginProxy extends BasePlugin {
-  _ImprovedMermaidPluginProxy(super.metadata);
+/// Generic plugin proxy for external plugins
+class _GenericPluginProxy extends BasePlugin {
+  _GenericPluginProxy(super.metadata, this._pluginFactory);
   
-  Map<String, dynamic> _config = {
-    'theme': 'default',
-    'enableInteraction': true,
-    'defaultWidth': 800.0,
-    'defaultHeight': 600.0,
-  };
+  final MarkoraPlugin Function() _pluginFactory;
+  MarkoraPlugin? _actualPlugin;
   
   @override
   Future<void> onLoad(PluginContext context) async {
     await super.onLoad(context);
     
-    // Register Mermaid block syntax
-    context.syntaxRegistry.registerBlockSyntax(
-      'mermaid',
-      RegExp(r'^```mermaid\s*\n([\s\S]*?)\n```', multiLine: true),
-      (content) {
-        final syntax = ImprovedMermaidBlockSyntax(_config);
-        return syntax.parseBlock(content);
-      },
-    );
-    
-    // Register toolbar button
-    context.toolbarRegistry.registerAction(
-      const PluginAction(
-        id: 'mermaid',
-        title: 'Mermaid Chart',
-        description: 'Insert Mermaid chart code block',
-        icon: 'account_tree',
-      ),
-      () {
-        // Insert Mermaid code block template
-        final template = '''```mermaid
-graph TD
-    A[Start] --> B{Condition}
-    B -->|Yes| C[Execute]
-    B -->|No| D[End]
-    C --> D
-```''';
-        context.editorController.insertText(template);
-      },
-    );
-    
-    debugPrint('Improved Mermaid plugin loaded');
+    try {
+      _actualPlugin = _pluginFactory();
+      await _actualPlugin!.onLoad(context);
+      debugPrint('Generic plugin proxy loaded: ${metadata.id}');
+    } catch (e) {
+      debugPrint('Failed to load plugin ${metadata.id}: $e');
+      rethrow;
+    }
   }
   
   @override
   Future<void> onUnload() async {
     try {
-      // 清理语法注册
-      final contextService = PluginContextService.instance;
-      final currentContext = contextService.context;
-      
-      // 取消注册语法规则
-      currentContext.syntaxRegistry.removeSyntax('mermaid');
-      
-      // 取消注册工具栏操作
-      currentContext.toolbarRegistry.unregisterAction('mermaid');
-      
-      debugPrint('Improved Mermaid plugin: Cleaned up syntax and toolbar registrations');
+      if (_actualPlugin != null) {
+        await _actualPlugin!.onUnload();
+        _actualPlugin = null;
+      }
+      debugPrint('Generic plugin proxy unloaded: ${metadata.id}');
     } catch (e) {
-      debugPrint('Improved Mermaid plugin: Error during cleanup: $e');
+      debugPrint('Error unloading plugin ${metadata.id}: $e');
     }
     
     await super.onUnload();
-    debugPrint('Improved Mermaid plugin unloaded');
   }
   
   @override
   void onConfigChanged(Map<String, dynamic> config) {
-    _config = {..._config, ...config};
+    _actualPlugin?.onConfigChanged(config);
   }
   
   @override
   Widget? getConfigWidget() {
-    return MermaidConfigWidget();
+    return _actualPlugin?.getConfigWidget();
   }
   
   @override
   Map<String, dynamic> getStatus() {
-    return {
-      ...super.getStatus(),
-      'config': _config,
-    };
+    final baseStatus = super.getStatus();
+    if (_actualPlugin != null) {
+      baseStatus.addAll(_actualPlugin!.getStatus());
+    }
+    return baseStatus;
   }
 }
 
-/// Mermaid plugin proxy implementation
-class _MermaidPluginProxy extends BasePlugin {
-  _MermaidPluginProxy(super.metadata);
-  
-  @override
-  Future<void> onLoad(PluginContext context) async {
-    await super.onLoad(context);
-    
-    // Register Mermaid block syntax
-    context.syntaxRegistry.registerBlockSyntax(
-      'mermaid',
-      RegExp(r'^```mermaid\s*\n([\s\S]*?)\n```', multiLine: true),
-      (content) {
-        final syntax = MermaidBlockSyntax();
-        return syntax.parseBlock(content);
-      },
-    );
-    
-    // Register toolbar button
-    context.toolbarRegistry.registerAction(
-      const PluginAction(
-        id: 'mermaid',
-        title: 'Mermaid Chart',
-        description: 'Insert Mermaid chart code block',
-        icon: 'account_tree',
-      ),
-      () {
-        // Insert Mermaid code block template
-        final template = '''```mermaid
-graph TD
-    A[Start] --> B{Condition}
-    B -->|Yes| C[Execute]
-    B -->|No| D[End]
-    C --> D
-```''';
-        context.editorController.insertText(template);
-      },
-    );
-    
-    debugPrint('Mermaid plugin loaded');
-  }
-  
-  @override
-  Future<void> onUnload() async {
-    try {
-      // 清理语法注册
-      final contextService = PluginContextService.instance;
-      final currentContext = contextService.context;
-      
-      // 取消注册语法规则
-      currentContext.syntaxRegistry.removeSyntax('mermaid');
-      
-      // 取消注册工具栏操作
-      currentContext.toolbarRegistry.unregisterAction('mermaid');
-      
-      debugPrint('Mermaid plugin: Cleaned up syntax and toolbar registrations');
-    } catch (e) {
-      debugPrint('Mermaid plugin: Error during cleanup: $e');
-    }
-    
-    await super.onUnload();
-    debugPrint('Mermaid plugin unloaded');
-  }
-  
-  @override
-  Widget? getConfigWidget() {
-    return MermaidConfigWidget();
-  }
-}
+
 
 /// Improved Mermaid block syntax implementation
 class ImprovedMermaidBlockSyntax {
@@ -860,7 +751,6 @@ class PluginElement {
     return 'PluginElement(name: $name, range: $startIndex-$endIndex, isBlock: $isBlock)';
   }
 }
-
 /// Minimal web Mermaid plugin (testing only)
 class _MinimalWebMermaidPlugin extends BasePlugin {
   _MinimalWebMermaidPlugin(super.metadata);

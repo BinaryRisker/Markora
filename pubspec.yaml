@@ -37,6 +37,8 @@ dependencies:
   # 国际化生成
   flutter_gen: ^5.7.0
 
+
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -85,6 +87,8 @@ dependencies:
   
   # URL启动器
   url_launcher: ^6.3.1
+
+
   
   # PDF生成
   pdf: ^3.11.1

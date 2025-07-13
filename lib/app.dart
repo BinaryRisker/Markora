@@ -17,7 +17,7 @@ import 'features/settings/presentation/widgets/settings_page.dart';
 import 'features/editor/domain/services/global_editor_manager.dart';
 import 'features/plugins/presentation/pages/plugin_management_page.dart';
 import 'features/plugins/domain/plugin_context_service.dart';
-import 'features/plugins/domain/plugin_manager.dart';
+import 'features/plugins/domain/plugin_loader_legacy.dart';
 
 import 'core/utils/markdown_block_cache.dart';
 
@@ -341,7 +341,7 @@ ${l10n.blockFormula}：
   /// Build plugin buttons
   List<Widget> _buildPluginButtons() {
     try {
-      final contextService = ref.read(pluginContextServiceProvider);
+      final contextService = PluginContextService.instance;
       final toolbarRegistry = contextService.toolbarRegistry;
       final actions = toolbarRegistry.actions;
       
@@ -368,7 +368,7 @@ ${l10n.blockFormula}：
               debugPrint('Execute plugin action: ${action.title}');
               try {
                 // Ensure plugin context has current BuildContext
-                final contextService = ref.read(pluginContextServiceProvider);
+                final contextService = PluginContextService.instance;
                 contextService.setBuildContext(context);
                 
                 actionItem.callback();

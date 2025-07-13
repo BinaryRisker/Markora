@@ -6,12 +6,17 @@ import 'package:path/path.dart' as path;
 
 /// MXT包创建工具
 class MxtPackageCreator {
-  static Future<String> createPandocPluginPackage() async {
-    print('开始创建Pandoc插件MXT包...');
-    
+  static Future<String> createPluginPackage(String pluginPath) async {
+    final pluginDir = Directory(pluginPath);
+    if (!await pluginDir.exists()) {
+      throw Exception('Plugin directory not found: $pluginPath');
+    }
+
+    final pluginName = path.basename(pluginPath);
+    print('开始创建 $pluginName 插件 MXT 包...');
+
     // 获取项目根目录
     final currentDir = Directory.current.path;
-    final pluginDir = path.join(currentDir, 'plugins', 'pandoc_plugin');
     final outputDir = path.join(currentDir, 'packages');
     
     // 创建输出目录
@@ -20,21 +25,21 @@ class MxtPackageCreator {
       await outputDirectory.create(recursive: true);
     }
     
-    final outputPath = path.join(outputDir, 'pandoc_plugin_v1.0.0.mxt');
-    
     // 读取插件配置
-    final pluginJsonFile = File(path.join(pluginDir, 'plugin.json'));
+    final pluginJsonFile = File(path.join(pluginDir.path, 'plugin.json'));
     final pluginJsonContent = await pluginJsonFile.readAsString();
     final pluginJson = jsonDecode(pluginJsonContent) as Map<String, dynamic>;
+    final version = pluginJson['version'];
+ 
+    final outputPath = path.join(outputDir, '${pluginName}_v$version.mxt');
     
     // 收集文件
     final files = <String>[];
     final assets = <String>[];
     
-    final pluginDirectory = Directory(pluginDir);
-    await for (final entity in pluginDirectory.list(recursive: true)) {
+    await for (final entity in pluginDir.list(recursive: true)) {
       if (entity is File) {
-        final relativePath = path.relative(entity.path, from: pluginDir);
+        final relativePath = path.relative(entity.path, from: pluginDir.path);
         files.add(relativePath);
         
         // 标识资源文件
@@ -82,7 +87,7 @@ class MxtPackageCreator {
     
     // 添加所有文件
     for (final file in files) {
-      final filePath = path.join(pluginDir, file);
+      final filePath = path.join(pluginDir.path, file);
       final fileEntity = File(filePath);
       if (await fileEntity.exists()) {
         final fileBytes = await fileEntity.readAsBytes();
@@ -129,29 +134,77 @@ class MxtPackageCreator {
 }
 
 /// 主函数 - 可以直接运行
-void main() async {
+/// 支持单个插件打包或批量打包所有插件
+void main(List<String> args) async {
+  if (args.isEmpty) {
+    // 批量打包模式
+    await _batchPackagePlugins();
+  } else {
+    // 单个插件打包模式
+    final pluginPath = args[0];
+    await _packageSinglePlugin(pluginPath);
+  }
+}
+
+Future<void> _packageSinglePlugin(String pluginPath) async {
   try {
-    final packagePath = await MxtPackageCreator.createPandocPluginPackage();
-    
+    final packagePath = await MxtPackageCreator.createPluginPackage(pluginPath);
+
     print('\n📋 验证包内容...');
     final manifest = await MxtPackageCreator.validatePackage(packagePath);
     final metadata = manifest['metadata'] as Map<String, dynamic>;
-    
+
     print('✅ 验证成功！');
     print('🏷️  插件ID: ${metadata['id']}');
     print('📝 插件名称: ${metadata['name']}');
     print('🔢 版本: ${metadata['version']}');
     print('👤 作者: ${metadata['author']}');
     print('📄 描述: ${metadata['description']}');
-    print('🏷️  标签: ${metadata['tags']}');
-    print('⚙️  权限: ${manifest['permissions']}');
-    print('🖥️  平台: ${manifest['platforms']}');
-    
-    print('\n🎉 Pandoc插件MXT包已准备就绪！');
-    print('现在可以通过Markora插件管理器安装此插件了。');
-    
+
+    print('\n🎉 插件 MXT 包已准备就绪！');
   } catch (e, stackTrace) {
     print('❌ 错误: $e');
     print('堆栈跟踪: $stackTrace');
+    exit(1);
   }
-} 
+}
+
+Future<void> _batchPackagePlugins() async {
+  try {
+    print('🚀 开始批量打包所有插件...');
+    final pluginsDir = Directory(path.join(Directory.current.path, 'plugins'));
+    if (!await pluginsDir.exists()) {
+      print('❌ 错误: 插件目录 \'plugins\' 不存在。');
+      return;
+    }
+
+    final pluginDirs = <String>[];
+    await for (final entity in pluginsDir.list()) {
+      if (entity is Directory) {
+        final pluginJsonFile = File(path.join(entity.path, 'plugin.json'));
+        if (await pluginJsonFile.exists()) {
+          pluginDirs.add(entity.path);
+        }
+      }
+    }
+
+    if (pluginDirs.isEmpty) {
+      print('🟡 未找到有效的插件。');
+      return;
+    }
+
+    print('🔍 找到 ${pluginDirs.length} 个插件准备打包。');
+
+    for (final pluginDir in pluginDirs) {
+      final pluginName = path.basename(pluginDir);
+      print('\n打包插件: $pluginName');
+      await _packageSinglePlugin(pluginDir);
+    }
+
+    print('\n✅ 所有插件打包完成！');
+  } catch (e, stackTrace) {
+    print('❌ 批量打包过程中发生错误: $e');
+    print('堆栈跟踪: $stackTrace');
+    exit(1);
+  }
+}
