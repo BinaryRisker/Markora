@@ -3,15 +3,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-// Remove this line: import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as path;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../../core/services/command_service.dart';
 import '../../../types/plugin.dart';
-import 'plugin_interface.dart';
+import 'plugin_context_service.dart';
 import 'plugin_package_service.dart';
+import 'plugin_interface.dart';
+import 'icon_registry.dart';
 
 /// Plugin Manager - 负责插件的生命周期管理 (v2 Architecture)
 class PluginManager extends ChangeNotifier {
@@ -53,15 +54,20 @@ class PluginManager extends ChangeNotifier {
 
   // --- Listener and Event Methods ---
   
+  /// Add plugin event listener
   void addPluginListener(PluginEventListener listener) => _listeners.add(listener);
+  
+  /// Remove plugin event listener
   void removePluginListener(PluginEventListener listener) => _listeners.remove(listener);
   
+  /// Notify plugin lifecycle event to all listeners
   void _notifyLifecycleEvent(String pluginId, PluginLifecycleEvent event, {String? error}) {
     for (final listener in _listeners) {
       listener.onPluginLifecycleEvent(pluginId, event, error: error);
     }
   }
   
+  /// Notify plugin status change to all listeners
   void _notifyStatusChanged(String pluginId, PluginStatus oldStatus, PluginStatus newStatus) {
     for (final listener in _listeners) {
       listener.onPluginStatusChanged(pluginId, oldStatus, newStatus);
@@ -71,7 +77,7 @@ class PluginManager extends ChangeNotifier {
 
   // --- Core Plugin Lifecycle ---
 
-  /// Scan all plugin directories.
+  /// Scan all plugin directories for available plugins
   Future<void> _scanPlugins() async {
     // DO NOT CLEAR plugins here. We need to merge new findings with existing state.
     final devDir = await getDevPluginsDirectory();
@@ -82,7 +88,7 @@ class PluginManager extends ChangeNotifier {
     notifyListeners();
   }
   
-  /// Scan a single directory for potential plugins.
+  /// Scan a single directory for potential plugins
   Future<void> _scanPluginDirectory(Directory pluginsDir, {required bool isDevelopment}) async {
     if (!await pluginsDir.exists()) return;
     await for (final entity in pluginsDir.list()) {
@@ -111,6 +117,7 @@ class PluginManager extends ChangeNotifier {
     }
   }
 
+  /// Load plugin metadata from manifest file
   Future<PluginMetadata?> _loadPluginMetadata(File manifestFile) async {
     try {
       final content = await manifestFile.readAsString();
@@ -122,7 +129,7 @@ class PluginManager extends ChangeNotifier {
     }
   }
   
-  /// Activate all plugins that are marked as 'enabled'.
+  /// Activate all plugins that are marked as 'enabled'
   Future<void> _activateEnabledPlugins() async {
     for (final plugin in _plugins.values) {
       if (plugin.status == PluginStatus.enabled) {
@@ -131,7 +138,7 @@ class PluginManager extends ChangeNotifier {
     }
   }
 
-  /// Activates a plugin by parsing its contributions and registering them.
+  /// Activates a plugin by parsing its contributions and registering them
   Future<void> _activatePlugin(Plugin plugin) async {
     final metadata = plugin.metadata;
     if (_loadedPlugins.containsKey(metadata.id)) return; // Already active
@@ -139,14 +146,15 @@ class PluginManager extends ChangeNotifier {
     debugPrint('Activating plugin: ${metadata.id}');
     _notifyLifecycleEvent(metadata.id, PluginLifecycleEvent.loading);
     
+    // Register contributions including icons
     _registerContributions(plugin);
-
+    
     _loadedPlugins[metadata.id] = _GenericPluginProxy(metadata, plugin.installPath ?? '');
     _updatePluginStatus(metadata.id, PluginStatus.enabled);
     _notifyLifecycleEvent(metadata.id, PluginLifecycleEvent.loaded);
   }
 
-  /// Deactivates a plugin by unregistering all its contributions.
+  /// Deactivates a plugin by unregistering all its contributions
   Future<void> _deactivatePlugin(Plugin plugin) async {
     final metadata = plugin.metadata;
     if (!_loadedPlugins.containsKey(metadata.id)) return;
@@ -154,6 +162,7 @@ class PluginManager extends ChangeNotifier {
     debugPrint('Deactivating plugin: ${metadata.id}');
     _notifyLifecycleEvent(metadata.id, PluginLifecycleEvent.unloading);
     
+    // Unregister contributions including icons
     _unregisterContributions(plugin);
     
     _loadedPlugins.remove(metadata.id);
@@ -163,41 +172,41 @@ class PluginManager extends ChangeNotifier {
 
   // --- Contribution and Command Handling ---
 
+  /// Register plugin contributions (commands, toolbar items, icons)
   void _registerContributions(Plugin plugin) {
-    final contributions = plugin.metadata.contributes;
-    if (contributions == null) return;
+    final contributes = plugin.metadata.contributes;
+    if (contributes == null) return;
 
     // Register Commands
-    for (final command in contributions.commands) {
+    for (final command in contributes.commands) {
       _commandService.registerCommand(
           command.command, _createCommandHandler(plugin, command));
     }
 
     // Register Toolbar Items
     if (_context != null) {
-      for (final item in contributions.toolbar) {
+      for (final item in contributes.toolbar) {
         _context!.toolbarRegistry.registerAction(
           PluginAction(
               id: item.command,
               title: item.title,
               description: item.description ?? '',
-              icon: _createIconWidget(item.icon, plugin.installPath!, item.phosphorIcon),
+              icon: _createIconWidget(item.icon, item.phosphorIcon),
               group: item.group),
           () => _commandService.executeCommand(item.command),
         );
       }
     }
+    
+    // Register plugin icons
+    _registerPluginIcons(plugin);
   }
 
-  /// Create icon widget from plugin configuration
-  Widget? _createIconWidget(String? iconString, String installPath, [String? phosphorIconName]) {
-    if (iconString == null || iconString.isEmpty) {
-      return null;
-    }
-
+  /// Create icon widget for plugin toolbar items
+  Widget _createIconWidget(String? iconString, String? phosphorIconName) {
     // Use phosphorIcon from plugin config if available
     if (phosphorIconName != null && phosphorIconName.isNotEmpty) {
-      final iconData = _getPhosphorIconByName(phosphorIconName);
+      final iconData = IconRegistry().getIcon(phosphorIconName);
       if (iconData != null) {
         return Icon(
           iconData,
@@ -207,45 +216,49 @@ class PluginManager extends ChangeNotifier {
       }
     }
 
-    // Fallback to default icon
-    debugPrint('Could not resolve phosphor icon: $phosphorIconName for plugin icon: $iconString');
-    return Icon(PhosphorIconsRegular.plugs, size: 20);
+    // Fallback to iconString if phosphorIcon is not available
+    if (iconString != null && iconString.isNotEmpty) {
+      final iconData = IconRegistry().getIcon(iconString);
+      if (iconData != null) {
+        return Icon(
+          iconData,
+          size: 20,
+          color: Colors.white,
+        );
+      }
+    }
+
+    // Final fallback to default icon
+    debugPrint('Could not resolve icon: phosphorIcon=$phosphorIconName, icon=$iconString');
+    return Icon(
+      IconRegistry().getIconWithFallback('plugs'),
+      size: 20,
+      color: Colors.white,
+    );
   }
 
-  /// Get Phosphor icon by name using reflection-like approach
-  IconData? _getPhosphorIconByName(String iconName) {
-    // Common Phosphor icons mapping
-    final Map<String, IconData> phosphorIcons = {
-      'export': PhosphorIconsRegular.export,
-      'arrowSquareIn': PhosphorIconsRegular.arrowSquareIn,
-      'flower': PhosphorIconsRegular.flower,
-      'gear': PhosphorIconsRegular.gear,
-      'plus': PhosphorIconsRegular.plus,
-      'x': PhosphorIconsRegular.x,
-      'plugs': PhosphorIconsRegular.plugs,
-      // Add more icons as needed
-    };
-    
-    return phosphorIcons[iconName];
-  }
-
+  /// Unregister plugin contributions
   void _unregisterContributions(Plugin plugin) {
-    final contributions = plugin.metadata.contributes;
-    if (contributions == null) return;
+    final contributes = plugin.metadata.contributes;
+    if (contributes == null) return;
     
     // Unregister commands
-    for (final command in contributions.commands) {
+    for (final command in contributes.commands) {
       _commandService.unregisterCommand(command.command);
     }
     
     // Unregister toolbar items
     if (_context != null) {
-      for (final item in contributions.toolbar) {
+      for (final item in contributes.toolbar) {
         _context!.toolbarRegistry.unregisterAction(item.command);
       }
     }
+    
+    // Unregister plugin icons
+    _unregisterPluginIcons(plugin);
   }
   
+  /// Create command handler for plugin commands
   CommandHandler _createCommandHandler(Plugin plugin, CommandContribution command) {
     final entryPoint = plugin.metadata.entryPoint;
     if (entryPoint == null) {
@@ -261,11 +274,13 @@ class PluginManager extends ChangeNotifier {
     }
   }
 
-
+  /// Execute process-based plugin command
   Future<void> _executeProcessCommand(Plugin plugin, EntryPoint entryPoint, CommandContribution command, Map<String, dynamic>? args) async {
     // Platform-specific executable path logic
+    debugPrint('Executing process command: ${command.command} for plugin: ${plugin.metadata.id}');
   }
 
+  /// Execute internal plugin command
   Future<void> _executeInternalCommand(Plugin plugin, CommandContribution command, Map<String, dynamic>? args) async {
     switch (command.command) {
       case 'mermaid.insertBlock':
@@ -279,6 +294,7 @@ class PluginManager extends ChangeNotifier {
 
   // --- Public Methods for UI Interaction ---
 
+  /// Enable a plugin
   Future<void> enablePlugin(String pluginId) async {
     final plugin = _plugins[pluginId];
     if (plugin != null && plugin.status != PluginStatus.enabled) {
@@ -288,6 +304,7 @@ class PluginManager extends ChangeNotifier {
     }
   }
 
+  /// Disable a plugin
   Future<void> disablePlugin(String pluginId) async {
     final plugin = _plugins[pluginId];
     if (plugin != null && plugin.status == PluginStatus.enabled) {
@@ -297,6 +314,7 @@ class PluginManager extends ChangeNotifier {
     }
   }
 
+  /// Install a plugin from .mxt package
   Future<void> installPlugin(String mxtPath) async {
     try {
       final installedPluginsDir = await getInstalledPluginsDirectory();
@@ -311,6 +329,7 @@ class PluginManager extends ChangeNotifier {
     }
   }
 
+  /// Uninstall a plugin
   Future<void> uninstallPlugin(String pluginId) async {
     final plugin = _plugins[pluginId];
     if (plugin == null) return;
@@ -328,6 +347,7 @@ class PluginManager extends ChangeNotifier {
 
   // --- State Persistence ---
 
+  /// Save plugin states to persistent storage
   Future<void> _savePluginStates() async {
     final box = await Hive.openBox('plugin_states');
     final Map<String, String> statesToSave = {};
@@ -338,6 +358,7 @@ class PluginManager extends ChangeNotifier {
     debugPrint('Saved plugin states for ${statesToSave.length} plugins.');
   }
 
+  /// Load plugin states from persistent storage
   Future<void> _loadPluginStates() async {
     final box = await Hive.openBox('plugin_states');
     for (final pluginId in _plugins.keys) {
@@ -354,6 +375,7 @@ class PluginManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Update plugin status
   void _updatePluginStatus(String pluginId, PluginStatus status) {
     final plugin = _plugins[pluginId];
     if (plugin != null && plugin.status != status) {
@@ -363,35 +385,66 @@ class PluginManager extends ChangeNotifier {
     }
   }
 
-  // Remove the unused _parsePluginStatus method
-  // PluginStatus _parsePluginStatus(String statusString) =>
-  //     PluginStatus.values.firstWhere((e) => e.name == statusString, orElse: () => PluginStatus.installed);
-
   // --- Utility ---
   
+  /// Get development plugins directory
   Future<Directory> getDevPluginsDirectory() async {
     final dir = Directory(path.join(Directory.current.path, 'plugins'));
     if (!await dir.exists()) await dir.create(recursive: true);
     return dir;
   }
   
+  /// Get installed plugins directory
   Future<Directory> getInstalledPluginsDirectory() async {
      final dir = Directory(path.join(Directory.current.path, 'installed_plugins'));
     if (!await dir.exists()) await dir.create(recursive: true);
     return dir;
   }
 
-  @override
-  void dispose() {
-    // Disconnect the listener when the manager is disposed
-    _context?.toolbarRegistry.removeChangeListener(notifyListeners);
-    super.dispose();
+  /// Register icons defined by the plugin
+  void _registerPluginIcons(Plugin plugin) {
+    final contributes = plugin.metadata.contributes;
+    if (contributes == null) return;
+
+    final iconRegistry = IconRegistry();
+    
+    // Register icons from toolbar contributions
+    for (final toolbar in contributes.toolbar) {
+      if (toolbar.phosphorIcon != null && toolbar.phosphorIcon!.isNotEmpty) {
+        final iconData = _resolvePhosphorIconData(toolbar.phosphorIcon!);
+        if (iconData != null) {
+          iconRegistry.registerIcon('${plugin.metadata.id}.${toolbar.phosphorIcon}', iconData);
+        }
+      }
+    }
+  }
+
+  /// Unregister icons defined by the plugin
+  void _unregisterPluginIcons(Plugin plugin) {
+    final contributes = plugin.metadata.contributes;
+    if (contributes == null) return;
+
+    final iconRegistry = IconRegistry();
+    
+    // Unregister icons from toolbar contributions
+    for (final toolbar in contributes.toolbar) {
+      if (toolbar.phosphorIcon != null && toolbar.phosphorIcon!.isNotEmpty) {
+        iconRegistry.unregisterIcon('${plugin.metadata.id}.${toolbar.phosphorIcon}');
+      }
+    }
+  }
+
+  /// Resolve Phosphor icon data by name
+  IconData? _resolvePhosphorIconData(String iconName) {
+    // This method can be extended to support more icon resolution strategies
+    return IconRegistry().getIcon(iconName);
   }
 }
 
-// Simplified generic proxy
+/// Simplified generic proxy for loaded plugins
 class _GenericPluginProxy {
   final PluginMetadata metadata;
   final String pluginPath;
+  
   _GenericPluginProxy(this.metadata, this.pluginPath);
 }
