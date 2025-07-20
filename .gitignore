@@ -136,3 +136,8 @@ app.*.symbols
 plugins/*/assets/pandoc/windows/pandoc.exe
 plugins/*/assets/pandoc/macos/pandoc
 plugins/*/assets/pandoc/linux/pandoc
+
+# Global pandoc assets
+assets/pandoc/windows/pandoc.exe
+assets/pandoc/macos/pandoc
+assets/pandoc/linux/pandoc
