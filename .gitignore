@@ -118,3 +118,21 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+
+# Large files and executables
+*.exe
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.msi
+*.zip
+*.tar.gz
+*.tar.bz2
+*.7z
+*.rar
+
+# Plugin assets that should be downloaded at runtime
+plugins/*/assets/pandoc/windows/pandoc.exe
+plugins/*/assets/pandoc/macos/pandoc
+plugins/*/assets/pandoc/linux/pandoc
